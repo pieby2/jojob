@@ -139,6 +139,73 @@ body {
 }
 .view-header h2 { font-size: 1.15rem; }
 
+/* === Sort & Filter Toolbar === */
+.sort-toolbar {
+  background: var(--bg2);
+  border: 1px solid var(--bg3);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sort-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sort-label {
+  font-size: 0.75rem;
+  color: var(--text2);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.sort-select {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--bg3);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+.sort-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.time-filter-pills {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.pill-btn {
+  background: var(--bg);
+  border: 1px solid var(--bg3);
+  color: var(--text2);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.pill-btn:active {
+  transform: scale(0.96);
+}
+.pill-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
 /* === Filter Tabs === */
 .filter-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
 .filter-tab {
@@ -170,6 +237,7 @@ body {
   white-space: nowrap;
 }
 .tag-site { background: #1d4ed8; color: white; }
+.tag-time { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.35); font-weight: 600; }
 .tag-wf { background: rgba(249, 115, 22, 0.25); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); }
 .tag-yc { background: #f97316; color: white; font-weight: 600; }
 .tag-naukri { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }

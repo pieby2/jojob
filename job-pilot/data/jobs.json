@@ -1775,31 +1775,32 @@
     "_scannedAt": "2026-11-09T20:46:02.321Z",
     "_evaluation": {
       "score": 2.8,
-      "archetype": "AI Platform / LLMOps (not a candidate target)",
+      "archetype": "AI Platform / LLMOps (not a target archetype)",
       "verdict": "Skip",
       "legitimacy": "Proceed with Caution",
       "summary": "# Evaluation: Simplismart — Machine Learning Engineer",
       "answers": {
-        "Cover Letter": "Dear Hiring Team at Simplismart,\n\nI am writing to express my strong interest in the Machine Learning Engineer role at Simplismart. As a final-year Computer Science student and Computer Vision Engineer with hands-on experience in real-time 3D perception, sensor fusion, and edge-optimized model deployment, I am excited by the opportunity to contribute to a next-generation GenAI inference platform. My background in optimizing models for GPU and edge devices—using TensorRT, ONNX, CUDA, and quantization techniques—aligns directly with Simplismart's mission to deploy, scale, and monitor GenAI models with strict SLAs and cost efficiency.\n\nIn my current role at Mayonix Innovation, I have trained and deployed object detection and segmentation models for mobile devices, achieving sub-100ms inference latency through INT8/FP16 quantization, structured pruning, and GPU delegate configuration. I have also built end-to-end ML pipelines, including data preprocessing, model training, evaluation, and deployment, using PyTorch, TensorFlow Lite, and Docker. My project AlphaSense AI demonstrates my ability to design complex multi-model systems with online learning and ensemble methods, deployed on Hugging Face Spaces with FastAPI and real-time monitoring. These experiences have honed my skills in system design, distributed workloads, and performance tuning—key areas for Simplismart's MLOps platform.\n\nI am particularly drawn to Simplismart's focus on building high-reliability, observable, and fault-tolerant inference systems for diverse GPU-accelerated workloads. My IEEE-published research and production experience have instilled a strong engineering discipline, including test-driven development and collaboration across teams. I am eager to bring my expertise in model optimization, CUDA, and cloud-native deployment to help Simplismart scale its platform and deliver mission-critical AI solutions. Thank you for considering my application.\n\nSincerely,\nPrakhar Pragyan Chaubey",
-        "Why are you interested in this role?": "Simplismart's vision of building a modular, high-performance GenAI inference platform that balances cost, latency, and reliability resonates deeply with my passion for production-grade ML systems. I am excited by the opportunity to work on GPU-accelerated workloads and contribute to a platform that enables enterprises to deploy diverse models seamlessly across cloud and on-prem environments.",
-        "Why should we hire you?": "I bring hands-on experience in optimizing and deploying ML models at the edge and cloud, with a proven track record of reducing inference latency through quantization, pruning, and GPU acceleration. My strong fundamentals in system design, distributed systems, and TDD, combined with my IEEE research and startup experience, position me to quickly contribute to Simplismart's MLOps platform and help solve complex performance and reliability challenges.",
-        "Relevant Experience": "At Mayonix Innovation, I optimized object detection and segmentation models for mobile deployment, achieving sub-100ms latency using TensorRT, TensorFlow Lite, and GPU delegates—directly relevant to Simplismart's focus on GPU-accelerated inference. I also built end-to-end ML pipelines with PyTorch and Docker, and designed a feedback-loop system for continuous model improvement. My project AlphaSense AI involved deploying a multi-model deep learning system with FastAPI on Hugging Face Spaces, demonstrating my ability to build scalable, production-ready ML services.",
-        "Salary Expectation": "I am open to a competitive compensation package aligned with industry standards for Machine Learning Engineer roles in India, and I am confident that Simplismart offers a fair and motivating package. I am more focused on the opportunity to contribute to impactful GenAI infrastructure and grow with the team."
+        "Cover Letter": "Dear Hiring Team at Simplismart,\n\nI am writing to express my strong interest in the Machine Learning Engineer role at Simplismart. As a final-year Computer Science student and Computer Vision Engineer with hands-on experience in real-time 3D perception, sensor fusion, and edge-optimized model deployment, I am excited about the opportunity to contribute to Simplismart's GenAI inference platform. Your focus on deploying, scaling, and monitoring GenAI models across cloud or on-prem aligns perfectly with my background in optimizing models for latency and cost using TensorRT, ONNX, and quantization techniques.\n\nIn my current role as a Machine Learning Engineer at Mayonix Innovation, I have trained and evaluated object detection models (YOLOv8, YOLOv9) achieving 92%+ mAP, built image-embedding-based recommendation systems, and developed on-device computer vision features using TensorFlow Lite and MobileNetV3-Small. I have optimized models through INT8/FP16 quantization, structured pruning, and GPU delegate configuration to achieve sub-100ms inference latency on edge devices. My experience with Docker, Kubernetes, and CI/CD pipelines, combined with my published IEEE research on machine learning-ready designs, demonstrates my ability to build scalable, reliable ML systems.\n\nI am particularly drawn to Simplismart's mission to provide a modular, high-performance inference platform with strict SLAs and enterprise-grade security. My technical expertise in Python, C++, CUDA, PyTorch, and TensorRT, along with my experience in building multi-step pipelines from ETL to deployment, positions me to contribute to the design and implementation of your next-generation MLOps platform. I am eager to collaborate with your Applied ML and Core ML teams to improve system reliability, latency, and cost efficiency, and to ship production-grade code using strong engineering fundamentals and test-driven development.\n\nSincerely,\nPrakhar Pragyan Chaubey",
+        "Why are you interested in this role?": "I am deeply interested in Simplismart's mission to build a high-performance GenAI inference platform that optimizes for cost and latency across diverse workloads. The opportunity to design and implement core architecture for GPU-accelerated ML workflows from the ground up aligns with my passion for building scalable, reliable systems. I am excited to work on mission-critical inference pipelines and contribute to a fast-growing startup that values innovation and technical excellence.",
+        "Why should we hire you?": "You should hire me because I bring hands-on experience in optimizing and deploying ML models for real-time inference on edge devices, achieving sub-100ms latency through quantization and pruning. My strong software engineering fundamentals, combined with experience in Docker, Kubernetes, and CI/CD, enable me to build production-grade systems. I have a proven track record of collaborating across teams and delivering results, as evidenced by my IEEE publications and production-deployed autonomous systems.",
+        "Relevant Experience": "In my role at Mayonix Innovation, I optimized object detection models for mobile deployment using TensorFlow Lite and TensorRT, achieving 92%+ mAP and sub-100ms inference latency through INT8/FP16 quantization and structured pruning. I also built image preprocessing pipelines and feedback-loop systems for continuous model improvement. My project AlphaSense AI involved designing a multi-model deep learning system with FastAPI deployment on Hugging Face Spaces, demonstrating my ability to build and deploy complex ML pipelines.",
+        "Salary Expectation": "I am open to a competitive compensation package that aligns with industry standards for Machine Learning Engineer roles in the Indian market, and I am flexible based on the overall opportunity and growth potential at Simplismart."
       },
       "strengths": [
         "Strong software engineering fundamentals (DS, APIs, testing, debugging): ⚠️ Partial",
+        "Systems knowledge: Linux internals, networking, performance tuning, GPU memory behavior: ⚠️ Partial",
         "ML fundamentals, model architectures (Transformers, CNNs), inference behavior: ✅ Strong",
-        "Linux internals, networking, performance tuning, GPU memory behavior: ⚠️ Partial",
         "Quantization, model optimization, CUDA: ✅ Strong",
         "CI/CD, Docker, GitHub workflows, IaC-driven deployments: ✅ Strong"
       ],
       "gaps": [
-        "Design core architecture of a GPU-accelerated MLOps platform: No platform-architecture or MLOps-platform work in `cv.md`. Mayonix work is model training and on-device inference, not platform design.",
-        "Deep expertise in distributed systems and system design: `cv.md` lists Kubernetes, EKS, Terraform, Airflow as skills but no distributed-systems design experience or project. Skills list is not evidence of expertise."
+        "Design core architecture of a GPU-accelerated MLOps platform: No platform-architecture or MLOps-infrastructure experience in `cv.md`. Candidate's work is model training, optimization, and deployment on mobile/edge devices.",
+        "Deep expertise in distributed systems and system design: `cv.md` lists Kubernetes, EKS, Terraform, Airflow as skills but no distributed-systems design or multi-node workload experience is evidenced."
       ],
-      "reportPath": "reports/003-simplismart-2026-11-10.md"
+      "reportPath": "reports/004-simplismart-2026-11-10.md"
     },
-    "_salaryBenchmark": null
+    "_salaryBenchmark": null,
+    "date_posted": "2026-11-09"
   },
   {
     "site": "wellfound",
@@ -1818,7 +1819,8 @@
     },
     "_id": "mw9qdyz5a9lxz",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:46:02.321Z"
+    "_scannedAt": "2026-11-09T20:46:02.321Z",
+    "date_posted": "2026-11-09"
   },
   {
     "site": "wellfound",
@@ -1837,7 +1839,8 @@
     },
     "_id": "mw9qdyz5jahd8",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:46:02.321Z"
+    "_scannedAt": "2026-11-09T20:46:02.321Z",
+    "date_posted": "2026-11-09"
   },
   {
     "site": "yc",
@@ -1856,7 +1859,8 @@
     },
     "_id": "mw9qdyz5r3cew",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:46:02.321Z"
+    "_scannedAt": "2026-11-09T20:46:02.321Z",
+    "date_posted": "2026-11-09"
   },
   {
     "site": "yc",
@@ -1875,7 +1879,8 @@
     },
     "_id": "mw9qdyz5u19ku",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:46:02.321Z"
+    "_scannedAt": "2026-11-09T20:46:02.321Z",
+    "date_posted": "2026-11-09"
   },
   {
     "site": "yc",
@@ -1894,6 +1899,7 @@
     },
     "_id": "mw9qdyz5b13lq",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:46:02.321Z"
+    "_scannedAt": "2026-11-09T20:46:02.321Z",
+    "date_posted": "2026-11-09"
   }
 ]

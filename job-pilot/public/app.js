@@ -5,6 +5,8 @@
 // --- State ---
 let allJobs = [];
 let trackedApplications = [];
+let currentTimeFilter = "all";
+let currentSort = "posted-newest";
 
 // --- Init ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -131,19 +133,102 @@ async function scanAts() {
   }
 }
 
-// --- Jobs List Rendering ---
+// --- Jobs List Rendering & Sorting ---
 async function refreshJobs() {
   try {
     const res = await fetch("/api/jobs");
     allJobs = await res.json();
-    renderJobs(allJobs.filter((j) => j._status === "new" || j._status === "saved"));
+    applySortAndFilter();
   } catch { /* ignore */ }
+}
+
+function setTimeFilter(filter) {
+  currentTimeFilter = filter;
+  document.querySelectorAll(".pill-btn").forEach((p) => {
+    p.classList.toggle("active", p.dataset.time === filter);
+  });
+  applySortAndFilter();
+}
+
+function getJobTimestamp(job) {
+  if (job.date_posted) {
+    const t = new Date(job.date_posted).getTime();
+    if (!isNaN(t)) return t;
+  }
+  if (job._scannedAt) {
+    const t = new Date(job._scannedAt).getTime();
+    if (!isNaN(t)) return t;
+  }
+  return 0;
+}
+
+function formatPostedTime(dateStr, scannedStr) {
+  const d = dateStr ? new Date(dateStr) : scannedStr ? new Date(scannedStr) : null;
+  if (!d || isNaN(d.getTime())) return "Recently";
+
+  const now = new Date();
+  const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 0) return "Today";
+  if (diffDays === 1) return "1d ago";
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+  return d.toLocaleDateString();
+}
+
+function applySortAndFilter() {
+  const sortSelect = document.getElementById("job-sort-select");
+  if (sortSelect) {
+    currentSort = sortSelect.value;
+  }
+
+  let filtered = allJobs.filter((j) => j._status === "new" || j._status === "saved");
+
+  // 1. Time Filter (Last 24h, 3 days, 7 days)
+  if (currentTimeFilter !== "all") {
+    const now = Date.now();
+    const maxAgeMs =
+      currentTimeFilter === "24h"
+        ? 24 * 60 * 60 * 1000
+        : currentTimeFilter === "3d"
+        ? 3 * 24 * 60 * 60 * 1000
+        : 7 * 24 * 60 * 60 * 1000;
+
+    filtered = filtered.filter((j) => {
+      const ts = getJobTimestamp(j);
+      return now - ts <= maxAgeMs;
+    });
+  }
+
+  // 2. Ranking & Sorting
+  filtered.sort((a, b) => {
+    if (currentSort === "posted-newest") {
+      return getJobTimestamp(b) - getJobTimestamp(a);
+    } else if (currentSort === "posted-oldest") {
+      return getJobTimestamp(a) - getJobTimestamp(b);
+    } else if (currentSort === "score-highest") {
+      const scoreA = a._evaluation?.score || 0;
+      const scoreB = b._evaluation?.score || 0;
+      return scoreB - scoreA;
+    } else if (currentSort === "scanned-newest") {
+      const timeA = a._scannedAt ? new Date(a._scannedAt).getTime() : 0;
+      const timeB = b._scannedAt ? new Date(b._scannedAt).getTime() : 0;
+      return timeB - timeA;
+    } else if (currentSort === "company-az") {
+      const compA = (a.company_name || a.company || "").toLowerCase();
+      const compB = (b.company_name || b.company || "").toLowerCase();
+      return compA.localeCompare(compB);
+    }
+    return 0;
+  });
+
+  renderJobs(filtered);
 }
 
 function renderJobs(jobs) {
   const list = document.getElementById("jobs-list");
   if (!jobs.length) {
-    list.innerHTML = '<p class="empty-state">No active jobs yet. Tap Scan on the Home tab! 🔍</p>';
+    list.innerHTML = '<p class="empty-state">No matching jobs found for this filter. 🔍</p>';
     return;
   }
   list.innerHTML = jobs.map((job) => createJobCard(job)).join("");
@@ -158,7 +243,7 @@ function createJobCard(job) {
   const location = job.location || job.city || "";
   const site = job.site || "";
   const company = job.company_name || job.company || "Unknown";
-  const dateStr = job.date_posted ? new Date(job.date_posted).toLocaleDateString() : "";
+  const postedLabel = formatPostedTime(job.date_posted, job._scannedAt);
   const security = job._security;
   const salary = job._salaryBenchmark;
 
@@ -186,12 +271,12 @@ function createJobCard(job) {
         <div class="score-badge ${scoreClass}">${scoreText}</div>
       </div>
       <div class="job-meta">
+        <span class="tag tag-time">⏱️ ${escHtml(postedLabel)}</span>
         ${location ? `<span class="tag">📍 ${escHtml(location)}</span>` : ""}
         ${siteBadge}
         ${compTag}
         ${security ? `<span class="tag tag-security" title="${escHtml(security.verdict)}">🛡️ Verified Safe</span>` : ""}
         ${eval_?.archetype ? `<span class="tag tag-archetype">🎯 ${escHtml(eval_.archetype.split("/")[0])}</span>` : ""}
-        ${dateStr ? `<span class="tag">📅 ${dateStr}</span>` : ""}
       </div>
       <div class="job-actions" onclick="event.stopPropagation()">
         <button class="btn btn-primary btn-small" onclick="evaluateJobCard('${job._id}')">

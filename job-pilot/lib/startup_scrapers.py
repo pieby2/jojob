@@ -77,6 +77,18 @@ def scrape_wellfound(query="machine-learning-engineer", location="india", max_re
                 if company == "Wellfound Startup" and startups:
                     company = list(startups.values())[0]
 
+                live_start = v.get("liveStartAt")
+                date_str = None
+                if live_start:
+                    try:
+                        from datetime import datetime
+                        date_str = datetime.fromtimestamp(live_start).strftime("%Y-%m-%d")
+                    except Exception:
+                        pass
+                if not date_str:
+                    from datetime import datetime
+                    date_str = datetime.utcnow().strftime("%Y-%m-%d")
+
                 jobs.append({
                     "site": "wellfound",
                     "title": title,
@@ -86,6 +98,7 @@ def scrape_wellfound(query="machine-learning-engineer", location="india", max_re
                     "description": desc,
                     "compensation": comp,
                     "job_type": v.get("jobType", "full-time"),
+                    "date_posted": date_str,
                 })
                 if len(jobs) >= max_results:
                     break
@@ -136,6 +149,9 @@ def scrape_yc(query="engineering", location="india", max_results=15):
             if comp_search:
                 comp = comp_search.group(1)
 
+            from datetime import datetime
+            today_str = datetime.utcnow().strftime("%Y-%m-%d")
+
             jobs.append({
                 "site": "yc",
                 "title": raw_title,
@@ -145,6 +161,7 @@ def scrape_yc(query="engineering", location="india", max_results=15):
                 "description": f"Role at YC-backed startup {company}: {raw_title}.\nApply directly through Y Combinator Work at a Startup.",
                 "compensation": comp,
                 "job_type": "full-time",
+                "date_posted": today_str,
             })
             if len(jobs) >= max_results:
                 break

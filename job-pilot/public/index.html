@@ -114,6 +114,28 @@
       <h2>📋 Scanned Listings</h2>
       <button class="btn btn-small" onclick="refreshJobs()">↻ Refresh</button>
     </div>
+
+    <!-- Ranking & Time Filter Toolbar -->
+    <div class="sort-toolbar">
+      <div class="sort-row">
+        <span class="sort-label">Rank by:</span>
+        <select id="job-sort-select" class="sort-select" onchange="applySortAndFilter()">
+          <option value="posted-newest" selected>⏳ Posted: Newest First</option>
+          <option value="posted-oldest">⌛ Posted: Oldest First</option>
+          <option value="score-highest">⭐ Match Score: Highest First</option>
+          <option value="scanned-newest">📥 Scanned: Recently First</option>
+          <option value="company-az">🏢 Company: A to Z</option>
+        </select>
+      </div>
+
+      <div class="time-filter-pills">
+        <button class="pill-btn active" data-time="all" onclick="setTimeFilter('all')">All Time</button>
+        <button class="pill-btn" data-time="24h" onclick="setTimeFilter('24h')">⚡ 24h</button>
+        <button class="pill-btn" data-time="3d" onclick="setTimeFilter('3d')">📅 3 Days</button>
+        <button class="pill-btn" data-time="7d" onclick="setTimeFilter('7d')">🗓️ 7 Days</button>
+      </div>
+    </div>
+
     <div id="jobs-list" class="jobs-list">
       <p class="empty-state">No jobs yet. Tap Scan on the Home tab!</p>
     </div>
