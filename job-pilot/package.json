@@ -1,0 +1,14 @@
+{
+  "name": "job-pilot",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Mobile-first AI job search pilot — scan, evaluate, and apply from your phone",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs --open"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}

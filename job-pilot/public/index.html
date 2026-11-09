@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Job Pilot</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-brand">
+      <span>🚀 Job Pilot</span>
+      <span class="engine-badge">career-ops + ai-job-search</span>
+    </div>
+    <div class="nav-tabs">
+      <button class="tab active" data-view="dashboard">Home</button>
+      <button class="tab" data-view="jobs">Jobs</button>
+      <button class="tab" data-view="history">Tracker</button>
+    </div>
+  </nav>
+
+  <!-- Dashboard View -->
+  <main id="view-dashboard" class="view active">
+    <div class="hero">
+      <h1>Hi, <span id="user-name">Prakhar</span> 👋</h1>
+      <p class="subtitle">AI Job Pilot powered by career-ops & ai-job-search</p>
+    </div>
+
+    <!-- Live Career-Ops Stats -->
+    <div class="section-title">📊 Career-Ops Pipeline Stats</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-total">0</div>
+        <div class="stat-label">Scanned</div>
+      </div>
+      <div class="stat-card stat-green">
+        <div class="stat-number" id="stat-applied">0</div>
+        <div class="stat-label">Applied</div>
+      </div>
+      <div class="stat-card stat-blue">
+        <div class="stat-number" id="stat-avg-score">—</div>
+        <div class="stat-label">Avg Match</div>
+      </div>
+      <div class="stat-card stat-yellow">
+        <div class="stat-number" id="stat-top-score">—</div>
+        <div class="stat-label">Top Score</div>
+      </div>
+    </div>
+
+    <!-- Scan Form -->
+    <div class="scan-section">
+      <h2>🔍 Scan for Jobs</h2>
+      <div class="form-group">
+        <label>Target Role</label>
+        <select id="scan-query" class="input">
+          <option value="Machine Learning Engineer">Machine Learning Engineer</option>
+          <option value="Computer Vision Engineer" selected>Computer Vision Engineer</option>
+          <option value="Edge AI Engineer">Edge AI Engineer</option>
+          <option value="Deep Learning Engineer">Deep Learning Engineer</option>
+          <option value="Perception Engineer">Perception Engineer</option>
+          <option value="MLOps Engineer">MLOps Engineer</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label>Location</label>
+          <select id="scan-location" class="input">
+            <option value="India" selected>India</option>
+            <option value="Bengaluru">Bengaluru</option>
+            <option value="Delhi NCR">Delhi NCR</option>
+            <option value="Hyderabad">Hyderabad</option>
+            <option value="Pune">Pune</option>
+            <option value="Remote">Remote</option>
+          </select>
+        </div>
+        <div class="form-group flex-1">
+          <label>Engine / Portals</label>
+          <select id="scan-sites" class="input">
+            <option value="indeed,linkedin,naukri,wellfound,yc" selected>🔥 Ultimate Combo (Naukri, LinkedIn, Indeed, Wellfound, YC)</option>
+            <option value="wellfound,yc">🦄 Startup Special (Wellfound + YC Jobs)</option>
+            <option value="wellfound">🌟 Wellfound Only (AngelList Talent)</option>
+            <option value="yc">🚀 YC Jobs Only (Y Combinator)</option>
+            <option value="indeed,linkedin,naukri">🇮🇳 Big Tech India (Naukri, LinkedIn, Indeed)</option>
+            <option value="naukri">💼 Naukri Only</option>
+            <option value="linkedin">💼 LinkedIn Only</option>
+            <option value="indeed">🌐 Indeed Only</option>
+            <option value="glassdoor">🏢 Glassdoor Only</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="btn-scan" class="btn btn-primary btn-block" onclick="scanJobs()">
+        🔍 Scan Portals (with ai-job-search Security Gate)
+      </button>
+
+      <button id="btn-scan-ats" class="btn btn-outline btn-block" style="margin-top:8px" onclick="scanAts()">
+        🏢 Scan Direct ATS Boards (career-ops Greenhouse/Lever/Ashby)
+      </button>
+
+      <div id="scan-status" class="status-msg hidden"></div>
+    </div>
+  </main>
+
+  <!-- Jobs View -->
+  <main id="view-jobs" class="view">
+    <div class="view-header">
+      <h2>📋 Scanned Listings</h2>
+      <button class="btn btn-small" onclick="refreshJobs()">↻ Refresh</button>
+    </div>
+    <div id="jobs-list" class="jobs-list">
+      <p class="empty-state">No jobs yet. Tap Scan on the Home tab!</p>
+    </div>
+  </main>
+
+  <!-- History / Official Tracker View -->
+  <main id="view-history" class="view">
+    <div class="view-header">
+      <h2>📜 Official career-ops Tracker</h2>
+      <button class="btn btn-small" onclick="loadTracked()">↻ Sync</button>
+    </div>
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-filter="all" onclick="filterTracked('all')">All</button>
+      <button class="filter-tab" data-filter="Applied" onclick="filterTracked('Applied')">Applied</button>
+      <button class="filter-tab" data-filter="Evaluated" onclick="filterTracked('Evaluated')">Evaluated</button>
+      <button class="filter-tab" data-filter="Interview" onclick="filterTracked('Interview')">Interview</button>
+    </div>
+    <div id="history-list" class="jobs-list" style="margin-top:12px">
+      <p class="empty-state">Loading official tracker...</p>
+    </div>
+  </main>
+
+  <!-- Job Detail Modal -->
+  <div id="job-modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading" class="loading hidden">
+    <div class="spinner"></div>
+    <p id="loading-text">Loading...</p>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
