@@ -295,6 +295,26 @@ body {
 
 .modal-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 2px; padding-right: 36px; }
 .modal-company { color: var(--text2); margin-bottom: 12px; font-size: 0.88rem; }
+
+/* Quick Tools */
+.quick-tools-row {
+  display: flex; gap: 8px; margin: 12px 0 8px; flex-wrap: wrap;
+}
+.quick-tools-row .btn { flex: 1; min-width: 140px; padding: 10px 12px; }
+
+/* Outreach & Prep Boxes */
+.outreach-box {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+.prep-box {
+  background: rgba(168, 85, 247, 0.05);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: var(--radius);
+  padding: 12px;
+}
 .modal-section { margin-top: 14px; }
 .modal-section h3 { font-size: 0.8rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
 .modal-section p, .modal-section li { font-size: 0.85rem; line-height: 1.5; color: var(--text); }

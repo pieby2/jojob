@@ -20,6 +20,11 @@ import {
   lookupCompanySalary,
 } from "./lib/ai-job-search-bridge.mjs";
 
+import {
+  generateInterviewPrep,
+  generateColdOutreach,
+} from "./lib/deepseek.mjs";
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -249,6 +254,66 @@ app.get("/api/salary", async (req, res) => {
   const { company } = req.query;
   const benchmark = await lookupCompanySalary(company);
   res.json(benchmark || { found: false });
+});
+
+// 10. POST /api/interview-prep — generates technical interview prep cheat sheet
+app.post("/api/interview-prep", async (req, res) => {
+  try {
+    const { jobId } = req.body;
+    const jobs = loadJobs();
+    const job = jobs.find((j) => j._id === jobId);
+    if (!job) return res.status(404).json({ error: "Job not found" });
+
+    if (job._interviewPrep) {
+      return res.json(job._interviewPrep);
+    }
+
+    const cv = loadCV();
+    const title = job.title || "Machine Learning Engineer";
+    const company = job.company_name || job.company || "Company";
+    const desc = job.description || title;
+
+    const prep = await generateInterviewPrep(title, company, desc, cv);
+    job._interviewPrep = prep;
+    saveJobs(jobs);
+
+    res.json(prep);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// 11. POST /api/cold-outreach — generates cold LinkedIn DM and email templates
+app.post("/api/cold-outreach", async (req, res) => {
+  try {
+    const { jobId } = req.body;
+    const jobs = loadJobs();
+    const job = jobs.find((j) => j._id === jobId);
+    if (!job) return res.status(404).json({ error: "Job not found" });
+
+    if (job._coldOutreach) {
+      return res.json(job._coldOutreach);
+    }
+
+    const cv = loadCV();
+    const title = job.title || "Machine Learning Engineer";
+    const company = job.company_name || job.company || "Company";
+    const desc = job.description || title;
+
+    const outreach = await generateColdOutreach(title, company, desc, cv);
+
+    // Add direct LinkedIn search link and mailto link
+    const cleanComp = company.replace(/[^a-zA-Z0-9 ]/g, " ").trim();
+    outreach.linkedinSearchUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(cleanComp + " recruiter OR founder OR engineering lead")}`;
+    outreach.mailtoUrl = `mailto:?subject=${encodeURIComponent(outreach.emailSubject || "")}&body=${encodeURIComponent(outreach.emailBody || "")}`;
+
+    job._coldOutreach = outreach;
+    saveJobs(jobs);
+
+    res.json(outreach);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // --- Get LAN IP ---

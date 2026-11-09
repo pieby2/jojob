@@ -406,6 +406,71 @@ function openJobDetail(jobId) {
       </div>`;
   }
 
+  // Cold Outreach Section
+  let outreachHtml = "";
+  const outreach = job._coldOutreach;
+  if (outreach) {
+    outreachHtml = `
+      <div class="modal-section outreach-box">
+        <h3>✉️ Recruiter & Founder Cold Outreach</h3>
+        <div style="margin: 6px 0 10px;">
+          <a href="${escHtml(outreach.linkedinSearchUrl)}" target="_blank" rel="noopener" class="btn btn-primary btn-small" style="text-decoration:none;">
+            🔎 Search Hiring Managers on LinkedIn
+          </a>
+          <a href="${escHtml(outreach.mailtoUrl)}" class="btn btn-outline btn-small" style="text-decoration:none; margin-left: 6px;">
+            ✉️ Open Email App
+          </a>
+        </div>
+        ${copyBlock("💬 LinkedIn Connection Request Note (<300 chars)", outreach.linkedinNote)}
+        ${copyBlock("✉️ Cold Email Subject", outreach.emailSubject)}
+        ${copyBlock("📄 Cold Email / InMail Body", outreach.emailBody)}
+        ${copyBlock("⏰ 5-Day Polite Follow-Up Note", outreach.followUp)}
+      </div>`;
+  }
+
+  // Interview Prep Section
+  let prepHtml = "";
+  const prep = job._interviewPrep;
+  if (prep) {
+    const qList = (prep.technicalQuestions || []).map((tq, i) => `
+      <div class="qa-item" style="background:var(--bg);padding:10px;border-radius:8px;margin-top:8px;border:1px solid var(--bg3)">
+        <div style="font-weight:600;color:var(--text);font-size:0.86rem">Q${i+1}: ${escHtml(tq.question)}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:2px"><em>Goal: ${escHtml(tq.whyTheyAsk || "")}</em></div>
+        <div class="copy-block" style="margin-top:6px" id="prep-q-${i}">
+          <button class="copy-btn" onclick="copyText('prep-q-${i}')">Copy</button>
+          <strong>Your Tailored Answer:</strong><br>${escHtml(tq.suggestedAnswer)}
+        </div>
+      </div>
+    `).join("");
+
+    const askList = (prep.questionsForInterviewer || []).map((q, i) => `
+      <div class="copy-block" style="margin-top:6px" id="prep-ask-${i}">
+        <button class="copy-btn" onclick="copyText('prep-ask-${i}')">Copy</button>
+        ${escHtml(q)}
+      </div>
+    `).join("");
+
+    prepHtml = `
+      <div class="modal-section prep-box">
+        <h3>🎙️ AI Technical Interview Prep</h3>
+        ${prep.summary ? `<div style="font-size:0.83rem;color:var(--text);background:rgba(59,130,246,0.1);padding:8px 10px;border-radius:6px;border:1px solid rgba(59,130,246,0.25);margin-bottom:8px"><strong>Focus:</strong> ${escHtml(prep.summary)}</div>` : ""}
+        ${qList}
+        ${prep.systemDesignScenario?.scenario ? `
+          <div style="margin-top:12px">
+            <strong style="font-size:0.8rem;color:var(--accent)">🏗️ System Design Scenario:</strong>
+            <div style="font-size:0.83rem;margin-top:2px">${escHtml(prep.systemDesignScenario.scenario)}</div>
+            ${copyBlock("Recommended Architectural Approach", prep.systemDesignScenario.approach)}
+          </div>
+        ` : ""}
+        ${askList ? `
+          <div style="margin-top:12px">
+            <strong style="font-size:0.8rem;color:var(--green)">💡 High-Impact Questions To Ask The Interviewer:</strong>
+            ${askList}
+          </div>
+        ` : ""}
+      </div>`;
+  }
+
   // Draft Application Answers from Section H of career-ops
   let answersHtml = "";
   const answerKeys = Object.keys(answers);
@@ -432,6 +497,20 @@ function openJobDetail(jobId) {
 
     ${salaryHtml}
 
+    <!-- Quick Action Tool Buttons -->
+    <div class="quick-tools-row" style="display:flex;gap:6px;margin:12px 0 6px;flex-wrap:wrap">
+      <button class="btn ${outreach ? 'btn-outline' : 'btn-primary'} btn-small" onclick="generateColdOutreach('${job._id}')">
+        ${outreach ? "✉️ View Outreach DMs" : "✉️ Draft Cold DMs & Email"}
+      </button>
+      <button class="btn ${prep ? 'btn-outline' : 'btn-primary'} btn-small" onclick="generateInterviewPrep('${job._id}')">
+        ${prep ? "🎙️ View Interview Prep" : "🎙️ Generate Interview Prep"}
+      </button>
+    </div>
+
+    ${outreachHtml}
+
+    ${prepHtml}
+
     ${answersHtml}
 
     <div class="modal-section">
@@ -451,6 +530,64 @@ function openJobDetail(jobId) {
 
 function closeModal() {
   document.getElementById("job-modal").classList.add("hidden");
+}
+
+// --- Generate Cold Outreach ---
+async function generateColdOutreach(jobId) {
+  const job = allJobs.find((j) => j._id === jobId);
+  if (!job) return;
+
+  if (job._coldOutreach) {
+    openJobDetail(jobId);
+    return;
+  }
+
+  showLoading("AI is crafting high-converting cold DMs & emails...\nInjecting your Mayonix & AlphaSense metrics...");
+  try {
+    const res = await fetch("/api/cold-outreach", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jobId }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    job._coldOutreach = data;
+    hideLoading();
+    openJobDetail(jobId);
+  } catch (e) {
+    hideLoading();
+    alert("Outreach generation failed: " + e.message);
+  }
+}
+
+// --- Generate Technical Interview Prep ---
+async function generateInterviewPrep(jobId) {
+  const job = allJobs.find((j) => j._id === jobId);
+  if (!job) return;
+
+  if (job._interviewPrep) {
+    openJobDetail(jobId);
+    return;
+  }
+
+  showLoading("AI is preparing your technical interview cheat sheet...\nFormulating questions, tailored answers, and system design...");
+  try {
+    const res = await fetch("/api/interview-prep", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jobId }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    job._interviewPrep = data;
+    hideLoading();
+    openJobDetail(jobId);
+  } catch (e) {
+    hideLoading();
+    alert("Interview prep failed: " + e.message);
+  }
 }
 
 document.addEventListener("click", (e) => {
