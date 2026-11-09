@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: job-pilot
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    region: oregon
+    healthCheckPath: /api/profile
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: DEEPSEEK_API_KEY
+        sync: false # Render will prompt you to enter your DeepSeek API key in the dashboard
