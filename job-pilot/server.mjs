@@ -13,6 +13,7 @@ import {
   updateCareerOpsStatus,
   scanCareerOpsATS,
   syncCareerOpsTracker,
+  tailorResumeForJob,
 } from "./lib/career-ops-bridge.mjs";
 
 import {
@@ -23,7 +24,10 @@ import {
 import {
   generateInterviewPrep,
   generateColdOutreach,
+  answerFormQuestions,
 } from "./lib/deepseek.mjs";
+
+import { autofillJobApplication } from "./lib/form-autofiller.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -314,6 +318,223 @@ app.post("/api/cold-outreach", async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+// 12. POST /api/jobs/:id/tailor-resume — Generates tailored personal CV (HTML + PDF)
+app.post("/api/jobs/:id/tailor-resume", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const jobs = loadJobs();
+    const job = jobs.find((j) => j._id === id);
+    if (!job) return res.status(404).json({ error: "Job not found" });
+
+    const jobTitle = job.title || "Machine Learning Engineer";
+    const company = job.company_name || job.company || "Company";
+    const description = job.description || jobTitle;
+    const reportPath = job._evaluation?.reportPath;
+
+    console.log(`[resume] Tailoring personal resume for job ${id}: ${company} — ${jobTitle}`);
+    const result = await tailorResumeForJob({
+      jobId: id,
+      jobTitle,
+      company,
+      description,
+      reportPath,
+    });
+
+    job._tailoredResume = result;
+    saveJobs(jobs);
+
+    res.json(result);
+  } catch (err) {
+    console.error("Tailor resume error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 13. GET /api/jobs/:id/resume.pdf — Downloads or streams tailored personal resume PDF
+app.get("/api/jobs/:id/resume.pdf", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const jobs = loadJobs();
+    const job = jobs.find((j) => j._id === id);
+    if (!job) return res.status(404).send("Job not found");
+
+    const safeJobId = id.replace(/[^a-zA-Z0-9_-]/g, "_");
+    const localPdf = join(__dirname, "data", "resumes", `resume-${safeJobId}.pdf`);
+
+    if (!existsSync(localPdf)) {
+      try {
+        console.log(`[resume] Auto-generating resume PDF on-demand for ${id}...`);
+        const jobTitle = job.title || "Machine Learning Engineer";
+        const company = job.company_name || job.company || "Company";
+        const description = job.description || jobTitle;
+        const reportPath = job._evaluation?.reportPath;
+        const result = await tailorResumeForJob({ jobId: id, jobTitle, company, description, reportPath });
+        job._tailoredResume = result;
+        saveJobs(jobs);
+      } catch (e) {
+        console.warn("Auto-tailor on PDF request failed:", e.message);
+      }
+    }
+
+    if (existsSync(localPdf)) {
+      const compSlug = (job.company_name || job.company || "Company").replace(/[^a-zA-Z0-9]/g, "_");
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `inline; filename="Prakhar_Chaubey_Resume_${compSlug}.pdf"`);
+      return res.sendFile(localPdf);
+    }
+
+    // Fallback to any existing PDF in career-ops/output
+    const outDir = join(__dirname, "..", "career-ops", "output");
+    if (existsSync(outDir)) {
+      const pdfs = (await import("fs")).readdirSync(outDir).filter((f) => f.endsWith(".pdf"));
+      if (pdfs.length > 0) {
+        res.setHeader("Content-Type", "application/pdf");
+        return res.sendFile(join(outDir, pdfs[pdfs.length - 1]));
+      }
+    }
+
+    res.status(404).send("Resume PDF not found. Click 'Tailor My Resume' in Job Pilot to generate.");
+  } catch (err) {
+    res.status(500).send("Error serving resume: " + err.message);
+  }
+});
+
+// 14. GET /api/jobs/:id/resume.html — Previews tailored personal resume HTML
+app.get("/api/jobs/:id/resume.html", (req, res) => {
+  const { id } = req.params;
+  const safeJobId = id.replace(/[^a-zA-Z0-9_-]/g, "_");
+  const localHtml = join(__dirname, "data", "resumes", `resume-${safeJobId}.html`);
+
+  if (existsSync(localHtml)) {
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    return res.sendFile(localHtml);
+  }
+
+  res.status(404).send("Tailored HTML resume not found.");
+});
+
+// 15. POST /api/jobs/:id/autofill — Headed Playwright browser auto-fill with custom Q&A
+app.post("/api/jobs/:id/autofill", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const jobs = loadJobs();
+    const job = jobs.find((j) => j._id === id);
+    if (!job) return res.status(404).json({ error: "Job not found" });
+
+    // Check if resume PDF exists or tailor one
+    const safeJobId = id.replace(/[^a-zA-Z0-9_-]/g, "_");
+    let resumePdfPath = join(__dirname, "data", "resumes", `resume-${safeJobId}.pdf`);
+
+    if (!existsSync(resumePdfPath)) {
+      try {
+        console.log(`[autofill] No tailored resume PDF found for ${id}. Generating before auto-fill...`);
+        const result = await tailorResumeForJob({
+          jobId: id,
+          jobTitle: job.title,
+          company: job.company_name || job.company,
+          description: job.description,
+          reportPath: job._evaluation?.reportPath,
+        });
+        resumePdfPath = result.destPdfPath;
+        job._tailoredResume = result;
+        saveJobs(jobs);
+      } catch (err) {
+        console.warn("[autofill] Could not generate tailored resume before autofill:", err.message);
+      }
+    }
+
+    const result = await autofillJobApplication({ job, resumePdfPath });
+    res.json(result);
+  } catch (err) {
+    console.error("Autofill error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 16. POST /api/jobs/:id/solve-questions — Solves arbitrary screening questions from portal
+app.post("/api/jobs/:id/solve-questions", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { questions } = req.body;
+    const jobs = loadJobs();
+    const job = jobs.find((j) => j._id === id);
+    if (!job) return res.status(404).json({ error: "Job not found" });
+
+    const cv = loadCV();
+    const answers = await answerFormQuestions(
+      questions,
+      job.title,
+      job.company_name || job.company,
+      job.description,
+      cv
+    );
+
+    if (!job._customQuestions) job._customQuestions = [];
+    for (const item of answers) {
+      const idx = job._customQuestions.findIndex((q) => q.question === item.question);
+      if (idx !== -1) {
+        job._customQuestions[idx] = item;
+      } else {
+        job._customQuestions.push(item);
+      }
+    }
+    saveJobs(jobs);
+
+    res.json({ ok: true, answers });
+  } catch (err) {
+    console.error("Solve questions error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 17. GET /api/bookmarklet — 1-click JavaScript bookmarklet for auto-filling portal fields
+app.get("/api/bookmarklet", (_req, res) => {
+  const code = `javascript:(function(){
+    var c={
+      name:"Prakhar Pragyan Chaubey",
+      first:"Prakhar Pragyan",
+      last:"Chaubey",
+      email:"prakharpragyan1000@gmail.com",
+      phone:"+91-8853511579",
+      city:"Ghaziabad",
+      location:"Ghaziabad, Uttar Pradesh, India",
+      country:"India",
+      linkedin:"https://linkedin.com/in/prakhar-b045b91ab",
+      github:"https://github.com/pieby2",
+      portfolio:"https://github.com/pieby2",
+      company:"Mayonix Innovation",
+      title:"Machine Learning Engineer",
+      notice:"Immediately available (15-30 days)",
+      salary:"₹15,00,000 INR"
+    };
+    function fill(sel,val){
+      document.querySelectorAll(sel).forEach(function(el){
+        if(!el.value||el.value.length===0){
+          el.value=val;
+          el.dispatchEvent(new Event('input',{bubbles:true}));
+          el.dispatchEvent(new Event('change',{bubbles:true}));
+          el.style.border="2px solid #22c55e";
+          el.style.backgroundColor="#f0fdf4";
+        }
+      });
+    }
+    fill('input[name*="first_name" i],input[name*="firstName" i],input[id*="first_name" i],input[autocomplete="given-name"]',c.first);
+    fill('input[name*="last_name" i],input[name*="lastName" i],input[id*="last_name" i],input[autocomplete="family-name"]',c.last);
+    fill('input[name*="name" i]:not([name*="first" i]):not([name*="last" i]),input[id*="name" i]:not([id*="first" i]):not([id*="last" i]),input[autocomplete="name"]',c.name);
+    fill('input[type="email"],input[name*="email" i],input[id*="email" i]',c.email);
+    fill('input[type="tel"],input[name*="phone" i],input[id*="phone" i]',c.phone);
+    fill('input[name*="city" i],input[id*="city" i]',c.city);
+    fill('input[name*="location" i],input[id*="location" i]',c.location);
+    fill('input[name*="linkedin" i],input[id*="linkedin" i],input[placeholder*="linkedin" i]',c.linkedin);
+    fill('input[name*="github" i],input[id*="github" i],input[placeholder*="github" i]',c.github);
+    fill('input[name*="portfolio" i],input[id*="portfolio" i],input[name*="website" i]',c.portfolio);
+    fill('input[name*="company" i],input[id*="company" i]',c.company);
+    fill('input[name*="title" i],input[id*="title" i]',c.title);
+    alert('✅ Job Pilot: Candidate details auto-filled! Please check and submit.');
+  })();`;
+  res.json({ bookmarklet: code });
 });
 
 // --- Get LAN IP ---

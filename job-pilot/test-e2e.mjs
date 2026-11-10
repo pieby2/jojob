@@ -165,6 +165,58 @@ async function runTests() {
     assert(false, `Re-checking tracked list failed: ${e.message}`);
   }
 
+  // 10. Bookmarklet API test
+  try {
+    const res = await fetch(`${BASE}/api/bookmarklet`);
+    const data = await res.json();
+    assert(res.status === 200, "GET /api/bookmarklet returns 200");
+    assert(data.bookmarklet?.startsWith("javascript:"), "Bookmarklet snippet is valid JavaScript protocol");
+    assert(data.bookmarklet?.includes("Prakhar Pragyan Chaubey"), "Bookmarklet contains candidate name");
+  } catch (e) {
+    assert(false, `Bookmarklet test failed: ${e.message}`);
+  }
+
+  // 11. Tailored Resume PDF & HTML API test
+  try {
+    const resJobs = await fetch(`${BASE}/api/jobs`);
+    const jobs = await resJobs.json();
+    const evaluatedJob = jobs.find(j => j._tailoredResume || j._evaluation) || jobs[0];
+
+    if (evaluatedJob) {
+      const pdfRes = await fetch(`${BASE}/api/jobs/${evaluatedJob._id}/resume.pdf`);
+      assert(pdfRes.status === 200, `GET /api/jobs/:id/resume.pdf returns 200 for job ${evaluatedJob._id}`);
+      assert(pdfRes.headers.get("content-type")?.includes("pdf"), `Resume response is application/pdf (${pdfRes.headers.get("content-type")})`);
+
+      const htmlRes = await fetch(`${BASE}/api/jobs/${evaluatedJob._id}/resume.html`);
+      assert(htmlRes.status === 200, `GET /api/jobs/:id/resume.html returns 200`);
+      const htmlText = await htmlRes.text();
+      assert(htmlText.includes("Prakhar Pragyan Chaubey"), "Tailored HTML contains candidate name");
+    }
+  } catch (e) {
+    assert(false, `Resume serving test failed: ${e.message}`);
+  }
+
+  // 12. Custom Portal Question Solver API test
+  try {
+    const resJobs = await fetch(`${BASE}/api/jobs`);
+    const jobs = await resJobs.json();
+    const target = jobs[0];
+
+    const solveRes = await fetch(`${BASE}/api/jobs/${target._id}/solve-questions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        questions: ["Why are you interested in this position?", "What is your availability?"]
+      }),
+    });
+    const solveData = await solveRes.json();
+    assert(solveRes.status === 200, "POST /api/jobs/:id/solve-questions returns 200");
+    assert(Array.isArray(solveData.answers) && solveData.answers.length === 2, `Solved 2 screening questions with DeepSeek`);
+    assert(Boolean(solveData.answers[0]?.answer), `Answer 1 non-empty: "${solveData.answers[0]?.answer.substring(0, 60)}..."`);
+  } catch (e) {
+    assert(false, `Custom Question Solver test failed: ${e.message}`);
+  }
+
   console.log("\n==================================================");
   console.log(`   TEST SUMMARY: ${passed} PASSED, ${failed} FAILED`);
   console.log("==================================================\n");

@@ -30,5 +30,10 @@ temp/
 Thumbs.db
 desktop.ini
 
+# Generated CVs and PDFs
+job-pilot/data/resumes/*.pdf
+job-pilot/data/resumes/*.html
+!job-pilot/data/resumes/.gitkeep
+
 # SQLite databases if desired (leave markdown tracker)
 *.db-journal

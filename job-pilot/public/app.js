@@ -277,11 +277,19 @@ function createJobCard(job) {
         ${compTag}
         ${security ? `<span class="tag tag-security" title="${escHtml(security.verdict)}">🛡️ Verified Safe</span>` : ""}
         ${eval_?.archetype ? `<span class="tag tag-archetype">🎯 ${escHtml(eval_.archetype.split("/")[0])}</span>` : ""}
+        ${job._tailoredResume ? `<span class="tag" style="background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3)">📄 Tailored CV Ready</span>` : ""}
       </div>
       <div class="job-actions" onclick="event.stopPropagation()">
         <button class="btn btn-primary btn-small" onclick="evaluateJobCard('${job._id}')">
           ${eval_ ? "📄 Report" : "⚡ Evaluate (career-ops)"}
         </button>
+        ${job._tailoredResume ? `
+        <a href="/api/jobs/${encodeURIComponent(job._id)}/resume.pdf" target="_blank" download="Prakhar_Chaubey_Resume_${escHtml(company)}.pdf" class="btn btn-outline btn-small" style="text-decoration:none" onclick="event.stopPropagation()">
+          ⬇️ CV (PDF)
+        </a>` : `
+        <button class="btn btn-outline btn-small" onclick="tailorResume('${job._id}'); event.stopPropagation()">
+          📄 Tailor CV
+        </button>`}
         <button class="btn btn-success btn-small" onclick="applyJobCard('${job._id}')">
           🚀 Apply
         </button>
@@ -482,6 +490,100 @@ function openJobDetail(jobId) {
       </div>`;
   }
 
+  // Tailored Personal Resume Section
+  let resumeHtml = "";
+  const tailored = job._tailoredResume;
+  if (tailored) {
+    resumeHtml = `
+      <div class="modal-section resume-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <h3 style="color:var(--green);margin-bottom:0">📄 Tailored Personal Resume (PDF)</h3>
+          <span class="tag tag-time" style="background:rgba(34,197,94,0.2);color:#4ade80">Ready</span>
+        </div>
+        <p style="font-size:0.82rem;color:var(--text);margin-bottom:10px">
+          Customized for ${escHtml(company)} strictly using your verified track record (YOLOv8/v9, Mayonix, TensorRT, AlphaSense, IEEE publications).
+        </p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a href="/api/jobs/${encodeURIComponent(job._id)}/resume.pdf" target="_blank" download="Prakhar_Chaubey_Resume_${escHtml(company)}.pdf" class="btn btn-success btn-small" style="text-decoration:none">
+            ⬇️ Download PDF Resume
+          </a>
+          <a href="/api/jobs/${encodeURIComponent(job._id)}/resume.html" target="_blank" class="btn btn-outline btn-small" style="text-decoration:none">
+            👁️ Preview HTML
+          </a>
+          <button class="btn btn-outline btn-small" onclick="tailorResume('${job._id}')">
+            ↻ Re-tailor
+          </button>
+        </div>
+      </div>`;
+  } else {
+    resumeHtml = `
+      <div class="modal-section resume-box" style="border-style:dashed;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <h3 style="color:var(--accent);margin-bottom:0">📄 Tailored Personal Resume</h3>
+          <span class="tag tag-time">Not Built Yet</span>
+        </div>
+        <p style="font-size:0.82rem;color:var(--text2);margin-bottom:8px">
+          Generate an ATS-compliant tailored PDF resume highlighting your matching edge AI and computer vision achievements.
+        </p>
+        <button class="btn btn-primary btn-small" onclick="tailorResume('${job._id}')">
+          📄 Generate Tailored Resume (PDF)
+        </button>
+      </div>`;
+  }
+
+  // Autonomous Form Auto-Filler Section
+  let autofillHtml = `
+    <div class="modal-section autofill-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <h3 style="color:#60a5fa;margin-bottom:0">⚡ Autonomous Form Auto-Filler (Playwright)</h3>
+        <span class="tag" style="background:#1e3a8a;color:#93c5fd">Desktop Headed</span>
+      </div>
+      <p style="font-size:0.82rem;color:var(--text);margin-bottom:8px">
+        Launches visible Chromium, inputs candidate details, attaches your tailored PDF resume, and generates answers for screening questions with DeepSeek. Pauses before Submit for your review.
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-autofill btn-small" onclick="autofillForm('${job._id}')">
+          🚀 Auto-Fill Application Form in Browser
+        </button>
+        <button class="btn btn-outline btn-small" onclick="copyBookmarklet()">
+          📋 Copy 1-Click Bookmarklet
+        </button>
+      </div>
+      <div id="autofill-feedback-${job._id}" style="margin-top:8px;font-size:0.82rem;display:none;"></div>
+    </div>`;
+
+  // Portal Form Question Solver Section
+  let solverHtml = `
+    <div class="modal-section solver-box">
+      <h3 style="color:var(--yellow)">📝 Portal Form Question Solver</h3>
+      <p style="font-size:0.8rem;color:var(--text2);margin-bottom:8px">
+        Asked custom questions on the portal (Workday, Greenhouse, Lever, Naukri)? Paste them below to get instant tailored answers:
+      </p>
+      <textarea id="custom-questions-input-${job._id}" class="input" style="width:100%;height:68px;resize:vertical;font-size:0.82rem;margin-bottom:8px" placeholder="Paste questions here (e.g. 'Why do you want to work at ${escHtml(company)}?', 'Describe your experience with YOLO', 'Expected salary?')..."></textarea>
+      <button class="btn btn-primary btn-small" onclick="solveQuestions('${job._id}')">
+        ✨ Solve Form Questions with DeepSeek
+      </button>
+      <div id="solved-questions-container-${job._id}" style="margin-top:8px">
+        ${(job._customQuestions || []).map((qa) => copyBlock(qa.question, qa.answer)).join("")}
+      </div>
+    </div>`;
+
+  // Quick Profile Copy Bar
+  let candidateBarHtml = `
+    <div class="modal-section" style="padding:10px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--bg3)">
+      <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;color:var(--text2);margin-bottom:6px">⚡ Quick Profile Copy (1-Tap)</div>
+      <div class="profile-pill-row">
+        <button class="profile-pill" onclick="copyDirect('Prakhar Pragyan Chaubey', this)">👤 Prakhar Pragyan Chaubey</button>
+        <button class="profile-pill" onclick="copyDirect('prakharpragyan1000@gmail.com', this)">✉️ Email</button>
+        <button class="profile-pill" onclick="copyDirect('+91-8853511579', this)">📞 +91-8853511579</button>
+        <button class="profile-pill" onclick="copyDirect('https://linkedin.com/in/prakhar-b045b91ab', this)">🔗 LinkedIn</button>
+        <button class="profile-pill" onclick="copyDirect('https://github.com/pieby2', this)">🐙 GitHub</button>
+        <button class="profile-pill" onclick="copyDirect('Ghaziabad, Uttar Pradesh, India', this)">📍 Location</button>
+        <button class="profile-pill" onclick="copyDirect('Immediately available (15-30 days)', this)">⏱️ Notice Period</button>
+        <button class="profile-pill" onclick="copyDirect('₹15,00,000 INR (Negotiable)', this)">💵 Expected Comp</button>
+      </div>
+    </div>`;
+
   const jobUrl = job.job_url || job.link || "";
 
   document.getElementById("modal-body").innerHTML = `
@@ -495,10 +597,21 @@ function openJobDetail(jobId) {
 
     ${evalHtml}
 
+    ${resumeHtml}
+
+    ${autofillHtml}
+
+    ${solverHtml}
+
+    ${candidateBarHtml}
+
     ${salaryHtml}
 
     <!-- Quick Action Tool Buttons -->
     <div class="quick-tools-row" style="display:flex;gap:6px;margin:12px 0 6px;flex-wrap:wrap">
+      <button class="btn ${tailored ? 'btn-outline' : 'btn-primary'} btn-small" onclick="tailorResume('${job._id}')">
+        ${tailored ? "📄 Re-tailor Resume" : "📄 Tailor My Resume (PDF)"}
+      </button>
       <button class="btn ${outreach ? 'btn-outline' : 'btn-primary'} btn-small" onclick="generateColdOutreach('${job._id}')">
         ${outreach ? "✉️ View Outreach DMs" : "✉️ Draft Cold DMs & Email"}
       </button>
@@ -588,6 +701,126 @@ async function generateInterviewPrep(jobId) {
     hideLoading();
     alert("Interview prep failed: " + e.message);
   }
+}
+
+// --- Tailor Personal Resume (HTML + PDF) ---
+async function tailorResume(jobId) {
+  const job = allJobs.find((j) => j._id === jobId);
+  if (!job) return;
+
+  showLoading("Tailoring personal resume with DeepSeek + career-ops...\nReformulating experience bullets with JD vocabulary (strict anti-fabrication)...\nCompiling ATS-compliant PDF via Playwright Chromium...");
+
+  try {
+    const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}/tailor-resume`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    job._tailoredResume = data;
+    hideLoading();
+    openJobDetail(jobId);
+    refreshJobs();
+  } catch (err) {
+    hideLoading();
+    alert("Resume tailoring failed: " + err.message);
+  }
+}
+
+// --- Autonomous Browser Form Auto-Filler (Playwright) ---
+async function autofillForm(jobId) {
+  const job = allJobs.find((j) => j._id === jobId);
+  if (!job) return;
+
+  showLoading("Opening headed Chromium browser on your screen...\nNavigating to application form...\nAuto-filling personal details, attaching tailored PDF resume...\nAnswering screening questions with DeepSeek...");
+
+  try {
+    const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}/autofill`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    hideLoading();
+    const feedback = document.getElementById(`autofill-feedback-${jobId}`);
+    if (feedback) {
+      feedback.style.display = "block";
+      feedback.style.color = "var(--green)";
+      feedback.innerHTML = `✅ <strong>Auto-Fill Successful!</strong> Look at your open browser window. ${data.filledFields?.length || 0} fields filled and ${data.answeredQuestions?.length || 0} questions answered. Please review and click Submit!`;
+    }
+    alert(`🚀 Job Pilot Form Auto-Fill complete!\n\nYour headed browser is currently open on your screen with candidate details, tailored resume PDF, and screening questions filled in.\n\nPlease inspect the page and click Submit when satisfied.`);
+  } catch (err) {
+    hideLoading();
+    alert("Auto-fill error: " + err.message);
+  }
+}
+
+// --- Portal Form Question Solver ---
+async function solveQuestions(jobId) {
+  const job = allJobs.find((j) => j._id === jobId);
+  if (!job) return;
+
+  const input = document.getElementById(`custom-questions-input-${jobId}`);
+  const questionsText = input ? input.value.trim() : "";
+  if (!questionsText) {
+    alert("Please paste one or more questions from the application form first.");
+    return;
+  }
+
+  showLoading("DeepSeek is analyzing your CV & job description to generate tailored, authentic answers...");
+  try {
+    const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}/solve-questions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ questions: questionsText }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    if (!job._customQuestions) job._customQuestions = [];
+    for (const item of (data.answers || [])) {
+      const idx = job._customQuestions.findIndex((q) => q.question === item.question);
+      if (idx !== -1) job._customQuestions[idx] = item;
+      else job._customQuestions.push(item);
+    }
+
+    hideLoading();
+    openJobDetail(jobId);
+  } catch (err) {
+    hideLoading();
+    alert("Question solving failed: " + err.message);
+  }
+}
+
+// --- Copy 1-Click Bookmarklet ---
+async function copyBookmarklet() {
+  try {
+    const res = await fetch("/api/bookmarklet");
+    const data = await res.json();
+    if (data.bookmarklet) {
+      await navigator.clipboard.writeText(data.bookmarklet);
+      alert("📋 Auto-Fill Bookmarklet copied to clipboard!\n\nTo use:\n1. Bookmark any page in your browser.\n2. Edit the bookmark and paste this code as the URL.\n3. Whenever you are on an ATS application page (Workday, Greenhouse, Lever, etc.), click the bookmark to auto-fill all candidate fields instantly!");
+    }
+  } catch (err) {
+    alert("Could not copy bookmarklet: " + err.message);
+  }
+}
+
+// --- 1-Tap Copy Direct Helper ---
+function copyDirect(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerText;
+    btn.innerText = "Copied!";
+    btn.style.background = "var(--green)";
+    btn.style.color = "#000";
+    setTimeout(() => {
+      btn.innerText = orig;
+      btn.style.background = "";
+      btn.style.color = "";
+    }, 1200);
+  });
 }
 
 document.addEventListener("click", (e) => {

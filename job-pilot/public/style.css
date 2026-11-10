@@ -315,6 +315,60 @@ body {
   border-radius: var(--radius);
   padding: 12px;
 }
+
+/* Resume & Autofill Boxes */
+.resume-box {
+  background: rgba(34, 197, 94, 0.06);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.autofill-box {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.solver-box {
+  background: rgba(234, 179, 8, 0.05);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.btn-autofill {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  border: none;
+}
+.btn-autofill:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+.profile-pill-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.profile-pill {
+  background: var(--bg);
+  border: 1px solid var(--bg3);
+  color: var(--text2);
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.profile-pill:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+.profile-pill:active {
+  background: var(--accent2);
+  color: #fff;
+}
 .modal-section { margin-top: 14px; }
 .modal-section h3 { font-size: 0.8rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
 .modal-section p, .modal-section li { font-size: 0.85rem; line-height: 1.5; color: var(--text); }

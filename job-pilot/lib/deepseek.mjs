@@ -200,3 +200,73 @@ Generate cold outreach templates. Return ONLY valid JSON:
     };
   }
 }
+
+/**
+ * Answer custom or portal questions for an application form.
+ * Accepts either an array of questions or a multi-line string of questions.
+ */
+export async function answerFormQuestions(questionsInput, jobTitle, company, description, cvText) {
+  let questions = [];
+  if (Array.isArray(questionsInput)) {
+    questions = questionsInput.map((q) => (typeof q === "string" ? q.trim() : q.question || "")).filter(Boolean);
+  } else if (typeof questionsInput === "string") {
+    questions = questionsInput
+      .split(/\n+/)
+      .map((q) => q.replace(/^\s*[-*•\d+.)]\s*/, "").trim())
+      .filter((q) => q.length > 3);
+  }
+
+  if (questions.length === 0) {
+    questions = [
+      "Why are you interested in this role?",
+      "Why should we hire you over other candidates?",
+      "Describe your hands-on experience with the core skills required for this job.",
+      "What is your current notice period and availability?"
+    ];
+  }
+
+  const prompt = `You are an elite career agent representing candidate Prakhar Pragyan Chaubey.
+Candidate Profile & Track Record:
+- Name: Prakhar Pragyan Chaubey
+- Education: B.Tech Computer Science (Expected 2026, ABES EC)
+- Current Role: Machine Learning Engineer at Mayonix Innovation (February 2026 – Present)
+- Real Core Metrics:
+  * 92%+ mAP with YOLOv8 & YOLOv9 architectures on real-world mobile camera inputs
+  * Sub-100ms end-to-end edge inference on iOS/Android via INT8/FP16 quantization, structured pruning & TensorRT / TFLite
+  * U-Net semantic segmentation, MobileNetV3-Small, OpenCV/NumPy preprocessing
+- Notable Project: AlphaSense AI (multi-branch DL trading system with PyTorch, Temporal Fusion Transformer, Bidirectional Mamba, Stable-Baselines3 DRL)
+- Publications: IEEE WAMS 2025 (Chennai) & INCSTIC-2025 accepted papers on ML-aided design and Image Fusion
+- Location: Ghaziabad, Uttar Pradesh, India (Authorized in India; open to remote worldwide or hybrid)
+- Notice Period: Immediately available (or within 15-30 days)
+- Compensation: ₹12L-₹24L INR / $50K-$80K USD (flexible and competitive)
+
+Target Role: ${jobTitle}
+Company: ${company}
+Job Description:
+${description}
+
+The employer's application form asks the following question(s):
+${JSON.stringify(questions, null, 2)}
+
+Instructions:
+1. Provide a tailored, persuasive, and 100% truthful answer to EACH question.
+2. Formulate answers using the candidate's exact real projects (Mayonix, AlphaSense, IEEE papers, YOLOv8/v9, PyTorch, TensorRT).
+3. Do NOT hallucinate past companies, unearned degrees, or metrics.
+4. Keep answers concise, natural, confident, and direct (2-4 sentences or structured bullets if asking for steps).
+5. Output ONLY a valid JSON array of objects with keys "question" and "answer":
+[
+  {
+    "question": "...",
+    "answer": "..."
+  }
+]`;
+
+  const raw = await callDeepSeek([{ role: "user", content: prompt }], 0.3);
+  try {
+    const jsonStr = raw.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
+    return JSON.parse(jsonStr);
+  } catch {
+    return questions.map((q) => ({ question: q, answer: raw }));
+  }
+}
+
