@@ -40,13 +40,14 @@
     "_customQuestions": [
       {
         "question": "Why are you interested in this position?",
-        "answer": "Optum's mission of connecting people with the care and data they need resonates deeply with me — my work at Mayonix Innovation on real-world mobile camera inputs (92%+ mAP with YOLOv8/YOLOv9, sub-100ms edge inference via TensorRT/TFLite) has taught me how much impact performance-optimized, production-grade systems can have on end users. This Full Stack role excites me because it spans Go/Templ, React, JavaScript, and Java-SpringBoot alongside AI tooling like Claude/Codex — a natural extension of my ML engineering background (PyTorch, U-Net, MobileNetV3-Small) and my AlphaSense AI project, where I built a multi-branch DL trading system with Temporal Fusion Transformer, Bidirectional Mamba, and Stable-Baselines3 DRL. I'm eager to bring my edge-optimization and AI-assisted development experience to enterprise healthcare software, and my IEEE WAMS 2025 and INCSTIC-2025 publications reflect my commitment to rigorous, applied engineering. I'm immediately available and flexible on compensation, and I'd be thrilled to help Optum advance health optimization at global scale."
+        "answer": "Optum's mission of connecting people with the care and data they need resonates deeply with me — I want my engineering work to directly improve health outcomes at scale. As a Machine Learning Engineer at Mayonix Innovation, I've built production-grade systems (92%+ mAP with YOLOv8/YOLOv9, sub-100ms edge inference via TensorRT/TFLite) and shipped full-stack AI products like AlphaSense AI using PyTorch and Stable-Baselines3, so I bring both deep technical rigor and a builder's mindset to enterprise web development with Go, React, and Java-Springboot. I'm eager to apply my experience with AI tools like Claude/Codex and modern CI/CD practices to help Optum deliver high-quality, scalable healthcare software."
       },
       {
         "question": "What is your availability?",
-        "answer": "I am immediately available and can join within 15–30 days to accommodate any onboarding or transition needs. I am based in Ghaziabad, Uttar Pradesh, India, authorized to work in India, and open to remote worldwide or hybrid arrangements. My compensation expectations are ₹12L–₹24L INR / $50K–$80K USD and are flexible and competitive based on the role's scope."
+        "answer": "I am immediately available and can join within 15–30 days, including completing any onboarding formalities. I am based in Ghaziabad, Uttar Pradesh, India, authorized to work in India, and open to remote worldwide or hybrid arrangements as per Optum's policies."
       }
-    ]
+    ],
+    "target_role": "Software / AI Systems Engineer"
   },
   {
     "id": "in-0e179db3ff6d41c0",
@@ -85,7 +86,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pue0dg4",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Deep Learning / Generative AI Engineer"
   },
   {
     "id": "in-29650c71a7ddace2",
@@ -124,7 +126,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pu19gpi",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Data / ML Systems Engineer"
   },
   {
     "id": "in-7abbab94cf8a6b58",
@@ -163,7 +166,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1puli772",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "in-e7df6a655787d39c",
@@ -202,7 +206,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pub3xkr",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "MLOps / AI Platform Engineer"
   },
   {
     "id": "in-9ce467b19265896a",
@@ -241,7 +246,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pu6ardg",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "in-ed0f4d42f85d05dd",
@@ -280,7 +286,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1puhn6xi",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Computer Vision Engineer"
   },
   {
     "id": "in-9670d37e71be7a9e",
@@ -319,7 +326,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pu7y5ac",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Deep Learning / Generative AI Engineer"
   },
   {
     "id": "in-bf46bbd441664498",
@@ -358,7 +366,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pu3q4gi",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "MLOps / AI Platform Engineer"
   },
   {
     "id": "in-4c8b8b3b6319e365",
@@ -397,7 +406,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pu3w8qf",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "in-04e036e450512ae0",
@@ -436,7 +446,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pu58knh",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "in-b9370320ede73a68",
@@ -475,7 +486,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1puwhe4a",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "MLOps / AI Platform Engineer"
   },
   {
     "id": "in-1b635cc8882ecaa6",
@@ -514,7 +526,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1puxiuxx",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Data / ML Systems Engineer"
   },
   {
     "id": "in-34471c4192ea7f26",
@@ -553,7 +566,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pun3ee7",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "MLOps / AI Platform Engineer"
   },
   {
     "id": "in-6983ffbe27348cad",
@@ -592,7 +606,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pus1p5m",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "MLOps / AI Platform Engineer"
   },
   {
     "id": "li-4488868637",
@@ -631,7 +646,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pu5qt6y",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "li-4487903034",
@@ -670,7 +686,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1puby4io",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "li-4487683856",
@@ -709,7 +726,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1puemznb",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "li-4487192133",
@@ -748,7 +766,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pu27dhn",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "li-4435122408",
@@ -787,7 +806,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pu3d12l",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "li-4488892337",
@@ -826,7 +846,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1puxxpxl",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "li-4471320121",
@@ -865,7 +886,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1puxzo1h",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "li-4432390215",
@@ -904,7 +926,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pu25pjl",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "li-4484644973",
@@ -943,7 +966,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1puuf8nz",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "li-4488790815",
@@ -982,7 +1006,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pujqyaw",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.722Z"
+    "_scannedAt": "2026-11-09T20:32:52.722Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "li-4488486802",
@@ -1021,7 +1046,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pv73cqj",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "li-4484933468",
@@ -1060,7 +1086,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pvr8eik",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "li-4488721314",
@@ -1099,7 +1126,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pvuzbnx",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "li-4484927678",
@@ -1138,7 +1166,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pv6ap1t",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "li-4412284880",
@@ -1177,7 +1206,8 @@
     "work_from_home_type": null,
     "_id": "mw9px1pvunkky",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "nk-101126000099",
@@ -1216,7 +1246,8 @@
     "work_from_home_type": "Work from office",
     "_id": "mw9px1pv8xsjq",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Software / AI Systems Engineer"
   },
   {
     "id": "nk-091126002440",
@@ -1255,7 +1286,8 @@
     "work_from_home_type": "Hybrid",
     "_id": "mw9px1pvjcq1b",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "nk-021126009486",
@@ -1294,7 +1326,8 @@
     "work_from_home_type": "Remote",
     "_id": "mw9px1pvqyyj3",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "nk-050326022096",
@@ -1333,7 +1366,8 @@
     "work_from_home_type": "Work from office",
     "_id": "mw9px1pv5kcw2",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "MLOps / AI Platform Engineer"
   },
   {
     "id": "nk-091126007775",
@@ -1372,7 +1406,8 @@
     "work_from_home_type": "Work from office",
     "_id": "mw9px1pvxeu6p",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Software / AI Systems Engineer"
   },
   {
     "id": "nk-091126007764",
@@ -1411,7 +1446,8 @@
     "work_from_home_type": "Work from office",
     "_id": "mw9px1pv7l316",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "nk-091126007763",
@@ -1450,7 +1486,8 @@
     "work_from_home_type": "Work from office",
     "_id": "mw9px1pv5vnfk",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning Engineer"
   },
   {
     "id": "nk-091126007694",
@@ -1489,7 +1526,8 @@
     "work_from_home_type": "Work from office",
     "_id": "mw9px1pvik1n0",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "nk-091126007567",
@@ -1528,7 +1566,8 @@
     "work_from_home_type": "Work from office",
     "_id": "mw9px1pv0u9ey",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Software / AI Systems Engineer"
   },
   {
     "id": "nk-050426003266",
@@ -1567,7 +1606,8 @@
     "work_from_home_type": "Hybrid",
     "_id": "mw9px1pv2qav7",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "nk-091126007566",
@@ -1606,7 +1646,8 @@
     "work_from_home_type": "Work from office",
     "_id": "mw9px1pvh3fm3",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "nk-091126007407",
@@ -1645,7 +1686,8 @@
     "work_from_home_type": "Hybrid",
     "_id": "mw9px1pv2k9fc",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "nk-170826035054",
@@ -1684,7 +1726,8 @@
     "work_from_home_type": "Hybrid",
     "_id": "mw9px1pvhlsln",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "nk-091126007340",
@@ -1723,7 +1766,8 @@
     "work_from_home_type": "Work from office",
     "_id": "mw9px1pve7v0l",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "id": "nk-091126007288",
@@ -1762,7 +1806,8 @@
     "work_from_home_type": "Work from office",
     "_id": "mw9px1pvoo2wv",
     "_status": "new",
-    "_scannedAt": "2026-11-09T20:32:52.723Z"
+    "_scannedAt": "2026-11-09T20:32:52.723Z",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "site": "wellfound",
@@ -1784,32 +1829,30 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:46:02.321Z",
     "_evaluation": {
-      "score": 2.6,
-      "archetype": "AI Platform / LLMOps (not a candidate target archetype)",
+      "score": 2.8,
+      "archetype": "Not a target — closest default: AI Platform / LLMOps",
       "verdict": "Skip",
       "legitimacy": "Proceed with Caution",
       "summary": "# Evaluation: Simplismart — Machine Learning Engineer",
       "answers": {
-        "Cover Letter": "Dear Simplismart Hiring Team,\n\nI am writing to express my strong interest in the Machine Learning Engineer role at Simplismart. As a final-year Computer Science student and Computer Vision Engineer with hands-on experience in real-time 3D perception, sensor fusion, and edge-optimized model deployment, I am excited about the opportunity to contribute to Simplismart's GenAI inference platform. My background in optimizing models for latency and cost using TensorRT, ONNX, and quantization techniques aligns perfectly with Simplismart's mission to deploy, scale, and monitor GenAI models across cloud or on-prem environments with strict SLAs.\n\nIn my current role as a Machine Learning Engineer at Mayonix Innovation, I have trained and evaluated object detection models (YOLOv8, YOLOv9) achieving 92%+ mAP, and built an image-embedding-based recommendation system that improved click-through rates. I have also developed on-device computer vision features using TensorFlow Lite and optimized models through quantization (INT8, FP16) and pruning to achieve sub-100ms inference latency on mobile devices. My experience with Docker, Kubernetes, and CI/CD pipelines, combined with my work on multi-model deep learning systems like AlphaSense AI, has prepared me to design and build scalable MLOps architectures. I am eager to bring my expertise in GPU-accelerated workloads, model optimization, and production-grade deployment to Simplismart.\n\nI am particularly drawn to Simplismart's modular design that allows optimization for cost or latency and auto-selection of the best topology per workload. My published IEEE research on machine learning-ready computer-aided butler matrix designer and CT-MRI image fusion demonstrates my ability to innovate and formalize complex ML workloads. I am confident that my strong software engineering fundamentals, experience with infrastructure-as-code (Terraform, Docker, Kubernetes), and familiarity with modern inference stacks like TensorRT and ONNX make me a great fit for this role. I am excited about the opportunity to work closely with Applied ML and Core ML teams to improve system reliability, latency, and cost efficiency, and to contribute to Simplismart's engineering culture of test-driven development and production-grade code.\n\nSincerely,\nPrakhar Pragyan Chaubey",
-        "Why are you interested in this role?": "Simplismart's focus on building a next-generation MLOps platform for GenAI inference across cloud and on-prem environments aligns perfectly with my passion for optimizing real-time AI systems. I am excited by the opportunity to design scalable, GPU-accelerated workflows and contribute to a platform that prioritizes cost, latency, and reliability. The emphasis on modular design and auto-selection of best topology per workload resonates with my experience in model optimization and deployment.",
-        "Why should we hire you?": "I bring hands-on experience in optimizing and deploying ML models for edge and cloud environments, achieving sub-100ms latency through quantization and pruning, which directly supports Simplismart's goal of cost and latency optimization. My background in building end-to-end ML systems, from data pipelines to production deployment using Docker, Kubernetes, and Terraform, ensures I can contribute to robust MLOps architecture. Additionally, my IEEE publications and work on multi-model systems demonstrate my ability to formalize complex workloads and collaborate effectively across teams.",
-        "Relevant Experience": "As a Machine Learning Engineer at Mayonix Innovation, I trained and optimized object detection models (YOLOv8/v9) to 92%+ mAP and deployed them on mobile devices using TensorFlow Lite, achieving sub-100ms inference through quantization and pruning. I also built an image-embedding-based recommendation system and designed preprocessing pipelines, gaining hands-on experience with the full ML lifecycle. My project AlphaSense AI involved fusing multiple deep learning models and deploying a full-stack dashboard with FastAPI and Docker, showcasing my ability to handle complex, multi-step pipelines.",
-        "Salary Expectation": "I am open to a competitive compensation package that aligns with industry standards for Machine Learning Engineer roles in the Indian market, and I am confident that Simplismart offers a package that reflects the value and growth opportunities of this position. I am flexible and more focused on the opportunity to contribute to impactful GenAI projects and grow with the team."
+        "Cover Letter": "Dear Simplismart Hiring Team,\n\nI am writing to express my strong interest in the Machine Learning Engineer role at Simplismart. As a final-year Computer Science student and Computer Vision Engineer with hands-on experience in real-time 3D perception, sensor fusion, and edge-optimized model deployment, I am excited about the opportunity to contribute to Simplismart's GenAI inference platform. My background in optimizing models for latency and cost using TensorRT, ONNX, and quantization techniques aligns perfectly with your mission to deploy, scale, and monitor GenAI models across cloud or on-prem environments.\n\nIn my current role as a Machine Learning Engineer at Mayonix Innovation, I have trained and evaluated object detection models (YOLOv8, YOLOv9) achieving 92%+ mAP, built image-embedding-based recommendation systems, and developed on-device computer vision features using TensorFlow Lite and MobileNetV3-Small. I have optimized models through quantization (INT8, FP16), structured pruning, and GPU delegate configuration to achieve sub-100ms inference latency on edge devices. Additionally, my project AlphaSense AI demonstrates my ability to design and deploy full-stack ML systems with FastAPI, Docker, and cloud platforms, showcasing my skills in building scalable, reliable pipelines.\n\nI am particularly drawn to Simplismart's focus on building high-level architecture for MLOps platforms and standardizing heterogeneous ML workloads. My experience with PyTorch, TensorFlow, CUDA, and Docker, combined with my published IEEE research and production-deployed autonomous systems, positions me to contribute to your mission-critical inference, training, and data pipelines. I am eager to bring my expertise in model optimization, GPU behavior, and distributed systems to Simplismart and collaborate with your Applied ML and Core ML teams to improve system reliability, latency, and cost efficiency.\n\nSincerely,\nPrakhar Pragyan Chaubey",
+        "Why are you interested in this role?": "Simplismart's focus on building a next-generation MLOps platform for GenAI inference aligns perfectly with my passion for optimizing model deployment and scaling GPU-accelerated workloads. I am excited about the opportunity to work on high-level architecture and standardize heterogeneous ML workloads, which matches my experience in real-time perception and edge-optimized deployment.",
+        "Why should we hire you?": "I bring hands-on experience in optimizing models for latency and cost using TensorRT, ONNX, and quantization, achieving sub-100ms inference on edge devices. My background in building production-grade ML systems with FastAPI, Docker, and cloud platforms, combined with my IEEE publications and experience with YOLO, TensorFlow Lite, and CUDA, makes me a strong fit for Simplismart's mission-critical inference platform.",
+        "Relevant Experience": "As a Machine Learning Engineer at Mayonix Innovation, I trained YOLOv8/YOLOv9 models to 92%+ mAP and optimized them with INT8/FP16 quantization and pruning for sub-100ms latency on mobile devices. I also built an image-embedding recommendation system and developed on-device CV features using TensorFlow Lite and MobileNetV3-Small, demonstrating my ability to deploy efficient models at scale.",
+        "Salary Expectation": "I am open to a competitive compensation package that aligns with industry standards for Machine Learning Engineers in India, and I am flexible based on the overall role and growth opportunities at Simplismart."
       },
       "strengths": [
-        "Strong software engineering fundamentals (data structures, APIs, testing, debugging): ⚠️ Partial",
+        "Strong software engineering fundamentals (DS, APIs, testing, debugging): ⚠️ Partial",
         "Strong ML fundamentals, model architectures (Transformers, CNNs), inference behavior: ✅ Strong",
-        "Strong systems knowledge: Linux internals, networking, performance tuning, GPU memory behavior: ⚠️ Partial",
-        "Quantization, model optimization, CUDA concepts: ✅ Strong",
-        "CI/CD, Docker, GitHub workflows, IaC-driven deployments: ✅ Strong"
+        "Linux internals, networking, performance tuning, GPU memory behavior: ⚠️ Partial",
+        "Modern inference stacks (TensorRT, Triton, vLLM/TGI, SGLang): ⚠️ Partial",
+        "Quantization, model optimization, CUDA: ✅ Strong"
       ],
       "gaps": [
-        "Deep technical expertise in system design and distributed systems: No distributed-systems experience in cv.md. AlphaSense AI is a single-service FastAPI app on Hugging Face Spaces, not a distributed system.",
-        "Design and implement core architecture of an MLOps platform from the ground up: No MLOps platform architecture experience. Candidate has built ML pipelines, not platform infrastructure.",
-        "Llama/Mistral, Whisper, Stable Diffusion pipelines: No LLM/VLM/ASR/diffusion pipeline work in cv.md.",
-        "High-availability / fault-tolerant production systems: No HA/fault-tolerance design evidence in cv.md."
+        "Design core architecture of a GPU-accelerated MLOps platform: No platform-architecture or MLOps-infrastructure experience in `cv.md`. Your work is model-level (training, optimization, deployment of individual models), not platform-level.",
+        "Llama/Mistral, Whisper, Stable Diffusion pipelines: No LLM, ASR, or diffusion pipeline work in `cv.md`. Your LLM-adjacent work is CrewAI/LangChain/RAG application-level, not inference-pipeline-level."
       ],
-      "reportPath": "reports/005-simplismart-2026-11-10.md"
+      "reportPath": "reports/006-simplismart-2026-11-10.md"
     },
     "_salaryBenchmark": null,
     "date_posted": "2026-11-09",
@@ -1876,7 +1919,8 @@
       "htmlUrl": "/api/jobs/mw9qdyz5ovb7v/resume.html",
       "pdfUrl": "/api/jobs/mw9qdyz5ovb7v/resume.pdf",
       "generatedAt": "2026-11-10T06:42:58.112Z"
-    }
+    },
+    "target_role": "Edge AI / Embedded ML Engineer"
   },
   {
     "site": "wellfound",
@@ -1896,7 +1940,8 @@
     "_id": "mw9qdyz5a9lxz",
     "_status": "new",
     "_scannedAt": "2026-11-09T20:46:02.321Z",
-    "date_posted": "2026-11-09"
+    "date_posted": "2026-11-09",
+    "target_role": "Deep Learning / Generative AI Engineer"
   },
   {
     "site": "wellfound",
@@ -1916,7 +1961,8 @@
     "_id": "mw9qdyz5jahd8",
     "_status": "new",
     "_scannedAt": "2026-11-09T20:46:02.321Z",
-    "date_posted": "2026-11-09"
+    "date_posted": "2026-11-09",
+    "target_role": "Edge AI / Embedded ML Engineer"
   },
   {
     "site": "yc",
@@ -1936,7 +1982,8 @@
     "_id": "mw9qdyz5r3cew",
     "_status": "new",
     "_scannedAt": "2026-11-09T20:46:02.321Z",
-    "date_posted": "2026-11-09"
+    "date_posted": "2026-11-09",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "site": "yc",
@@ -1956,7 +2003,8 @@
     "_id": "mw9qdyz5u19ku",
     "_status": "new",
     "_scannedAt": "2026-11-09T20:46:02.321Z",
-    "date_posted": "2026-11-09"
+    "date_posted": "2026-11-09",
+    "target_role": "Machine Learning / AI Engineer"
   },
   {
     "site": "yc",
@@ -1976,6 +2024,7 @@
     "_id": "mw9qdyz5b13lq",
     "_status": "new",
     "_scannedAt": "2026-11-09T20:46:02.321Z",
-    "date_posted": "2026-11-09"
+    "date_posted": "2026-11-09",
+    "target_role": "Machine Learning / AI Engineer"
   }
 ]

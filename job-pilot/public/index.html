@@ -59,12 +59,13 @@
       <div class="form-group">
         <label>Target Role</label>
         <select id="scan-query" class="input">
-          <option value="Machine Learning Engineer">Machine Learning Engineer</option>
-          <option value="Computer Vision Engineer" selected>Computer Vision Engineer</option>
-          <option value="Edge AI Engineer">Edge AI Engineer</option>
-          <option value="Deep Learning Engineer">Deep Learning Engineer</option>
-          <option value="Perception Engineer">Perception Engineer</option>
-          <option value="MLOps Engineer">MLOps Engineer</option>
+          <option value="all" selected>🌟 All Roles Together (ML, Computer Vision, Edge AI, DL, MLOps)</option>
+          <option value="Computer Vision Engineer">👁️ Computer Vision Engineer</option>
+          <option value="Machine Learning Engineer">🤖 Machine Learning Engineer</option>
+          <option value="Edge AI Engineer">⚡ Edge AI / Embedded ML Engineer</option>
+          <option value="Deep Learning Engineer">🧠 Deep Learning Engineer</option>
+          <option value="Perception Engineer">📡 Perception / Autonomy Engineer</option>
+          <option value="MLOps Engineer">⚙️ MLOps / AI Platform Engineer</option>
         </select>
       </div>
 
@@ -106,12 +107,21 @@
 
       <div id="scan-status" class="status-msg hidden"></div>
     </div>
+
+    <!-- Live Unified Jobs Feed on Home -->
+    <div class="view-header" style="margin-top:24px;">
+      <h2>📋 All Jobs (<span id="home-job-count">0</span>)</h2>
+      <button class="btn btn-small" onclick="refreshJobs()">↻ Refresh</button>
+    </div>
+    <div id="home-jobs-list" class="jobs-list">
+      <p class="empty-state">Loading all jobs...</p>
+    </div>
   </main>
 
   <!-- Jobs View -->
   <main id="view-jobs" class="view">
     <div class="view-header">
-      <h2>📋 Scanned Listings</h2>
+      <h2>📋 All Scanned Jobs (<span id="total-jobs-count">0</span>)</h2>
       <button class="btn btn-small" onclick="refreshJobs()">↻ Refresh</button>
     </div>
 
@@ -133,6 +143,16 @@
         <button class="pill-btn" data-time="24h" onclick="setTimeFilter('24h')">⚡ 24h</button>
         <button class="pill-btn" data-time="3d" onclick="setTimeFilter('3d')">📅 3 Days</button>
         <button class="pill-btn" data-time="7d" onclick="setTimeFilter('7d')">🗓️ 7 Days</button>
+      </div>
+
+      <!-- Quick Role Category Filter Pills (All Roles by default) -->
+      <div class="role-filter-pills" style="display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px;margin-top:4px">
+        <button class="pill-btn active" data-role="all" onclick="setRoleFilter('all')">🌟 All Roles</button>
+        <button class="pill-btn" data-role="Computer Vision" onclick="setRoleFilter('Computer Vision')">👁️ Vision</button>
+        <button class="pill-btn" data-role="Machine Learning" onclick="setRoleFilter('Machine Learning')">🤖 ML</button>
+        <button class="pill-btn" data-role="Edge AI" onclick="setRoleFilter('Edge AI')">⚡ Edge AI</button>
+        <button class="pill-btn" data-role="Deep Learning" onclick="setRoleFilter('Deep Learning')">🧠 DL</button>
+        <button class="pill-btn" data-role="MLOps" onclick="setRoleFilter('MLOps')">⚙️ MLOps</button>
       </div>
     </div>
 

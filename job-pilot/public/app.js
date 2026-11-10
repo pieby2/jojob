@@ -6,6 +6,7 @@
 let allJobs = [];
 let trackedApplications = [];
 let currentTimeFilter = "all";
+let currentRoleFilter = "all";
 let currentSort = "posted-newest";
 
 // --- Init ---
@@ -144,10 +145,44 @@ async function refreshJobs() {
 
 function setTimeFilter(filter) {
   currentTimeFilter = filter;
-  document.querySelectorAll(".pill-btn").forEach((p) => {
+  document.querySelectorAll(".time-filter-pills .pill-btn").forEach((p) => {
     p.classList.toggle("active", p.dataset.time === filter);
   });
   applySortAndFilter();
+}
+
+function setRoleFilter(role) {
+  currentRoleFilter = role;
+  document.querySelectorAll(".role-filter-pills .pill-btn").forEach((p) => {
+    p.classList.toggle("active", p.dataset.role === role);
+  });
+  applySortAndFilter();
+}
+
+function detectRoleClient(title = "", desc = "") {
+  const text = `${title} ${desc}`.toLowerCase();
+  if (text.includes("computer vision") || text.includes("opencv") || text.includes("yolo") || text.includes("image processing") || text.includes("perception") || text.includes("segmentation") || text.includes("camera") || text.includes("video analytics")) {
+    return "Computer Vision Engineer";
+  }
+  if (text.includes("edge ai") || text.includes("embedded ml") || text.includes("tensorrt") || text.includes("tflite") || text.includes("quantization") || text.includes("on-device") || text.includes("sub-100ms") || text.includes("cuda")) {
+    return "Edge AI / Embedded ML Engineer";
+  }
+  if (text.includes("deep learning") || text.includes("neural network") || text.includes("transformer") || text.includes("diffusion") || text.includes("llm") || text.includes("generative ai")) {
+    return "Deep Learning / Generative AI Engineer";
+  }
+  if (text.includes("mlops") || text.includes("model serving") || text.includes("triton") || text.includes("pipeline") || text.includes("infrastructure")) {
+    return "MLOps / AI Platform Engineer";
+  }
+  if (text.includes("machine learning") || text.includes("ml engineer") || text.includes("data scientist")) {
+    return "Machine Learning Engineer";
+  }
+  if (text.includes("data engineer") || text.includes("etl") || text.includes("sql") || text.includes("spark") || text.includes("airflow")) {
+    return "Data / ML Systems Engineer";
+  }
+  if (text.includes("full stack") || text.includes("software engineer") || text.includes("backend") || text.includes("developer")) {
+    return "Software / AI Systems Engineer";
+  }
+  return "Machine Learning / AI Engineer";
 }
 
 function getJobTimestamp(job) {
@@ -184,7 +219,16 @@ function applySortAndFilter() {
 
   let filtered = allJobs.filter((j) => j._status === "new" || j._status === "saved");
 
-  // 1. Time Filter (Last 24h, 3 days, 7 days)
+  // 1. Role Category Filter (Shows all roles by default!)
+  if (currentRoleFilter !== "all") {
+    const rf = currentRoleFilter.toLowerCase();
+    filtered = filtered.filter((j) => {
+      const role = (j.target_role || detectRoleClient(j.title, j.description)).toLowerCase();
+      return role.includes(rf);
+    });
+  }
+
+  // 2. Time Filter (Last 24h, 3 days, 7 days)
   if (currentTimeFilter !== "all") {
     const now = Date.now();
     const maxAgeMs =
@@ -200,7 +244,7 @@ function applySortAndFilter() {
     });
   }
 
-  // 2. Ranking & Sorting
+  // 3. Ranking & Sorting
   filtered.sort((a, b) => {
     if (currentSort === "posted-newest") {
       return getJobTimestamp(b) - getJobTimestamp(a);
@@ -227,11 +271,23 @@ function applySortAndFilter() {
 
 function renderJobs(jobs) {
   const list = document.getElementById("jobs-list");
+  const homeList = document.getElementById("home-jobs-list");
+  const homeCount = document.getElementById("home-job-count");
+  const totalCount = document.getElementById("total-jobs-count");
+
+  if (homeCount) homeCount.textContent = jobs.length;
+  if (totalCount) totalCount.textContent = jobs.length;
+
   if (!jobs.length) {
-    list.innerHTML = '<p class="empty-state">No matching jobs found for this filter. 🔍</p>';
+    const emptyHtml = '<p class="empty-state">No matching jobs found for this filter. 🔍</p>';
+    if (list) list.innerHTML = emptyHtml;
+    if (homeList) homeList.innerHTML = emptyHtml;
     return;
   }
-  list.innerHTML = jobs.map((job) => createJobCard(job)).join("");
+
+  const html = jobs.map((job) => createJobCard(job)).join("");
+  if (list) list.innerHTML = html;
+  if (homeList) homeList.innerHTML = html;
 }
 
 function createJobCard(job) {
@@ -246,6 +302,9 @@ function createJobCard(job) {
   const postedLabel = formatPostedTime(job.date_posted, job._scannedAt);
   const security = job._security;
   const salary = job._salaryBenchmark;
+
+  const jobRole = job.target_role || detectRoleClient(job.title, job.description);
+  const roleBadge = `<span class="tag tag-role" style="background:rgba(59,130,246,0.18);color:#93c5fd;border:1px solid rgba(59,130,246,0.35);font-weight:600">🎯 Role: ${escHtml(jobRole)}</span>`;
 
   const siteBadge = site === "wellfound"
     ? `<span class="tag tag-wf">🌟 Wellfound</span>`
@@ -271,6 +330,7 @@ function createJobCard(job) {
         <div class="score-badge ${scoreClass}">${scoreText}</div>
       </div>
       <div class="job-meta">
+        ${roleBadge}
         <span class="tag tag-time">⏱️ ${escHtml(postedLabel)}</span>
         ${location ? `<span class="tag">📍 ${escHtml(location)}</span>` : ""}
         ${siteBadge}
@@ -585,10 +645,14 @@ function openJobDetail(jobId) {
     </div>`;
 
   const jobUrl = job.job_url || job.link || "";
+  const jobRole = job.target_role || detectRoleClient(job.title, job.description);
 
   document.getElementById("modal-body").innerHTML = `
     <div class="modal-title">${escHtml(job.title || "Untitled")}</div>
     <div class="modal-company">${escHtml(company)} · ${escHtml(job.location || "")}</div>
+    <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.35);padding:4px 10px;border-radius:6px;font-size:0.82rem;color:#93c5fd;font-weight:600;margin:6px 0 10px;">
+      🎯 Target Job Role: ${escHtml(jobRole)}
+    </div>
 
     ${security ? `
     <div style="font-size:0.75rem;color:#4ade80;margin-bottom:8px">
@@ -627,7 +691,13 @@ function openJobDetail(jobId) {
     ${answersHtml}
 
     <div class="modal-section">
-      <h3>Job Description</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <h3 style="margin-bottom:0">Job Description</h3>
+        <span class="tag tag-role" style="background:rgba(59,130,246,0.2);color:#93c5fd;font-size:0.75rem">🎯 ${escHtml(jobRole)}</span>
+      </div>
+      <div style="background:var(--bg3);padding:8px 12px;border-radius:6px;font-size:0.82rem;color:var(--text);margin-bottom:10px;border-left:3px solid var(--accent)">
+        <strong>Target Job Role:</strong> ${escHtml(jobRole)}
+      </div>
       <div style="max-height:220px;overflow-y:auto;font-size:0.83rem;color:var(--text2);line-height:1.5;white-space:pre-wrap">${escHtml(desc.substring(0, 3000))}</div>
     </div>
 

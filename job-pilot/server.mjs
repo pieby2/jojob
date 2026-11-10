@@ -61,12 +61,50 @@ function loadCV() {
   return "CV not found in career-ops/cv.md";
 }
 
+// --- Role Detection Helper ---
+export function detectJobRole(title = "", desc = "") {
+  const text = `${title} ${desc}`.toLowerCase();
+  if (text.includes("computer vision") || text.includes("opencv") || text.includes("yolo") || text.includes("image processing") || text.includes("perception") || text.includes("segmentation")) {
+    return "Computer Vision Engineer";
+  }
+  if (text.includes("edge ai") || text.includes("embedded ml") || text.includes("tensorrt") || text.includes("tflite") || text.includes("quantization") || text.includes("on-device") || text.includes("sub-100ms") || text.includes("cuda")) {
+    return "Edge AI / Embedded ML Engineer";
+  }
+  if (text.includes("deep learning") || text.includes("neural network") || text.includes("transformer") || text.includes("diffusion") || text.includes("llm") || text.includes("generative ai")) {
+    return "Deep Learning / Generative AI Engineer";
+  }
+  if (text.includes("mlops") || text.includes("model serving") || text.includes("triton") || text.includes("pipeline") || text.includes("infrastructure")) {
+    return "MLOps / AI Platform Engineer";
+  }
+  if (text.includes("machine learning") || text.includes("ml engineer") || text.includes("data scientist")) {
+    return "Machine Learning Engineer";
+  }
+  if (text.includes("data engineer") || text.includes("etl") || text.includes("sql") || text.includes("spark") || text.includes("airflow")) {
+    return "Data / ML Systems Engineer";
+  }
+  if (text.includes("full stack") || text.includes("software engineer") || text.includes("backend") || text.includes("developer")) {
+    return "Software / AI Systems Engineer";
+  }
+  return "Machine Learning / AI Engineer";
+}
+
 // --- Jobs Persistence ---
 const JOBS_FILE = join(__dirname, "data", "jobs.json");
 function loadJobs() {
   if (existsSync(JOBS_FILE)) {
     try {
-      return JSON.parse(readFileSync(JOBS_FILE, "utf-8"));
+      const jobs = JSON.parse(readFileSync(JOBS_FILE, "utf-8"));
+      let updated = false;
+      for (const j of jobs) {
+        if (!j.target_role) {
+          j.target_role = detectJobRole(j.title, j.description);
+          updated = true;
+        }
+      }
+      if (updated) {
+        saveJobs(jobs);
+      }
+      return jobs;
     } catch {
       return [];
     }
@@ -173,11 +211,14 @@ app.get("/api/scan-ats", async (_req, res) => {
   res.json(result);
 });
 
-// 5. GET /api/jobs — get local scanned jobs
+// 5. GET /api/jobs — get local scanned jobs (shows all jobs together by default)
 app.get("/api/jobs", (req, res) => {
-  const status = req.query.status;
+  const { status, role } = req.query;
   let jobs = loadJobs();
   if (status) jobs = jobs.filter((j) => j._status === status);
+  if (role && role !== "all") {
+    jobs = jobs.filter((j) => (j.target_role || "").toLowerCase().includes(role.toLowerCase()));
+  }
   res.json(jobs);
 });
 
