@@ -416,6 +416,8 @@ function openJobDetail(jobId) {
   const answers = eval_?.answers || {};
   const salary = job._salaryBenchmark;
   const security = job._security;
+  const jobRole = job.target_role || detectRoleClient(job.title, job.description);
+  const jobUrl = job.job_url || job.link || "";
 
   let evalHtml = "";
   if (eval_) {
@@ -681,9 +683,6 @@ function openJobDetail(jobId) {
         ${(job._customQuestions || []).map((qa) => copyBlock(qa.question, qa.answer)).join("")}
       </div>
     </div>`;
-
-  const jobUrl = job.job_url || job.link || "";
-  const jobRole = job.target_role || detectRoleClient(job.title, job.description);
 
   document.getElementById("modal-body").innerHTML = `
     <div class="modal-title">${escHtml(job.title || "Untitled")}</div>
