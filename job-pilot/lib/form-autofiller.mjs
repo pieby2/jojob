@@ -93,11 +93,12 @@ export async function autofillJobApplication({ job, resumePdfPath }) {
   const candidate = loadCandidateProfile();
   const cvText = loadCandidateCv();
 
-  console.log(`[autofill] Launching headed Chromium for ${job.company || "Job"} at ${url}...`);
+  const isHeadless = Boolean(process.env.RENDER || process.platform === "linux" || !process.env.DISPLAY);
+  console.log(`[autofill] Launching Chromium (headless: ${isHeadless}) for ${job.company || "Job"} at ${url}...`);
 
   const browser = await chromium.launch({
-    headless: false,
-    args: ["--start-maximized"],
+    headless: isHeadless,
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--start-maximized"],
   });
 
   const context = await browser.newContext({
@@ -334,12 +335,28 @@ export async function autofillJobApplication({ job, resumePdfPath }) {
 
     console.log(`[autofill] Finished auto-filling! Filled ${filledFields.length} fields and answered ${answeredQuestions.length} questions.`);
 
+    let screenshotBase64 = null;
+    try {
+      const buf = await page.screenshot({ type: "jpeg", quality: 75, fullPage: false });
+      screenshotBase64 = `data:image/jpeg;base64,${buf.toString("base64")}`;
+    } catch (e) {
+      console.warn("[autofill] Screenshot capture notice:", e.message);
+    }
+
+    if (isHeadless) {
+      await browser.close().catch(() => {});
+    }
+
     return {
       success: true,
       url,
+      isHeadless,
+      screenshot: screenshotBase64,
       filledFields,
       answeredQuestions,
-      message: `Successfully auto-filled ${filledFields.length} candidate fields and ${answeredQuestions.length} custom questions in your open browser window. Please inspect and submit!`,
+      message: isHeadless
+        ? `Cloud auto-fill complete! Filled ${filledFields.length} candidate fields and answered ${answeredQuestions.length} questions on the portal.`
+        : `Successfully auto-filled ${filledFields.length} candidate fields and ${answeredQuestions.length} custom questions in your open browser window. Please inspect and submit!`,
     };
   } catch (err) {
     console.error("[autofill] Form filling error:", err.message);

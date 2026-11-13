@@ -372,15 +372,15 @@ app.post("/api/jobs/:id/tailor-resume", async (req, res) => {
     const jobTitle = job.title || "Machine Learning Engineer";
     const company = job.company_name || job.company || "Company";
     const description = job.description || jobTitle;
-    const reportPath = job._evaluation?.reportPath;
+    const targetRole = job.target_role || detectJobRole(jobTitle, description);
 
-    console.log(`[resume] Tailoring personal resume for job ${id}: ${company} — ${jobTitle}`);
+    console.log(`[resume] Tailoring personal resume for job ${id}: ${company} — ${jobTitle} (${targetRole})`);
     const result = await tailorResumeForJob({
       jobId: id,
       jobTitle,
       company,
       description,
-      reportPath,
+      targetRole,
     });
 
     job._tailoredResume = result;
@@ -403,40 +403,36 @@ app.get("/api/jobs/:id/resume.pdf", async (req, res) => {
 
     const safeJobId = id.replace(/[^a-zA-Z0-9_-]/g, "_");
     const localPdf = join(__dirname, "data", "resumes", `resume-${safeJobId}.pdf`);
+    const localHtml = join(__dirname, "data", "resumes", `resume-${safeJobId}.html`);
 
     if (!existsSync(localPdf)) {
       try {
-        console.log(`[resume] Auto-generating resume PDF on-demand for ${id}...`);
+        console.log(`[resume] Auto-generating role-specific resume PDF on-demand for ${id}...`);
         const jobTitle = job.title || "Machine Learning Engineer";
         const company = job.company_name || job.company || "Company";
         const description = job.description || jobTitle;
-        const reportPath = job._evaluation?.reportPath;
-        const result = await tailorResumeForJob({ jobId: id, jobTitle, company, description, reportPath });
+        const targetRole = job.target_role || detectJobRole(jobTitle, description);
+        const result = await tailorResumeForJob({ jobId: id, jobTitle, company, description, targetRole });
         job._tailoredResume = result;
         saveJobs(jobs);
       } catch (e) {
-        console.warn("Auto-tailor on PDF request failed:", e.message);
+        console.warn("Auto-tailor on PDF request notice:", e.message);
       }
     }
 
+    const compSlug = (job.company_name || job.company || "Company").replace(/[^a-zA-Z0-9]/g, "_");
     if (existsSync(localPdf)) {
-      const compSlug = (job.company_name || job.company || "Company").replace(/[^a-zA-Z0-9]/g, "_");
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `inline; filename="Prakhar_Chaubey_Resume_${compSlug}.pdf"`);
       return res.sendFile(localPdf);
     }
 
-    // Fallback to any existing PDF in career-ops/output
-    const outDir = join(__dirname, "..", "career-ops", "output");
-    if (existsSync(outDir)) {
-      const pdfs = (await import("fs")).readdirSync(outDir).filter((f) => f.endsWith(".pdf"));
-      if (pdfs.length > 0) {
-        res.setHeader("Content-Type", "application/pdf");
-        return res.sendFile(join(outDir, pdfs[pdfs.length - 1]));
-      }
+    if (existsSync(localHtml)) {
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      return res.sendFile(localHtml);
     }
 
-    res.status(404).send("Resume PDF not found. Click 'Tailor My Resume' in Job Pilot to generate.");
+    res.status(404).send("Resume not found. Click 'Tailor My Resume' in Job Pilot to generate.");
   } catch (err) {
     res.status(500).send("Error serving resume: " + err.message);
   }
@@ -454,6 +450,48 @@ app.get("/api/jobs/:id/resume.html", (req, res) => {
   }
 
   res.status(404).send("Tailored HTML resume not found.");
+});
+
+// 14b. GET /api/jobs/:id/form-pack — 1-tap mobile auto-fill pack with candidate answers
+app.get("/api/jobs/:id/form-pack", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const jobs = loadJobs();
+    const job = jobs.find((j) => j._id === id);
+    if (!job) return res.status(404).json({ error: "Job not found" });
+
+    // If already tailored, return existing formAnswers
+    if (job._tailoredResume?.formAnswers) {
+      return res.json({
+        ok: true,
+        jobId: id,
+        formAnswers: job._tailoredResume.formAnswers,
+        copyAllText: job._tailoredResume.copyAllText,
+        bookmarklet: job._tailoredResume.bookmarklet,
+      });
+    }
+
+    // Otherwise generate tailored package
+    const jobTitle = job.title || "Machine Learning Engineer";
+    const company = job.company_name || job.company || "Company";
+    const description = job.description || jobTitle;
+    const targetRole = job.target_role || detectJobRole(jobTitle, description);
+
+    const tailored = await tailorResumeForJob({ jobId: id, jobTitle, company, description, targetRole });
+    job._tailoredResume = tailored;
+    saveJobs(jobs);
+
+    res.json({
+      ok: true,
+      jobId: id,
+      formAnswers: tailored.formAnswers,
+      copyAllText: tailored.copyAllText,
+      bookmarklet: tailored.bookmarklet,
+    });
+  } catch (err) {
+    console.error("Form pack error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // 15. POST /api/jobs/:id/autofill — Headed Playwright browser auto-fill with custom Q&A
@@ -531,7 +569,16 @@ app.post("/api/jobs/:id/solve-questions", async (req, res) => {
 });
 
 // 17. GET /api/bookmarklet — 1-click JavaScript bookmarklet for auto-filling portal fields
-app.get("/api/bookmarklet", (_req, res) => {
+app.get("/api/bookmarklet", (req, res) => {
+  const { jobId } = req.query;
+  if (jobId) {
+    const jobs = loadJobs();
+    const job = jobs.find((j) => j._id === jobId);
+    if (job && job._tailoredResume?.bookmarklet) {
+      return res.json({ bookmarklet: job._tailoredResume.bookmarklet });
+    }
+  }
+
   const code = `javascript:(function(){
     var c={
       name:"Prakhar Pragyan Chaubey",

@@ -557,21 +557,24 @@ function openJobDetail(jobId) {
     resumeHtml = `
       <div class="modal-section resume-box">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <h3 style="color:var(--green);margin-bottom:0">📄 Tailored Personal Resume (PDF)</h3>
-          <span class="tag tag-time" style="background:rgba(34,197,94,0.2);color:#4ade80">Ready</span>
+          <h3 style="color:var(--green);margin-bottom:0">📄 Tailored Personal Resume</h3>
+          <span class="tag tag-time" style="background:rgba(34,197,94,0.2);color:#4ade80">Ready for ${escHtml(jobRole)}</span>
         </div>
-        <p style="font-size:0.82rem;color:var(--text);margin-bottom:10px">
-          Customized for ${escHtml(company)} strictly using your verified track record (YOLOv8/v9, Mayonix, TensorRT, AlphaSense, IEEE publications).
+        <div style="font-size:0.85rem;color:var(--text);margin-bottom:4px;font-weight:600">
+          Target Role: <span style="color:#38bdf8">${escHtml(tailored.headline || jobRole)}</span>
+        </div>
+        <p style="font-size:0.8rem;color:var(--text2);margin-bottom:10px">
+          Tailored strictly for <strong>${escHtml(company)}</strong> using your verified track record (YOLOv8/v9 92%+ mAP, Mayonix Innovation, TensorRT, AlphaSense, IEEE papers). Zero hallucinations.
         </p>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <a href="/api/jobs/${encodeURIComponent(job._id)}/resume.pdf" target="_blank" download="Prakhar_Chaubey_Resume_${escHtml(company)}.pdf" class="btn btn-success btn-small" style="text-decoration:none">
             ⬇️ Download PDF Resume
           </a>
           <a href="/api/jobs/${encodeURIComponent(job._id)}/resume.html" target="_blank" class="btn btn-outline btn-small" style="text-decoration:none">
-            👁️ Preview HTML
+            🖨️ Preview / Save as PDF
           </a>
           <button class="btn btn-outline btn-small" onclick="tailorResume('${job._id}')">
-            ↻ Re-tailor
+            ↻ Re-tailor for Role
           </button>
         </div>
       </div>`;
@@ -580,36 +583,87 @@ function openJobDetail(jobId) {
       <div class="modal-section resume-box" style="border-style:dashed;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
           <h3 style="color:var(--accent);margin-bottom:0">📄 Tailored Personal Resume</h3>
-          <span class="tag tag-time">Not Built Yet</span>
+          <span class="tag tag-time">Unique for ${escHtml(jobRole)}</span>
         </div>
         <p style="font-size:0.82rem;color:var(--text2);margin-bottom:8px">
-          Generate an ATS-compliant tailored PDF resume highlighting your matching edge AI and computer vision achievements.
+          Generate an ATS-compliant tailored resume highlighting your matching achievements in <strong>${escHtml(jobRole)}</strong>.
         </p>
         <button class="btn btn-primary btn-small" onclick="tailorResume('${job._id}')">
-          📄 Generate Tailored Resume (PDF)
+          📄 Generate Role-Specific Resume (PDF &amp; HTML)
         </button>
       </div>`;
   }
 
-  // Autonomous Form Auto-Filler Section
-  let autofillHtml = `
-    <div class="modal-section autofill-box">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <h3 style="color:#60a5fa;margin-bottom:0">⚡ Autonomous Form Auto-Filler (Playwright)</h3>
-        <span class="tag" style="background:#1e3a8a;color:#93c5fd">Desktop Headed</span>
+  // Form Answers Pack
+  const fAnswers = job._tailoredResume?.formAnswers || {};
+  const whyInterested = fAnswers.whyInterested || `I am excited to apply for the ${jobRole} role at ${company}. With hands-on experience deploying edge-optimized YOLOv8/v9 models (92%+ mAP, sub-100ms latency) and multi-branch deep learning systems, I am eager to contribute to ${company}'s engineering goals.`;
+  const relevantExperience = fAnswers.relevantExperience || `At Mayonix Innovation, I developed on-device computer vision models with TensorFlow Lite and YOLOv8/v9, optimizing them via INT8/FP16 quantization for sub-100ms mobile latency. I also engineered AlphaSense AI, integrating PyTorch, Transformers, Mamba, and FastAPI.`;
+  const whyHireMe = fAnswers.whyHireMe || `I combine practical production experience optimizing edge models to sub-100ms latencies with published IEEE research in machine learning. I can immediately contribute to ${company}'s computer vision and ML pipelines.`;
+  const coverLetter = fAnswers.coverLetter || `Dear Hiring Team at ${company},\n\nI am writing to express my strong interest in the ${job.title || jobRole} role. As a Machine Learning Engineer at Mayonix Innovation and published IEEE researcher, I specialize in computer vision, real-time object detection (YOLOv8/v9, 92%+ mAP), and edge model optimization (INT8/FP16 quantization, TensorRT, TFLite).\n\nMy background matches your requirements for high-performance ML engineering and latency-critical systems. I look forward to the opportunity to discuss how my hands-on experience can support ${company}'s engineering goals.\n\nSincerely,\nPrakhar Pragyan Chaubey`;
+
+  // Mobile & Web Form Assistant Section
+  let mobileAssistantHtml = `
+    <div class="modal-section mobile-assistant-box" style="background:rgba(30, 41, 59, 0.7); border:1px solid rgba(59, 130, 246, 0.35); border-radius:10px; padding:12px 14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <h3 style="color:#38bdf8; margin-bottom:0; font-size:0.88rem; display:flex; align-items:center; gap:6px;">
+          📱 Mobile Form Auto-Fill &amp; 1-Tap Copy
+        </h3>
+        <span class="tag" style="background:rgba(56, 189, 248, 0.2); color:#38bdf8; font-size:0.72rem;">Phone Ready</span>
       </div>
-      <p style="font-size:0.82rem;color:var(--text);margin-bottom:8px">
-        Launches visible Chromium, inputs candidate details, attaches your tailored PDF resume, and generates answers for screening questions with DeepSeek. Pauses before Submit for your review.
+      <p style="font-size:0.8rem; color:var(--text2); margin-bottom:10px;">
+        Applying on your phone? Tap <strong>Copy All</strong> to copy everything at once, or tap any individual pill below to copy that specific answer.
       </p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-autofill btn-small" onclick="autofillForm('${job._id}')">
-          🚀 Auto-Fill Application Form in Browser
+
+      <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+        <button class="btn btn-primary btn-small" onclick="copyAllJobFormInfo('${job._id}')" style="flex:1; min-width:180px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          ⚡ Copy All Form Info (1-Tap)
         </button>
-        <button class="btn btn-outline btn-small" onclick="copyBookmarklet()">
-          📋 Copy 1-Click Bookmarklet
+        <button class="btn btn-outline btn-small" onclick="copyJobBookmarklet('${job._id}')" style="display:inline-flex; align-items:center; gap:4px;">
+          📲 Copy Mobile Bookmarklet
         </button>
       </div>
-      <div id="autofill-feedback-${job._id}" style="margin-top:8px;font-size:0.82rem;display:none;"></div>
+
+      <div style="font-size:0.73rem; font-weight:700; text-transform:uppercase; color:#94a3b8; margin-bottom:6px;">
+        1-Tap Copy Candidate Details:
+      </div>
+      <div class="profile-pill-row" style="margin-bottom:12px;">
+        <button class="profile-pill" onclick="copyDirect('Prakhar Pragyan Chaubey', this)">👤 Name</button>
+        <button class="profile-pill" onclick="copyDirect('prakharpragyan1000@gmail.com', this)">✉️ Email</button>
+        <button class="profile-pill" onclick="copyDirect('+91-8853511579', this)">📞 Phone</button>
+        <button class="profile-pill" onclick="copyDirect('Ghaziabad, Uttar Pradesh, India', this)">📍 Location</button>
+        <button class="profile-pill" onclick="copyDirect('https://linkedin.com/in/prakhar-b045b91ab', this)">🔗 LinkedIn</button>
+        <button class="profile-pill" onclick="copyDirect('https://github.com/pieby2', this)">🐙 GitHub</button>
+        <button class="profile-pill" onclick="copyDirect('Mayonix Innovation', this)">🏢 Current Co.</button>
+        <button class="profile-pill" onclick="copyDirect('Machine Learning Engineer', this)">💼 Current Title</button>
+        <button class="profile-pill" onclick="copyDirect('Immediately available (15-30 days)', this)">⏱️ Notice Period</button>
+        <button class="profile-pill" onclick="copyDirect('₹15,00,000 INR (Negotiable)', this)">💵 Expected CTC</button>
+        <button class="profile-pill" onclick="copyDirect('Yes', this)">🛡️ Auth to Work: Yes</button>
+        <button class="profile-pill" onclick="copyDirect('No', this)">🚫 Sponsorship: No</button>
+      </div>
+
+      <div style="font-size:0.73rem; font-weight:700; text-transform:uppercase; color:#94a3b8; margin-bottom:6px;">
+        Job-Specific Screening Answers (1-Tap Copy):
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${copyBlock("❓ Why are you interested in this role & company?", whyInterested)}
+        ${copyBlock("💼 Describe your relevant experience", relevantExperience)}
+        ${copyBlock("🎯 Why should we hire you? (Proof points)", whyHireMe)}
+        ${copyBlock("📝 Cover Letter / Note to Hiring Team", coverLetter)}
+      </div>
+
+      <!-- Cloud Headless Auto-Fill Option -->
+      <div style="margin-top:14px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-size:0.78rem; font-weight:600; color:#93c5fd;">🤖 Cloud Auto-Fill Application (Playwright)</span>
+        </div>
+        <p style="font-size:0.75rem; color:var(--text2); margin-bottom:8px;">
+          Navigates to the portal, fills fields and answers questions, and snapshots the filled page.
+        </p>
+        <button class="btn btn-autofill btn-small" onclick="autofillForm('${job._id}')">
+          🚀 Run Cloud Auto-Fill &amp; Get Screenshot
+        </button>
+        <div id="autofill-feedback-${job._id}" style="margin-top:8px; font-size:0.82rem; display:none;"></div>
+      </div>
     </div>`;
 
   // Portal Form Question Solver Section
@@ -625,22 +679,6 @@ function openJobDetail(jobId) {
       </button>
       <div id="solved-questions-container-${job._id}" style="margin-top:8px">
         ${(job._customQuestions || []).map((qa) => copyBlock(qa.question, qa.answer)).join("")}
-      </div>
-    </div>`;
-
-  // Quick Profile Copy Bar
-  let candidateBarHtml = `
-    <div class="modal-section" style="padding:10px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--bg3)">
-      <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;color:var(--text2);margin-bottom:6px">⚡ Quick Profile Copy (1-Tap)</div>
-      <div class="profile-pill-row">
-        <button class="profile-pill" onclick="copyDirect('Prakhar Pragyan Chaubey', this)">👤 Prakhar Pragyan Chaubey</button>
-        <button class="profile-pill" onclick="copyDirect('prakharpragyan1000@gmail.com', this)">✉️ Email</button>
-        <button class="profile-pill" onclick="copyDirect('+91-8853511579', this)">📞 +91-8853511579</button>
-        <button class="profile-pill" onclick="copyDirect('https://linkedin.com/in/prakhar-b045b91ab', this)">🔗 LinkedIn</button>
-        <button class="profile-pill" onclick="copyDirect('https://github.com/pieby2', this)">🐙 GitHub</button>
-        <button class="profile-pill" onclick="copyDirect('Ghaziabad, Uttar Pradesh, India', this)">📍 Location</button>
-        <button class="profile-pill" onclick="copyDirect('Immediately available (15-30 days)', this)">⏱️ Notice Period</button>
-        <button class="profile-pill" onclick="copyDirect('₹15,00,000 INR (Negotiable)', this)">💵 Expected Comp</button>
       </div>
     </div>`;
 
@@ -663,11 +701,9 @@ function openJobDetail(jobId) {
 
     ${resumeHtml}
 
-    ${autofillHtml}
+    ${mobileAssistantHtml}
 
     ${solverHtml}
-
-    ${candidateBarHtml}
 
     ${salaryHtml}
 
@@ -778,7 +814,7 @@ async function tailorResume(jobId) {
   const job = allJobs.find((j) => j._id === jobId);
   if (!job) return;
 
-  showLoading("Tailoring personal resume with DeepSeek + career-ops...\nReformulating experience bullets with JD vocabulary (strict anti-fabrication)...\nCompiling ATS-compliant PDF via Playwright Chromium...");
+  showLoading("Tailoring role-specific personal resume with DeepSeek...\nReformulating experience bullets with JD vocabulary (strict anti-fabrication)...\nCompiling ATS-compliant PDF via Playwright Chromium...\nGenerating application form answers pack...");
 
   try {
     const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}/tailor-resume`, {
@@ -794,7 +830,7 @@ async function tailorResume(jobId) {
     refreshJobs();
   } catch (err) {
     hideLoading();
-    alert("Resume tailoring failed: " + err.message);
+    alert("Resume tailoring notice: " + err.message);
   }
 }
 
@@ -803,7 +839,7 @@ async function autofillForm(jobId) {
   const job = allJobs.find((j) => j._id === jobId);
   if (!job) return;
 
-  showLoading("Opening headed Chromium browser on your screen...\nNavigating to application form...\nAuto-filling personal details, attaching tailored PDF resume...\nAnswering screening questions with DeepSeek...");
+  showLoading("Navigating to portal and auto-filling candidate details...\nAttaching tailored PDF resume...\nAnswering screening questions with DeepSeek...");
 
   try {
     const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}/autofill`, {
@@ -818,12 +854,21 @@ async function autofillForm(jobId) {
     if (feedback) {
       feedback.style.display = "block";
       feedback.style.color = "var(--green)";
-      feedback.innerHTML = `✅ <strong>Auto-Fill Successful!</strong> Look at your open browser window. ${data.filledFields?.length || 0} fields filled and ${data.answeredQuestions?.length || 0} questions answered. Please review and click Submit!`;
+      let html = `<div>✅ <strong>Auto-Fill Completed!</strong> Filled ${data.filledFields?.length || 0} fields and answered ${data.answeredQuestions?.length || 0} questions.</div>`;
+      if (data.screenshot) {
+        html += `<div style="margin-top:8px;"><strong style="font-size:0.75rem;color:#94a3b8;">Captured Form Snapshot:</strong><br><img src="${data.screenshot}" style="width:100%;max-height:260px;object-fit:cover;border-radius:6px;border:1px solid #334155;margin-top:4px;" alt="Filled form screenshot"/></div>`;
+      }
+      feedback.innerHTML = html;
     }
-    alert(`🚀 Job Pilot Form Auto-Fill complete!\n\nYour headed browser is currently open on your screen with candidate details, tailored resume PDF, and screening questions filled in.\n\nPlease inspect the page and click Submit when satisfied.`);
+
+    if (data.isHeadless) {
+      alert(`✅ Cloud Auto-Fill Complete!\n\nFilled ${data.filledFields?.length || 0} fields and ${data.answeredQuestions?.length || 0} questions.\n\nSnapshot preview has been loaded below. Tap 'Open Portal & Apply' to complete your final review and submission!`);
+    } else {
+      alert(`🚀 Auto-Fill complete!\n\nYour headed browser is currently open on your screen with candidate details, tailored resume PDF, and screening questions filled in.\n\nPlease inspect the page and click Submit when satisfied.`);
+    }
   } catch (err) {
     hideLoading();
-    alert("Auto-fill error: " + err.message);
+    alert("Auto-fill notice: " + err.message + "\n\nTip: You can use the '⚡ Copy All Form Info' button or individual field pills to fill the form in seconds on your phone!");
   }
 }
 
@@ -864,33 +909,131 @@ async function solveQuestions(jobId) {
   }
 }
 
-// --- Copy 1-Click Bookmarklet ---
-async function copyBookmarklet() {
+// --- 1-Tap Copy All Form Answers Package (Mobile & Web) ---
+async function copyAllJobFormInfo(jobId) {
+  const job = allJobs.find((j) => j._id === jobId);
+  if (!job) return;
+
+  if (navigator.vibrate) navigator.vibrate(50);
+
+  let text = job._tailoredResume?.copyAllText;
+  if (!text) {
+    try {
+      showLoading("Preparing complete form info package...");
+      const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}/form-pack`);
+      const data = await res.json();
+      hideLoading();
+      if (data.copyAllText) {
+        text = data.copyAllText;
+        if (data.formAnswers) {
+          if (!job._tailoredResume) job._tailoredResume = {};
+          job._tailoredResume.formAnswers = data.formAnswers;
+          job._tailoredResume.copyAllText = data.copyAllText;
+          job._tailoredResume.bookmarklet = data.bookmarklet;
+          openJobDetail(jobId);
+        }
+      }
+    } catch {
+      hideLoading();
+    }
+  }
+
+  if (!text) {
+    const company = job.company_name || job.company || "Company";
+    const role = job.target_role || detectRoleClient(job.title, job.description);
+    text = `APPLICANT INFORMATION:
+Name: Prakhar Pragyan Chaubey
+Email: prakharpragyan1000@gmail.com
+Phone: +91-8853511579
+Location: Ghaziabad, Uttar Pradesh, India
+LinkedIn: https://linkedin.com/in/prakhar-b045b91ab
+GitHub: https://github.com/pieby2
+Current Company: Mayonix Innovation
+Current Title: Machine Learning Engineer
+Notice Period: Immediately available (15-30 days)
+Expected CTC: ₹15,00,000 INR (Negotiable)
+Work Authorization: Yes (No visa sponsorship required)
+
+WHY INTERESTED:
+I am excited to apply for the ${role} role at ${company}. With hands-on experience deploying edge-optimized YOLOv8/v9 models (92%+ mAP, sub-100ms latency) and multi-model AI architectures, I am eager to contribute to ${company}'s engineering goals.
+
+RELEVANT EXPERIENCE:
+At Mayonix Innovation, I developed on-device computer vision models with TensorFlow Lite and YOLOv8/v9, optimizing them via INT8/FP16 quantization for sub-100ms mobile latency. I also engineered AlphaSense AI, integrating PyTorch, Transformers, Mamba, and FastAPI.
+
+WHY HIRE ME:
+I combine practical production experience optimizing edge models to sub-100ms latencies with published IEEE research in machine learning. I can immediately contribute to ${company}'s computer vision and ML pipelines.`;
+  }
+
   try {
-    const res = await fetch("/api/bookmarklet");
+    await navigator.clipboard.writeText(text);
+    alert("⚡ Complete Application Form Package copied to clipboard!\n\nYou can now paste all your details and answers into the job application form with 1 tap.");
+  } catch {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    alert("⚡ Complete Application Form Package copied to clipboard!\n\nYou can now paste all your details and answers into the job application form with 1 tap.");
+  }
+}
+
+// --- Copy Mobile Auto-Fill Bookmarklet ---
+async function copyJobBookmarklet(jobId) {
+  try {
+    const res = await fetch(`/api/bookmarklet?jobId=${encodeURIComponent(jobId)}`);
     const data = await res.json();
     if (data.bookmarklet) {
       await navigator.clipboard.writeText(data.bookmarklet);
-      alert("📋 Auto-Fill Bookmarklet copied to clipboard!\n\nTo use:\n1. Bookmark any page in your browser.\n2. Edit the bookmark and paste this code as the URL.\n3. Whenever you are on an ATS application page (Workday, Greenhouse, Lever, etc.), click the bookmark to auto-fill all candidate fields instantly!");
+      alert("📲 Mobile Auto-Fill Bookmarklet copied!\n\n📱 HOW TO USE ON YOUR PHONE:\n1. Bookmark any page in Mobile Chrome or Safari.\n2. Edit the bookmark: rename to '⚡ Auto-Fill' and paste this script into the URL field.\n3. Open any job application page (Workday, Greenhouse, Lever, Naukri, LinkedIn) on your phone.\n4. Type '⚡ Auto-Fill' in the URL bar (or select it from Bookmarks) -> All candidate details and screening answers will auto-fill instantly!");
     }
   } catch (err) {
     alert("Could not copy bookmarklet: " + err.message);
   }
 }
 
-// --- 1-Tap Copy Direct Helper ---
+// --- Copy 1-Click Universal Bookmarklet ---
+async function copyBookmarklet() {
+  await copyJobBookmarklet("");
+}
+
+// --- 1-Tap Copy Direct Helper with Haptic Feedback ---
 function copyDirect(text, btn) {
-  navigator.clipboard.writeText(text).then(() => {
-    const orig = btn.innerText;
-    btn.innerText = "Copied!";
+  if (navigator.vibrate) navigator.vibrate(40);
+  const orig = btn.innerText;
+
+  function markCopied() {
+    btn.innerText = "✅ Copied!";
     btn.style.background = "var(--green)";
     btn.style.color = "#000";
     setTimeout(() => {
       btn.innerText = orig;
       btn.style.background = "";
       btn.style.color = "";
-    }, 1200);
-  });
+    }, 1500);
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(markCopied).catch(() => {
+      fallbackCopy(text);
+      markCopied();
+    });
+  } else {
+    fallbackCopy(text);
+    markCopied();
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  document.execCommand("copy");
+  document.body.removeChild(ta);
 }
 
 document.addEventListener("click", (e) => {
