@@ -1,4 +1,5 @@
 import express from "express";
+import compression from "compression";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
@@ -54,10 +55,15 @@ function loadEnv() {
 }
 loadEnv();
 
-// --- CV and Profile Loading ---
+// --- CV and Profile Loading (In-Memory Cached) ---
+let cachedCv = null;
 function loadCV() {
+  if (cachedCv) return cachedCv;
   const cvPath = join(__dirname, "..", "career-ops", "cv.md");
-  if (existsSync(cvPath)) return readFileSync(cvPath, "utf-8");
+  if (existsSync(cvPath)) {
+    cachedCv = readFileSync(cvPath, "utf-8");
+    return cachedCv;
+  }
   return "CV not found in career-ops/cv.md";
 }
 
@@ -178,9 +184,16 @@ export function detectExperience(title = "", desc = "") {
   return { text: "1-3 yrs (Standard)", min: 1, max: 3, level: "entry", matchBadge: "Good Match (1-3 yrs)" };
 }
 
-// --- Jobs Persistence ---
+// --- Jobs Persistence (In-Memory Cached) ---
 const JOBS_FILE = join(__dirname, "data", "jobs.json");
+let memoryJobs = null;
+let lastJobsRead = 0;
+
 function loadJobs() {
+  const now = Date.now();
+  if (memoryJobs && now - lastJobsRead < 60000) {
+    return memoryJobs;
+  }
   if (existsSync(JOBS_FILE)) {
     try {
       const jobs = JSON.parse(readFileSync(JOBS_FILE, "utf-8"));
@@ -200,30 +213,76 @@ function loadJobs() {
           updated = true;
         }
       }
+      memoryJobs = jobs;
+      lastJobsRead = now;
       if (updated) {
         saveJobs(jobs);
       }
-      return jobs;
+      return memoryJobs;
     } catch {
       return [];
     }
   }
   return [];
 }
+
 function saveJobs(jobs) {
-  writeFileSync(JOBS_FILE, JSON.stringify(jobs, null, 2));
+  memoryJobs = jobs;
+  lastJobsRead = Date.now();
+  try {
+    writeFileSync(JOBS_FILE, JSON.stringify(jobs, null, 2));
+  } catch (err) {
+    console.warn("Could not save jobs to disk:", err.message);
+  }
 }
 
-// --- Middleware ---
+// --- Stats In-Memory Cache ---
+let memoryStats = null;
+let lastStatsRead = 0;
+
+async function getCachedStats() {
+  const now = Date.now();
+  if (memoryStats && now - lastStatsRead < 60000) {
+    return memoryStats;
+  }
+  const cStats = await getCareerOpsStats();
+  if (cStats) {
+    memoryStats = cStats;
+    lastStatsRead = now;
+  }
+  return memoryStats || cStats;
+}
+
+export function invalidateStatsCache() {
+  lastStatsRead = 0;
+}
+
+// --- High-Performance Middleware ---
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Connection", "keep-alive");
   if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
 });
+
+// Gzip / Deflate compression for 80%+ smaller responses
+app.use(compression({ level: 6, threshold: 1024 }));
 app.use(express.json({ limit: "5mb" }));
-app.use(express.static(join(__dirname, "public")));
+
+// Browser cache for static assets (CSS, JS, images, icons)
+app.use(express.static(join(__dirname, "public"), {
+  maxAge: "1d",
+  etag: true,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith(".html")) {
+      res.setHeader("Cache-Control", "no-cache");
+    } else {
+      res.setHeader("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
+    }
+  }
+}));
 
 // --- Helper: Resolve Python Binary ---
 function getPythonBin() {
@@ -242,6 +301,39 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+// 0. GET /api/init — High-speed unified bootstrap endpoint (profile + stats + jobs in ONE single compressed request)
+app.get("/api/init", async (_req, res) => {
+  const cv = loadCV();
+  const nameMatch = cv.match(/^#\s+CV\s*—\s*(.+)$/m);
+  const name = nameMatch ? nameMatch[1].trim() : "Prakhar Pragyan Chaubey";
+
+  const cStats = await getCachedStats();
+  const localJobs = loadJobs();
+
+  const totalScanned = localJobs.length;
+  const appliedCount = localJobs.filter((j) => j._status === "applied").length;
+  const skippedCount = localJobs.filter((j) => j._status === "skipped").length;
+  const savedCount = localJobs.filter((j) => j._status === "saved" || j._status === "new").length;
+
+  res.setHeader("Cache-Control", "private, no-cache");
+  res.json({
+    profile: {
+      name,
+      integrations: {
+        careerOps: "connected (openai-eval.mjs, tracker.mjs, stats.mjs, scan.mjs)",
+        aiJobSearch: "connected (posting_guard.py, salary_lookup.py)",
+        aiModel: "deepseek-chat via DeepSeek API",
+      },
+    },
+    stats: {
+      local: { totalScanned, appliedCount, skippedCount, savedCount },
+      careerOps: cStats?.tracker || null,
+      funnel: cStats?.funnel || null,
+    },
+    jobs: localJobs,
+  });
+});
+
 // 1. GET /api/profile
 app.get("/api/profile", (_req, res) => {
   const cv = loadCV();
@@ -257,9 +349,9 @@ app.get("/api/profile", (_req, res) => {
   });
 });
 
-// 2. GET /api/stats — queries career-ops stats.mjs
+// 2. GET /api/stats — queries career-ops stats.mjs (cached)
 app.get("/api/stats", async (_req, res) => {
-  const cStats = await getCareerOpsStats();
+  const cStats = await getCachedStats();
   const localJobs = loadJobs();
 
   const totalScanned = localJobs.length;
@@ -494,6 +586,7 @@ app.post("/api/jobs/:id/status", async (req, res) => {
 
   job._status = status || "skipped";
   saveJobs(jobs);
+  invalidateStatsCache();
 
   // Sync to career-ops if evaluated or applied
   const company = job.company_name || job.company;
@@ -851,7 +944,7 @@ function getLanIP() {
 }
 
 // --- Start ---
-app.listen(PORT, "0.0.0.0", async () => {
+const server = app.listen(PORT, "0.0.0.0", async () => {
   const ip = getLanIP();
   await syncCareerOpsTracker();
 
@@ -868,3 +961,7 @@ app.listen(PORT, "0.0.0.0", async () => {
 ╚══════════════════════════════════════════════════════════╝
   `);
 });
+
+// Configure Keep-Alive for low-latency TCP socket reuse
+server.keepAliveTimeout = 65000;
+server.headersTimeout = 66000;

@@ -39,13 +39,85 @@ const CANDIDATE_PROFILE = {
   experienceSummary: "1 yr ML Engineer at Mayonix (YOLOv8/v9 92%+ mAP, sub-100ms edge latency via TensorRT/TFLite/INT8) + AlphaSense AI + IEEE WAMS 2025 & INCSTIC-2025"
 };
 
-// --- Initialization ---
+// --- Initialization (Instant Cache-First Paint + Background Bootstrap) ---
+const CACHE_KEY = "job_pilot_cache_v2";
+
 document.addEventListener("DOMContentLoaded", () => {
   initNavigation();
-  loadProfile();
-  loadStats();
-  refreshJobs();
+  // 1. Instant 0ms Paint: restore cached jobs, stats & profile from local storage
+  loadFromLocalCache();
+  // 2. High-speed single-request background sync: fetches fresh data via /api/init
+  bootstrapApp();
 });
+
+function loadFromLocalCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data.profile?.name) {
+      setElText("user-name", data.profile.name);
+    }
+    if (data.stats) {
+      applyStatsToDom(data.stats);
+    }
+    if (Array.isArray(data.jobs) && data.jobs.length > 0) {
+      allJobs = data.jobs;
+      const activeCount = allJobs.filter((j) => j._status === "new" || j._status === "saved").length;
+      setElText("total-jobs-count", activeCount);
+      setElText("home-job-count", activeCount);
+      setElText("header-jobs-badge", activeCount);
+      setElText("mobile-jobs-badge", activeCount);
+      applySortAndFilter();
+    }
+  } catch (e) {
+    console.warn("Cache paint notice:", e);
+  }
+}
+
+async function bootstrapApp() {
+  try {
+    const res = await fetchWithRetry("/api/init", { timeoutMs: 15000 }, 2);
+    const data = await res.json();
+    if (!data) return;
+
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    } catch {}
+
+    if (data.profile?.name) {
+      setElText("user-name", data.profile.name);
+    }
+    if (data.stats) {
+      applyStatsToDom(data.stats);
+    }
+    if (Array.isArray(data.jobs)) {
+      allJobs = data.jobs;
+      const activeCount = allJobs.filter((j) => j._status === "new" || j._status === "saved").length;
+      setElText("total-jobs-count", activeCount);
+      setElText("home-job-count", activeCount);
+      setElText("header-jobs-badge", activeCount);
+      setElText("mobile-jobs-badge", activeCount);
+      applySortAndFilter();
+    }
+  } catch (err) {
+    console.warn("Bootstrap sync notice:", err);
+    if (!allJobs || allJobs.length === 0) {
+      loadProfile();
+      loadStats();
+      refreshJobs();
+    }
+  }
+}
+
+function applyStatsToDom(data) {
+  const local = data.local || {};
+  const cOps = data.careerOps || {};
+  setElText("stat-total", local.totalScanned || 0);
+  setElText("stat-applied", cOps.byStatus?.Applied || local.appliedCount || 0);
+  setElText("stat-avg-score", cOps.avgScore ? `${cOps.avgScore.toFixed(1)}/5` : "—");
+  setElText("stat-top-score", cOps.topScore ? `${cOps.topScore.toFixed(1)}/5` : "—");
+}
 
 // --- Navigation Tabs (Desktop Header + Mobile Bottom Nav) ---
 function initNavigation() {
@@ -120,8 +192,7 @@ async function loadProfile() {
     const res = await fetchWithRetry("/api/profile", { timeoutMs: 12000 }, 2);
     const data = await res.json();
     if (data.name) {
-      const el = document.getElementById("user-name");
-      if (el) el.textContent = data.name;
+      setElText("user-name", data.name);
     }
   } catch { /* ignore */ }
 }
@@ -130,13 +201,7 @@ async function loadStats() {
   try {
     const res = await fetchWithRetry("/api/stats", { timeoutMs: 12000 }, 2);
     const data = await res.json();
-    const local = data.local || {};
-    const cOps = data.careerOps || {};
-
-    setElText("stat-total", local.totalScanned || 0);
-    setElText("stat-applied", cOps.byStatus?.Applied || local.appliedCount || 0);
-    setElText("stat-avg-score", cOps.avgScore ? `${cOps.avgScore.toFixed(1)}/5` : "—");
-    setElText("stat-top-score", cOps.topScore ? `${cOps.topScore.toFixed(1)}/5` : "—");
+    applyStatsToDom(data);
   } catch { /* ignore */ }
 }
 
@@ -427,7 +492,24 @@ function renderJobsList(containerId, jobs) {
     return;
   }
 
-  el.innerHTML = jobs.map((job) => createJobCardHtml(job)).join("");
+  // Fast Batch Rendering: render the first 16 cards immediately so the screen paints in 2ms
+  const BATCH_SIZE = 16;
+  const initial = jobs.slice(0, BATCH_SIZE);
+  el.innerHTML = initial.map((job) => createJobCardHtml(job)).join("");
+
+  // Defer rendering of remaining cards to next idle frame to keep 60 FPS
+  if (jobs.length > BATCH_SIZE) {
+    const remaining = jobs.slice(BATCH_SIZE);
+    const appendRest = () => {
+      const restHtml = remaining.map((job) => createJobCardHtml(job)).join("");
+      el.insertAdjacentHTML("beforeend", restHtml);
+    };
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(appendRest, { timeout: 200 });
+    } else {
+      setTimeout(appendRest, 16);
+    }
+  }
 }
 
 function createJobCardHtml(job) {
