@@ -18,20 +18,46 @@ const RESUMES_DIR = resolve(join(__dirname, "..", "data", "resumes"));
 
 // Dynamically resolve Playwright
 async function getPlaywrightChromium() {
-  try {
-    const pw = await import("playwright");
-    return pw.chromium;
-  } catch {
+  const attempts = [
+    () => import("playwright"),
+    () => import("../../career-ops/node_modules/playwright/index.mjs"),
+    () => import("../../career-ops/node_modules/playwright/index.js"),
+    () => import("../node_modules/playwright/index.mjs"),
+  ];
+  for (const fn of attempts) {
     try {
-      const pw = await import("../../career-ops/node_modules/playwright/index.mjs");
-      return pw.chromium;
+      const pw = await fn();
+      if (pw?.chromium) return pw.chromium;
+      if (pw?.default?.chromium) return pw.default.chromium;
     } catch {
-      return null;
+      // try next
+    }
+  }
+  return null;
+}
+
+function ensureEnvLoaded() {
+  if (process.env.DEEPSEEK_API_KEY) return;
+  const envPaths = [
+    join(__dirname, "..", ".env"),
+    join(CAREER_OPS_DIR, ".env"),
+    join(__dirname, "..", "..", "ai-job-search", ".env"),
+  ];
+  for (const p of envPaths) {
+    if (existsSync(p)) {
+      const lines = readFileSync(p, "utf-8").split("\n");
+      for (const line of lines) {
+        const match = line.match(/^\s*([\w]+)\s*=\s*(.+?)\s*$/);
+        if (match && !process.env[match[1]]) {
+          process.env[match[1]] = match[2].replace(/^["']|["']$/g, "").trim();
+        }
+      }
     }
   }
 }
 
 function loadCandidateData() {
+  ensureEnvLoaded();
   const cvPath = join(CAREER_OPS_DIR, "cv.md");
   const profilePath = join(CAREER_OPS_DIR, "config", "profile.yml");
   const templatePath = join(CAREER_OPS_DIR, "templates", "cv-template.html");
