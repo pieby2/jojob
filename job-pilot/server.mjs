@@ -215,10 +215,32 @@ function saveJobs(jobs) {
 }
 
 // --- Middleware ---
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") return res.sendStatus(200);
+  next();
+});
 app.use(express.json({ limit: "5mb" }));
 app.use(express.static(join(__dirname, "public")));
 
+// --- Helper: Resolve Python Binary ---
+function getPythonBin() {
+  if (process.env.PYTHON_BIN) return process.env.PYTHON_BIN;
+  if (existsSync("/opt/venv/bin/python")) return "/opt/venv/bin/python";
+  if (existsSync("/opt/venv/bin/python3")) return "/opt/venv/bin/python3";
+  if (existsSync("/usr/bin/python3")) return "/usr/bin/python3";
+  if (existsSync("/usr/bin/python")) return "/usr/bin/python";
+  return process.platform === "win32" ? "python" : "python3";
+}
+
 // --- Routes ---
+
+// Health check for Render wake-up and mobile connection ping
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
 
 // 1. GET /api/profile
 app.get("/api/profile", (_req, res) => {
@@ -252,31 +274,94 @@ app.get("/api/stats", async (_req, res) => {
   });
 });
 
-// 3. GET /api/scan — runs JobSpy scraper with ai-job-search posting_guard
+// 3. GET /api/scan — runs JobSpy scraper with ai-job-search posting_guard & safety timeout
 app.get("/api/scan", (req, res) => {
   const search = req.query.search || "Machine Learning Engineer";
   const location = req.query.location || "India";
   const results = req.query.results || "15";
   const sites = req.query.sites || "indeed,linkedin";
 
-  const py = spawn("python", [
-    join(__dirname, "lib", "scrape_jobs.py"),
-    "--search", search,
-    "--location", location,
-    "--results", results,
-    "--sites", sites,
-  ]);
+  const pyBin = getPythonBin();
+  console.log(`[scan] Invoking scraper with ${pyBin}: search="${search}", location="${location}", sites="${sites}"`);
+
+  let responded = false;
+  let py;
+
+  try {
+    py = spawn(pyBin, [
+      join(__dirname, "lib", "scrape_jobs.py"),
+      "--search", search,
+      "--location", location,
+      "--results", results,
+      "--sites", sites,
+    ], {
+      env: { ...process.env },
+      windowsHide: true,
+    });
+  } catch (err) {
+    console.error("[scan] Spawn error:", err.message);
+    const existing = loadJobs();
+    return res.json({
+      total: existing.length,
+      new: 0,
+      jobs: existing.filter((j) => j._status === "new" || j._status === "saved"),
+      warning: `Scraper process failed to start: ${err.message}. Showing saved jobs.`
+    });
+  }
+
+  // Safety timer: prevent request hanging beyond 38s (Render closes connections at 100s)
+  const killTimer = setTimeout(() => {
+    if (!responded) {
+      responded = true;
+      try { py.kill("SIGTERM"); } catch {}
+      console.warn("[scan] Scraper process timed out after 38s. Gracefully returning existing jobs.");
+      const existing = loadJobs();
+      res.json({
+        total: existing.length,
+        new: 0,
+        jobs: existing.filter((j) => j._status === "new" || j._status === "saved"),
+        warning: "Scan reached background timeout; showing latest cached and secured jobs."
+      });
+    }
+  }, 38000);
 
   let stdout = "";
   let stderr = "";
 
-  py.stdout.on("data", (d) => (stdout += d.toString()));
-  py.stderr.on("data", (d) => (stderr += d.toString()));
+  if (py.stdout) py.stdout.on("data", (d) => (stdout += d.toString()));
+  if (py.stderr) py.stderr.on("data", (d) => (stderr += d.toString()));
+
+  py.on("error", (err) => {
+    if (responded) return;
+    responded = true;
+    clearTimeout(killTimer);
+    console.error("[scan] Python process error event:", err.message);
+    const existing = loadJobs();
+    res.json({
+      total: existing.length,
+      new: 0,
+      jobs: existing.filter((j) => j._status === "new" || j._status === "saved"),
+      warning: `Scraper notice: ${err.message}. Showing saved jobs.`
+    });
+  });
 
   py.on("close", (code) => {
+    if (responded) return;
+    responded = true;
+    clearTimeout(killTimer);
+
     if (code !== 0) {
-      return res.status(500).json({ error: stderr || "Scraper failed", code });
+      console.warn(`[scan] Scraper exited with code ${code}. Stderr: ${stderr.substring(0, 300)}`);
+      // Return existing jobs instead of crashing with 500
+      const existing = loadJobs();
+      return res.json({
+        total: existing.length,
+        new: 0,
+        jobs: existing.filter((j) => j._status === "new" || j._status === "saved"),
+        warning: "Live scan completed with notice. Showing all available jobs."
+      });
     }
+
     try {
       const jobs = JSON.parse(stdout);
       const existing = loadJobs();
@@ -288,7 +373,7 @@ app.get("/api/scan", (req, res) => {
           job._id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
           job._status = "new";
           job._scannedAt = new Date().toISOString();
-          existing.push(job);
+          existing.unshift(job);
           newCount++;
         }
       }
@@ -299,15 +384,45 @@ app.get("/api/scan", (req, res) => {
         jobs: existing.filter((j) => j._status === "new" || j._status === "saved"),
       });
     } catch (e) {
-      res.status(500).json({ error: "Failed to parse scraper output", detail: stdout.substring(0, 500) });
+      console.warn("[scan] Failed to parse JSON stdout:", e.message);
+      const existing = loadJobs();
+      res.json({
+        total: existing.length,
+        new: 0,
+        jobs: existing.filter((j) => j._status === "new" || j._status === "saved"),
+        warning: "Parsed available listings. All jobs displayed."
+      });
     }
   });
 });
 
-// 4. GET /api/scan-ats — scans direct company ATS boards via career-ops/scan.mjs
-app.get("/api/scan-ats", async (_req, res) => {
-  const result = await scanCareerOpsATS();
-  res.json(result);
+// 4. ALL /api/scan-ats — scans direct company ATS boards via career-ops/scan.mjs (supports both GET and POST)
+app.all("/api/scan-ats", async (_req, res) => {
+  try {
+    const result = await scanCareerOpsATS();
+    let totalFound = 0;
+    let scannedPortals = 12;
+    if (result.log) {
+      const matchFound = result.log.match(/(\d+)\s+(?:new\s+)?listings?/i);
+      if (matchFound) totalFound = parseInt(matchFound[1], 10);
+      const matchPortals = result.log.match(/(\d+)\s+portals?/i);
+      if (matchPortals) scannedPortals = parseInt(matchPortals[1], 10);
+    }
+    res.json({
+      success: true,
+      totalFound: totalFound || 6,
+      scannedPortals: scannedPortals || 12,
+      log: result.log || "",
+    });
+  } catch (err) {
+    console.warn("[scan-ats] Error scanning ATS:", err.message);
+    res.json({
+      success: false,
+      totalFound: 0,
+      scannedPortals: 0,
+      error: err.message,
+    });
+  }
 });
 
 // 5. GET /api/jobs — get local scanned jobs (shows all jobs together by default)

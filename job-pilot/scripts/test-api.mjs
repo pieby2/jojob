@@ -92,6 +92,20 @@ async function testApi() {
     console.log("Has 1-Tap Copy Text:", !!formPack.copyAllText);
     console.log("Has Mobile Bookmarklet:", !!formPack.bookmarklet);
 
+    // 5. GET /api/health
+    console.log("\n[Test 5] Testing GET /api/health...");
+    const healthRes = await request("/api/health");
+    console.log("Status:", healthRes.statusCode);
+    const health = JSON.parse(healthRes.bodyText);
+    console.log("Health Status:", health.status);
+
+    // 6. POST /api/scan-ats (verifying POST method works without 404)
+    console.log("\n[Test 6] Testing POST /api/scan-ats...");
+    const atsRes = await request("/api/scan-ats", { method: "POST" });
+    console.log("Status:", atsRes.statusCode);
+    const atsData = JSON.parse(atsRes.bodyText);
+    console.log("ATS Response:", { success: atsData.success, totalFound: atsData.totalFound, scannedPortals: atsData.scannedPortals });
+
     console.log("\n✅ ALL TESTS PASSED SUCCESSFULLY!");
   } finally {
     server.kill();

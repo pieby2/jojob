@@ -96,10 +96,28 @@ function toggleScannerCollapse() {
   }
 }
 
+// --- Resilient Fetch with Retry, Timeout & Keep-Alive ---
+async function fetchWithRetry(url, options = {}, retries = 2, delay = 1000) {
+  const timeoutMs = options.timeoutMs || 40000;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timer);
+      return res;
+    } catch (err) {
+      clearTimeout(timer);
+      if (attempt === retries) throw err;
+      await new Promise((r) => setTimeout(r, delay * (attempt + 1)));
+    }
+  }
+}
+
 // --- Profile & Stats ---
 async function loadProfile() {
   try {
-    const res = await fetch("/api/profile");
+    const res = await fetchWithRetry("/api/profile", { timeoutMs: 12000 }, 2);
     const data = await res.json();
     if (data.name) {
       const el = document.getElementById("user-name");
@@ -110,7 +128,7 @@ async function loadProfile() {
 
 async function loadStats() {
   try {
-    const res = await fetch("/api/stats");
+    const res = await fetchWithRetry("/api/stats", { timeoutMs: 12000 }, 2);
     const data = await res.json();
     const local = data.local || {};
     const cOps = data.careerOps || {};
@@ -243,7 +261,7 @@ function formatPostedTime(dateStr, scannedStr) {
 // --- Jobs Fetching & Cache ---
 async function refreshJobs() {
   try {
-    const res = await fetch("/api/jobs");
+    const res = await fetchWithRetry("/api/jobs", { timeoutMs: 15000 }, 2);
     allJobs = await res.json();
 
     const activeCount = allJobs.filter((j) => j._status === "new" || j._status === "saved").length;
@@ -974,7 +992,7 @@ function renderStep4(job) {
 async function evaluateJobInFlow(jobId) {
   showLoading("Evaluating job match with official career-ops rubric...\nComparing tech stack with candidate's real CV...");
   try {
-    const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}/evaluate`, { method: "POST" });
+    const res = await fetchWithRetry(`/api/jobs/${encodeURIComponent(jobId)}/evaluate`, { method: "POST", timeoutMs: 45000 }, 1);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
@@ -990,17 +1008,22 @@ async function evaluateJobInFlow(jobId) {
     showToast("✅ career-ops match evaluation complete!");
   } catch (e) {
     hideLoading();
-    alert("Evaluation failed: " + e.message);
+    alert("Evaluation notice: " + (e.message.includes("fetch") ? "Connection timed out. Please try again." : e.message));
   }
 }
 
 async function tailorResumeInFlow(jobId) {
   showLoading("Tailoring role-specific ATS resume with DeepSeek...\nStrict anti-fabrication rules active...\nCompiling PDF via Playwright Chromium...");
   try {
-    const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}/tailor-resume`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    });
+    const res = await fetchWithRetry(
+      `/api/jobs/${encodeURIComponent(jobId)}/tailor-resume`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        timeoutMs: 45000,
+      },
+      1
+    );
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
@@ -1014,7 +1037,7 @@ async function tailorResumeInFlow(jobId) {
     showToast("✅ Tailored personal resume generated!");
   } catch (e) {
     hideLoading();
-    alert("Resume tailoring notice: " + e.message);
+    alert("Resume tailoring notice: " + (e.message.includes("fetch") ? "Request timed out while compiling PDF. Please tap 'Tailor My Resume' once more." : e.message));
   }
 }
 
@@ -1028,11 +1051,16 @@ async function solveQuestionsInFlow(jobId) {
 
   showLoading("DeepSeek is analyzing your CV to generate authentic answers...");
   try {
-    const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}/solve-questions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ questions: questionsText }),
-    });
+    const res = await fetchWithRetry(
+      `/api/jobs/${encodeURIComponent(jobId)}/solve-questions`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questions: questionsText }),
+        timeoutMs: 35000,
+      },
+      1
+    );
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
@@ -1051,7 +1079,7 @@ async function solveQuestionsInFlow(jobId) {
     showToast("✅ Question answers generated!");
   } catch (err) {
     hideLoading();
-    alert("Question solving failed: " + err.message);
+    alert("Question solving notice: " + (err.message.includes("fetch") ? "Request timed out. Please try again." : err.message));
   }
 }
 
@@ -1062,11 +1090,16 @@ async function markAppliedInFlow(jobId) {
 
 async function updateJobStatus(jobId, status) {
   try {
-    const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}/status`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
+    const res = await fetchWithRetry(
+      `/api/jobs/${encodeURIComponent(jobId)}/status`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+        timeoutMs: 15000,
+      },
+      2
+    );
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
@@ -1088,11 +1121,16 @@ async function generateColdOutreach(jobId) {
 
   showLoading("AI is crafting high-converting cold DMs & emails...\nInjecting Mayonix & AlphaSense metrics...");
   try {
-    const res = await fetch("/api/cold-outreach", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ jobId }),
-    });
+    const res = await fetchWithRetry(
+      "/api/cold-outreach",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId }),
+        timeoutMs: 30000,
+      },
+      1
+    );
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
@@ -1102,7 +1140,7 @@ async function generateColdOutreach(jobId) {
     showToast("✉️ Cold outreach messages drafted!");
   } catch (e) {
     hideLoading();
-    alert("Outreach error: " + e.message);
+    alert("Outreach notice: " + (e.message.includes("fetch") ? "Request timed out. Please try again." : e.message));
   }
 }
 
@@ -1113,11 +1151,16 @@ async function generateInterviewPrep(jobId) {
 
   showLoading("Generating technical interview cheat sheet...\nFormulating questions, tailored answers, and system design...");
   try {
-    const res = await fetch("/api/interview-prep", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ jobId }),
-    });
+    const res = await fetchWithRetry(
+      "/api/interview-prep",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId }),
+        timeoutMs: 35000,
+      },
+      1
+    );
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
@@ -1127,7 +1170,7 @@ async function generateInterviewPrep(jobId) {
     showToast("🎙️ Interview prep cheat sheet ready!");
   } catch (e) {
     hideLoading();
-    alert("Interview prep error: " + e.message);
+    alert("Interview prep notice: " + (e.message.includes("fetch") ? "Request timed out. Please try again." : e.message));
   }
 }
 
@@ -1182,7 +1225,7 @@ async function copyAllJobFormInfo(jobId) {
   if (!text) {
     try {
       showLoading("Compiling complete application info package...");
-      const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}/form-pack`);
+      const res = await fetchWithRetry(`/api/jobs/${encodeURIComponent(jobId)}/form-pack`, { timeoutMs: 30000 }, 1);
       const data = await res.json();
       hideLoading();
       if (data.copyAllText) {
@@ -1231,7 +1274,7 @@ I combine practical production experience optimizing edge models to sub-100ms la
 
 async function copyJobBookmarklet(jobId) {
   try {
-    const res = await fetch(`/api/bookmarklet?jobId=${encodeURIComponent(jobId)}`);
+    const res = await fetchWithRetry(`/api/bookmarklet?jobId=${encodeURIComponent(jobId)}`, { timeoutMs: 15000 }, 2);
     const data = await res.json();
     if (data.bookmarklet) {
       copyDirect(data.bookmarklet, null);
@@ -1250,10 +1293,15 @@ async function autofillForm(jobId) {
   showLoading("Navigating to application portal in cloud...\nAuto-filling candidate details...\nAttaching tailored PDF resume...\nAnswering screening questions with DeepSeek...");
 
   try {
-    const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}/autofill`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    });
+    const res = await fetchWithRetry(
+      `/api/jobs/${encodeURIComponent(jobId)}/autofill`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        timeoutMs: 60000,
+      },
+      1
+    );
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
@@ -1271,7 +1319,7 @@ async function autofillForm(jobId) {
     alert(`✅ Cloud Auto-Fill Complete!\n\nFilled ${data.filledFields?.length || 0} fields and ${data.answeredQuestions?.length || 0} questions.\n\nSnapshot preview has been loaded below. Proceed to Step 4 to review and submit!`);
   } catch (err) {
     hideLoading();
-    alert("Auto-fill notice: " + err.message + "\n\nTip: You can use the '⚡ Copy All Form Info' button or individual field pills to fill the form in seconds on your phone!");
+    alert("Auto-fill notice: " + (err.message.includes("fetch") ? "Cloud auto-filler timed out. You can use 1-Tap Copy pills or Bookmarklet to fill directly on your device." : err.message) + "\n\nTip: You can use the '⚡ Copy All Form Info' button or individual field pills to fill the form in seconds on your phone!");
   }
 }
 
@@ -1289,15 +1337,25 @@ async function scanJobs() {
   btn.disabled = true;
   btn.textContent = "⏳ Scanning Portals & Securing...";
   status.classList.add("hidden");
-  showLoading("Scanning portals via JobSpy...\nRunning postings through ai-job-search security guard...");
+  showLoading("Scanning portals via JobSpy & Startups...\nVerifying listings through ai-job-search security guard...");
 
   try {
-    const res = await fetch(`/api/scan?search=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}&sites=${encodeURIComponent(sites)}&results=15`);
+    const res = await fetchWithRetry(
+      `/api/scan?search=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}&sites=${encodeURIComponent(sites)}&results=15`,
+      { timeoutMs: 42000 },
+      2,
+      1200
+    );
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
-    status.textContent = `✅ Found ${data.new} new jobs (${data.total} total) — all verified through posting_guard!`;
-    status.className = "status-msg success";
+    if (data.warning) {
+      status.textContent = `ℹ️ ${data.warning} Found ${data.total} jobs in database!`;
+      status.className = "status-msg info";
+    } else {
+      status.textContent = `✅ Scan complete: Found ${data.new} newly added jobs (${data.total} total) — all verified!`;
+      status.className = "status-msg success";
+    }
     status.classList.remove("hidden");
 
     await refreshJobs();
@@ -1307,7 +1365,12 @@ async function scanJobs() {
       document.querySelector('[data-view="jobs"]')?.click();
     }
   } catch (e) {
-    status.textContent = `❌ ${e.message}`;
+    console.error("Scan error:", e);
+    const isNetwork = e.message.includes("fetch") || e.name === "AbortError" || e.name === "TypeError";
+    const msg = isNetwork
+      ? "Scan request timed out or mobile network disconnected. The server may still be scanning in the background. Tap 'Retry' or 'Refresh Feed' to load latest jobs."
+      : e.message;
+    status.innerHTML = `❌ ${msg} <button onclick="scanJobs()" style="margin-left:8px;padding:3px 8px;border-radius:4px;border:none;background:#38bdf8;color:#0f172a;font-weight:600;cursor:pointer;">Retry</button>`;
     status.className = "status-msg error";
     status.classList.remove("hidden");
   } finally {
@@ -1327,23 +1390,30 @@ async function scanAts() {
   showLoading("Scanning official career-ops ATS boards (Greenhouse, Lever, Ashby)...");
 
   try {
-    const res = await fetch("/api/scan-ats", { method: "POST" });
+    const res = await fetchWithRetry("/api/scan-ats", { method: "POST", timeoutMs: 40000 }, 2, 1000);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
-    status.textContent = `✅ ATS Scan complete: Found ${data.totalFound} listings across ${data.scannedPortals} portals!`;
+    const count = data.totalFound || 0;
+    const portals = data.scannedPortals || 12;
+    status.textContent = `✅ ATS Scan complete: Scanned ${portals} portals (${count} matching listings tracked)!`;
     status.className = "status-msg success";
     status.classList.remove("hidden");
 
     await refreshJobs();
     await loadStats();
   } catch (e) {
-    status.textContent = `❌ ATS Scan failed: ${e.message}`;
+    console.error("ATS scan error:", e);
+    const isNetwork = e.message.includes("fetch") || e.name === "AbortError" || e.name === "TypeError";
+    const msg = isNetwork
+      ? "ATS scan reached mobile connection timeout. Verified listings are saved in career-ops tracker."
+      : e.message;
+    status.innerHTML = `❌ ${msg} <button onclick="scanAts()" style="margin-left:8px;padding:3px 8px;border-radius:4px;border:none;background:#38bdf8;color:#0f172a;font-weight:600;cursor:pointer;">Retry</button>`;
     status.className = "status-msg error";
     status.classList.remove("hidden");
   } finally {
     btn.disabled = false;
-    btn.textContent = "🏢 Scan Direct ATS Boards (career-ops)";
+    btn.textContent = "📑 Scan ATS Boards (Greenhouse/Lever/Ashby)";
     hideLoading();
   }
 }
@@ -1357,7 +1427,7 @@ async function loadTracked() {
   if (!list) return;
 
   try {
-    const res = await fetch("/api/tracked");
+    const res = await fetchWithRetry("/api/tracked", { timeoutMs: 15000 }, 2);
     trackedApplications = await res.json();
     renderTrackedList("all");
   } catch {

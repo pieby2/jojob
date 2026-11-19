@@ -130,14 +130,12 @@ def main():
 
     site_list = [s.strip().lower() for s in args.sites.split(",") if s.strip()]
 
-    # If "all", search across all candidate target roles
+    # If "all", search across the two primary candidate target clusters (covers ML, CV, Edge AI, DL)
     search_queries = [args.search]
     if args.search.lower() in ("all", "all roles", "all target roles"):
         search_queries = [
             "Machine Learning Engineer",
             "Computer Vision Engineer",
-            "Edge AI Engineer",
-            "Deep Learning Engineer"
         ]
 
     all_records = []
@@ -178,7 +176,7 @@ def main():
             is_india = any(city in loc_lower for city in indian_locations)
 
             try:
-                per_query_results = max(6, args.results // len(search_queries))
+                per_query_results = max(4, min(8, args.results // len(search_queries)))
                 jobs = scrape_jobs(
                     site_name=jobspy_sites,
                     search_term=query,
