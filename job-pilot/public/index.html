@@ -2,195 +2,424 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f19">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Job Pilot</title>
+  <title>Job Pilot — Autonomous AI Career & Job Application Engine</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="nav">
-    <div class="nav-brand">
-      <span>🚀 Job Pilot</span>
-      <span class="engine-badge">career-ops + ai-job-search</span>
+  <!-- Top Glass Header Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-group">
+        <div class="brand-logo">
+          <span class="logo-icon">🚀</span>
+          <div>
+            <div class="brand-title">Job Pilot</div>
+            <div class="brand-tagline">career-ops + ai-job-search</div>
+          </div>
+        </div>
+        <div class="candidate-chip">
+          <span class="pulse-dot"></span>
+          <span id="user-name">Prakhar Pragyan Chaubey</span>
+          <span class="candidate-role-badge">ML Engineer · Mayonix</span>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" role="tablist">
+        <button class="tab-btn active" data-view="dashboard" role="tab" aria-selected="true">
+          <span class="tab-icon">🏠</span>
+          <span class="tab-text">Feed &amp; Scan</span>
+        </button>
+        <button class="tab-btn" data-view="jobs" role="tab" aria-selected="false">
+          <span class="tab-icon">💼</span>
+          <span class="tab-text">All Jobs</span>
+          <span class="badge-count" id="header-jobs-badge">0</span>
+        </button>
+        <button class="tab-btn" data-view="history" role="tab" aria-selected="false">
+          <span class="tab-icon">📜</span>
+          <span class="tab-text">Tracker</span>
+        </button>
+      </nav>
     </div>
-    <div class="nav-tabs">
-      <button class="tab active" data-view="dashboard">Home</button>
-      <button class="tab" data-view="jobs">Jobs</button>
-      <button class="tab" data-view="history">Tracker</button>
-    </div>
+  </header>
+
+  <!-- Mobile Bottom Sticky Navigation -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-tab-btn active" data-view="dashboard">
+      <span class="mobile-tab-icon">🏠</span>
+      <span class="mobile-tab-label">Feed</span>
+    </button>
+    <button class="mobile-tab-btn" data-view="jobs">
+      <span class="mobile-tab-icon">💼</span>
+      <span class="mobile-tab-label">Jobs</span>
+      <span class="mobile-badge" id="mobile-jobs-badge">0</span>
+    </button>
+    <button class="mobile-tab-btn" data-view="history">
+      <span class="mobile-tab-icon">📜</span>
+      <span class="mobile-tab-label">Tracker</span>
+    </button>
   </nav>
 
-  <!-- Dashboard View -->
-  <main id="view-dashboard" class="view active">
-    <div class="hero">
-      <h1>Hi, <span id="user-name">Prakhar</span> 👋</h1>
-      <p class="subtitle">AI Job Pilot powered by career-ops & ai-job-search</p>
-    </div>
+  <!-- Main App Shell -->
+  <div class="app-shell">
 
-    <!-- Live Career-Ops Stats -->
-    <div class="section-title">📊 Career-Ops Pipeline Stats</div>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-number" id="stat-total">0</div>
-        <div class="stat-label">Scanned</div>
-      </div>
-      <div class="stat-card stat-green">
-        <div class="stat-number" id="stat-applied">0</div>
-        <div class="stat-label">Applied</div>
-      </div>
-      <div class="stat-card stat-blue">
-        <div class="stat-number" id="stat-avg-score">—</div>
-        <div class="stat-label">Avg Match</div>
-      </div>
-      <div class="stat-card stat-yellow">
-        <div class="stat-number" id="stat-top-score">—</div>
-        <div class="stat-label">Top Score</div>
-      </div>
-    </div>
-
-    <!-- Scan Form -->
-    <div class="scan-section">
-      <h2>🔍 Scan for Jobs</h2>
-      <div class="form-group">
-        <label>Target Role</label>
-        <select id="scan-query" class="input">
-          <option value="all" selected>🌟 All Roles Together (ML, Computer Vision, Edge AI, DL, MLOps)</option>
-          <option value="Computer Vision Engineer">👁️ Computer Vision Engineer</option>
-          <option value="Machine Learning Engineer">🤖 Machine Learning Engineer</option>
-          <option value="Edge AI Engineer">⚡ Edge AI / Embedded ML Engineer</option>
-          <option value="Deep Learning Engineer">🧠 Deep Learning Engineer</option>
-          <option value="Perception Engineer">📡 Perception / Autonomy Engineer</option>
-          <option value="MLOps Engineer">⚙️ MLOps / AI Platform Engineer</option>
-        </select>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group flex-1">
-          <label>Location</label>
-          <select id="scan-location" class="input">
-            <option value="India" selected>India</option>
-            <option value="Bengaluru">Bengaluru</option>
-            <option value="Delhi NCR">Delhi NCR</option>
-            <option value="Hyderabad">Hyderabad</option>
-            <option value="Pune">Pune</option>
-            <option value="Remote">Remote</option>
-          </select>
+    <!-- VIEW 1: Dashboard / Home Feed -->
+    <main id="view-dashboard" class="view active">
+      <!-- Welcome Hero Banner -->
+      <section class="welcome-hero">
+        <div class="hero-left">
+          <span class="welcome-tag">AI-POWERED DUAL-ENGINE PIPELINE</span>
+          <h1>Welcome, <span class="highlight-name">Prakhar</span> 👋</h1>
+          <p class="hero-desc">
+            Discover roles ranked by your <strong>experience fit (0–2 yrs)</strong>, generate tailored personal resumes, and auto-fill applications seamlessly.
+          </p>
         </div>
-        <div class="form-group flex-1">
-          <label>Engine / Portals</label>
-          <select id="scan-sites" class="input">
-            <option value="indeed,linkedin,naukri,wellfound,yc" selected>🔥 Ultimate Combo (Naukri, LinkedIn, Indeed, Wellfound, YC)</option>
-            <option value="wellfound,yc">🦄 Startup Special (Wellfound + YC Jobs)</option>
-            <option value="wellfound">🌟 Wellfound Only (AngelList Talent)</option>
-            <option value="yc">🚀 YC Jobs Only (Y Combinator)</option>
-            <option value="indeed,linkedin,naukri">🇮🇳 Big Tech India (Naukri, LinkedIn, Indeed)</option>
-            <option value="naukri">💼 Naukri Only</option>
-            <option value="linkedin">💼 LinkedIn Only</option>
-            <option value="indeed">🌐 Indeed Only</option>
-            <option value="glassdoor">🏢 Glassdoor Only</option>
-          </select>
+        <div class="hero-candidate-summary">
+          <div class="summary-pill">🎓 ABES EC (CSE 2026)</div>
+          <div class="summary-pill">🏢 Mayonix (92%+ mAP YOLO)</div>
+          <div class="summary-pill">⚡ Sub-100ms Edge Inference</div>
+          <div class="summary-pill">📚 IEEE WAMS &amp; INCSTIC</div>
+        </div>
+      </section>
+
+      <!-- Live Pipeline Stats Cards -->
+      <section class="stats-overview">
+        <div class="stat-card">
+          <div class="stat-icon-wrap icon-blue">📊</div>
+          <div>
+            <div class="stat-val" id="stat-total">0</div>
+            <div class="stat-lbl">Jobs Scanned</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap icon-green">✅</div>
+          <div>
+            <div class="stat-val stat-green" id="stat-applied">0</div>
+            <div class="stat-lbl">Applied</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap icon-purple">⭐</div>
+          <div>
+            <div class="stat-val stat-blue" id="stat-avg-score">—</div>
+            <div class="stat-lbl">Avg Match</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap icon-amber">🏆</div>
+          <div>
+            <div class="stat-val stat-yellow" id="stat-top-score">—</div>
+            <div class="stat-lbl">Top Score</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Portal & ATS Scanner Section -->
+      <section class="scanner-card">
+        <div class="card-header-flex">
+          <div>
+            <h2>🔍 Scan Job Portals &amp; ATS Boards</h2>
+            <p class="card-sub">Scrapes Indeed, LinkedIn, Naukri, Wellfound, YC &amp; direct Greenhouse/Lever portals with safety guard</p>
+          </div>
+          <button id="toggle-scan-btn" class="btn btn-ghost btn-sm" onclick="toggleScannerCollapse()">
+            <span id="scan-toggle-icon">▼</span> Customize Scan
+          </button>
+        </div>
+
+        <div id="scanner-inputs" class="scanner-body">
+          <div class="form-row">
+            <div class="form-col flex-2">
+              <label class="input-lbl">Target Role Focus</label>
+              <select id="scan-query" class="styled-select">
+                <option value="all" selected>🌟 All Roles (Computer Vision, ML, Edge AI, DL, MLOps)</option>
+                <option value="Computer Vision Engineer">👁️ Computer Vision Engineer</option>
+                <option value="Machine Learning Engineer">🤖 Machine Learning Engineer</option>
+                <option value="Edge AI Engineer">⚡ Edge AI / Embedded ML Engineer</option>
+                <option value="Deep Learning Engineer">🧠 Deep Learning Engineer</option>
+                <option value="Perception Engineer">📡 Perception / Autonomy Engineer</option>
+                <option value="MLOps Engineer">⚙️ MLOps / AI Platform Engineer</option>
+              </select>
+            </div>
+            <div class="form-col flex-1">
+              <label class="input-lbl">Location</label>
+              <select id="scan-location" class="styled-select">
+                <option value="India" selected>🇮🇳 India</option>
+                <option value="Bengaluru">Bengaluru</option>
+                <option value="Delhi NCR">Delhi NCR</option>
+                <option value="Hyderabad">Hyderabad</option>
+                <option value="Pune">Pune</option>
+                <option value="Remote">🌐 Remote</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-top:10px;">
+            <div class="form-col flex-1">
+              <label class="input-lbl">Portal &amp; Source Configuration</label>
+              <select id="scan-sites" class="styled-select">
+                <option value="indeed,linkedin,naukri,wellfound,yc" selected>🔥 Ultimate Combo (Naukri, LinkedIn, Indeed, Wellfound, YC)</option>
+                <option value="wellfound,yc">🦄 Startup Special (Wellfound + YC Startups)</option>
+                <option value="wellfound">🌟 Wellfound Only (AngelList Talent)</option>
+                <option value="yc">🚀 YC Jobs Only (Y Combinator)</option>
+                <option value="indeed,linkedin,naukri">🇮🇳 Big Tech India (Naukri, LinkedIn, Indeed)</option>
+                <option value="linkedin">💼 LinkedIn Only</option>
+                <option value="naukri">💼 Naukri Only</option>
+                <option value="indeed">🌐 Indeed Only</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="scan-btn-group" style="margin-top:14px;">
+            <button id="btn-scan" class="btn btn-primary" onclick="scanJobs()">
+              <span>🔍 Scan Portals (with Security Gate)</span>
+            </button>
+            <button id="btn-scan-ats" class="btn btn-outline" onclick="scanAts()">
+              <span>🏢 Scan ATS Boards (Greenhouse/Lever/Ashby)</span>
+            </button>
+          </div>
+
+          <div id="scan-status" class="status-msg hidden"></div>
+        </div>
+      </section>
+
+      <!-- Live Feed Section -->
+      <section class="feed-section">
+        <div class="feed-header">
+          <div>
+            <h2>🔥 High-Match Job Opportunities (<span id="home-job-count">0</span>)</h2>
+            <p class="feed-sub">Ranked by experience match and date posted. Click any card to launch the 4-step flow.</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="refreshJobs()">↻ Refresh Feed</button>
+        </div>
+
+        <div id="home-jobs-list" class="jobs-list">
+          <div class="empty-state">
+            <div class="empty-icon">⏳</div>
+            <p>Loading vetted job listings...</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- VIEW 2: Jobs Pipeline & Explorer -->
+    <main id="view-jobs" class="view">
+      <div class="view-header-row">
+        <div>
+          <h2>💼 Job Pipeline &amp; Explorer</h2>
+          <p class="view-sub">Showing <span id="total-jobs-count">0</span> matching opportunities with experience &amp; score ranking</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="refreshJobs()">↻ Refresh</button>
+      </div>
+
+      <!-- Advanced Filter & Experience Ranking Toolbar -->
+      <section class="filter-panel">
+        <!-- Search bar -->
+        <div class="search-bar-wrap">
+          <span class="search-icon">🔎</span>
+          <input type="text" id="job-search-input" class="search-input" placeholder="Search by title, company, technology (e.g. YOLO, PyTorch, TensorRT, Optum)..." oninput="applySortAndFilter()">
+          <button class="clear-search-btn" onclick="clearSearch()" id="clear-search-btn" style="display:none;">✕</button>
+        </div>
+
+        <!-- Ranking Dropdown & Experience Priority -->
+        <div class="ranking-row">
+          <div class="ranking-select-group">
+            <label class="sort-tag-label" for="job-sort-select">RANK JOBS BY:</label>
+            <select id="job-sort-select" class="ranking-dropdown" onchange="applySortAndFilter()">
+              <option value="exp-match" selected>🎯 Best Experience Match (0-2 yrs / Entry first)</option>
+              <option value="exp-asc">⏳ Experience: Lowest to Highest (0 to 10+ yrs)</option>
+              <option value="exp-desc">⌛ Experience: Highest to Lowest (Senior first)</option>
+              <option value="score-highest">⭐ Match Score: Highest First (career-ops rubric)</option>
+              <option value="posted-newest">⚡ Date Posted: Newest First</option>
+              <option value="posted-oldest">⌛ Date Posted: Oldest First</option>
+              <option value="company-az">🏢 Company Name: A to Z</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Filter Pills Rows -->
+        <div class="filter-pills-container">
+          <!-- Experience Filter Row -->
+          <div class="pill-group-row">
+            <span class="pill-group-label">EXP:</span>
+            <div class="pill-scroll-list">
+              <button class="filter-pill active" data-exp="all" onclick="setExpFilter('all')">All Experience</button>
+              <button class="filter-pill pill-entry" data-exp="entry" onclick="setExpFilter('entry')">🟢 Entry / Fresher (0–2 yrs)</button>
+              <button class="filter-pill pill-mid" data-exp="mid" onclick="setExpFilter('mid')">🟡 Mid-Level (2–5 yrs)</button>
+              <button class="filter-pill pill-senior" data-exp="senior" onclick="setExpFilter('senior')">🟣 Senior (5+ yrs)</button>
+            </div>
+          </div>
+
+          <!-- Role Category Filter Row -->
+          <div class="pill-group-row">
+            <span class="pill-group-label">ROLE:</span>
+            <div class="pill-scroll-list role-filter-pills">
+              <button class="filter-pill active" data-role="all" onclick="setRoleFilter('all')">🌟 All Roles</button>
+              <button class="filter-pill" data-role="Computer Vision" onclick="setRoleFilter('Computer Vision')">👁️ Vision</button>
+              <button class="filter-pill" data-role="Machine Learning" onclick="setRoleFilter('Machine Learning')">🤖 ML</button>
+              <button class="filter-pill" data-role="Edge AI" onclick="setRoleFilter('Edge AI')">⚡ Edge AI</button>
+              <button class="filter-pill" data-role="Deep Learning" onclick="setRoleFilter('Deep Learning')">🧠 DL</button>
+              <button class="filter-pill" data-role="MLOps" onclick="setRoleFilter('MLOps')">⚙️ MLOps</button>
+            </div>
+          </div>
+
+          <!-- Time Filter Row -->
+          <div class="pill-group-row">
+            <span class="pill-group-label">TIME:</span>
+            <div class="pill-scroll-list time-filter-pills">
+              <button class="filter-pill active" data-time="all" onclick="setTimeFilter('all')">All Time</button>
+              <button class="filter-pill" data-time="24h" onclick="setTimeFilter('24h')">⚡ Past 24h</button>
+              <button class="filter-pill" data-time="3d" onclick="setTimeFilter('3d')">📅 Past 3 Days</button>
+              <button class="filter-pill" data-time="7d" onclick="setTimeFilter('7d')">🗓️ Past 7 Days</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Jobs List Container -->
+      <div id="jobs-list" class="jobs-list">
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <p>No jobs found matching your criteria. Try adjusting your filters or tap Scan on Home!</p>
         </div>
       </div>
+    </main>
 
-      <button id="btn-scan" class="btn btn-primary btn-block" onclick="scanJobs()">
-        🔍 Scan Portals (with ai-job-search Security Gate)
-      </button>
-
-      <button id="btn-scan-ats" class="btn btn-outline btn-block" style="margin-top:8px" onclick="scanAts()">
-        🏢 Scan Direct ATS Boards (career-ops Greenhouse/Lever/Ashby)
-      </button>
-
-      <div id="scan-status" class="status-msg hidden"></div>
-    </div>
-
-    <!-- Live Unified Jobs Feed on Home -->
-    <div class="view-header" style="margin-top:24px;">
-      <h2>📋 All Jobs (<span id="home-job-count">0</span>)</h2>
-      <button class="btn btn-small" onclick="refreshJobs()">↻ Refresh</button>
-    </div>
-    <div id="home-jobs-list" class="jobs-list">
-      <p class="empty-state">Loading all jobs...</p>
-    </div>
-  </main>
-
-  <!-- Jobs View -->
-  <main id="view-jobs" class="view">
-    <div class="view-header">
-      <h2>📋 All Scanned Jobs (<span id="total-jobs-count">0</span>)</h2>
-      <button class="btn btn-small" onclick="refreshJobs()">↻ Refresh</button>
-    </div>
-
-    <!-- Ranking & Time Filter Toolbar -->
-    <div class="sort-toolbar">
-      <div class="sort-row">
-        <span class="sort-label">Rank by:</span>
-        <select id="job-sort-select" class="sort-select" onchange="applySortAndFilter()">
-          <option value="posted-newest" selected>⏳ Posted: Newest First</option>
-          <option value="posted-oldest">⌛ Posted: Oldest First</option>
-          <option value="score-highest">⭐ Match Score: Highest First</option>
-          <option value="scanned-newest">📥 Scanned: Recently First</option>
-          <option value="company-az">🏢 Company: A to Z</option>
-        </select>
+    <!-- VIEW 3: Career-Ops Tracker -->
+    <main id="view-history" class="view">
+      <div class="view-header-row">
+        <div>
+          <h2>📜 Official career-ops Tracker</h2>
+          <p class="view-sub">Applications tracked and synced with <code>career-ops/data/applications.md</code></p>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="loadTracked()">↻ Sync Tracker</button>
       </div>
 
-      <div class="time-filter-pills">
-        <button class="pill-btn active" data-time="all" onclick="setTimeFilter('all')">All Time</button>
-        <button class="pill-btn" data-time="24h" onclick="setTimeFilter('24h')">⚡ 24h</button>
-        <button class="pill-btn" data-time="3d" onclick="setTimeFilter('3d')">📅 3 Days</button>
-        <button class="pill-btn" data-time="7d" onclick="setTimeFilter('7d')">🗓️ 7 Days</button>
+      <div class="tracker-filter-bar">
+        <button class="filter-tab active" data-filter="all" onclick="filterTracked('all')">All Tracked</button>
+        <button class="filter-tab" data-filter="Applied" onclick="filterTracked('Applied')">✅ Applied</button>
+        <button class="filter-tab" data-filter="Evaluated" onclick="filterTracked('Evaluated')">📊 Evaluated</button>
+        <button class="filter-tab" data-filter="Interview" onclick="filterTracked('Interview')">🎙️ Interview</button>
       </div>
 
-      <!-- Quick Role Category Filter Pills (All Roles by default) -->
-      <div class="role-filter-pills" style="display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px;margin-top:4px">
-        <button class="pill-btn active" data-role="all" onclick="setRoleFilter('all')">🌟 All Roles</button>
-        <button class="pill-btn" data-role="Computer Vision" onclick="setRoleFilter('Computer Vision')">👁️ Vision</button>
-        <button class="pill-btn" data-role="Machine Learning" onclick="setRoleFilter('Machine Learning')">🤖 ML</button>
-        <button class="pill-btn" data-role="Edge AI" onclick="setRoleFilter('Edge AI')">⚡ Edge AI</button>
-        <button class="pill-btn" data-role="Deep Learning" onclick="setRoleFilter('Deep Learning')">🧠 DL</button>
-        <button class="pill-btn" data-role="MLOps" onclick="setRoleFilter('MLOps')">⚙️ MLOps</button>
+      <div id="history-list" class="jobs-list" style="margin-top:14px;">
+        <div class="empty-state">
+          <div class="empty-icon">📜</div>
+          <p>Loading applications from career-ops tracker...</p>
+        </div>
       </div>
-    </div>
+    </main>
 
-    <div id="jobs-list" class="jobs-list">
-      <p class="empty-state">No jobs yet. Tap Scan on the Home tab!</p>
-    </div>
-  </main>
+  </div> <!-- /app-shell -->
 
-  <!-- History / Official Tracker View -->
-  <main id="view-history" class="view">
-    <div class="view-header">
-      <h2>📜 Official career-ops Tracker</h2>
-      <button class="btn btn-small" onclick="loadTracked()">↻ Sync</button>
-    </div>
-    <div class="filter-tabs">
-      <button class="filter-tab active" data-filter="all" onclick="filterTracked('all')">All</button>
-      <button class="filter-tab" data-filter="Applied" onclick="filterTracked('Applied')">Applied</button>
-      <button class="filter-tab" data-filter="Evaluated" onclick="filterTracked('Evaluated')">Evaluated</button>
-      <button class="filter-tab" data-filter="Interview" onclick="filterTracked('Interview')">Interview</button>
-    </div>
-    <div id="history-list" class="jobs-list" style="margin-top:12px">
-      <p class="empty-state">Loading official tracker...</p>
-    </div>
-  </main>
+  <!-- ========================================================================= -->
+  <!-- MODAL: THE FIXED 4-STEP APPLICATION FLOW WIZARD                           -->
+  <!-- ========================================================================= -->
+  <div id="job-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" onclick="closeModal()"></div>
+    <div class="modal-dialog">
+      <!-- Fixed Modal Header with Stepper Progress -->
+      <div class="modal-header-sticky">
+        <div class="modal-top-bar">
+          <div class="modal-heading-group">
+            <h2 id="flow-job-title" class="flow-title">Job Title</h2>
+            <div id="flow-job-company" class="flow-company">Company · Location</div>
+          </div>
+          <button class="modal-close-circle" onclick="closeModal()" title="Close">✕</button>
+        </div>
 
-  <!-- Job Detail Modal -->
-  <div id="job-modal" class="modal hidden">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeModal()">✕</button>
-      <div id="modal-body"></div>
+        <!-- Role & Experience Highlights Banner -->
+        <div class="flow-meta-banner">
+          <span id="flow-role-badge" class="meta-pill pill-role">🎯 Machine Learning Engineer</span>
+          <span id="flow-exp-badge" class="meta-pill pill-exp">⏳ Exp: 0–2 yrs</span>
+          <span id="flow-match-badge" class="meta-pill pill-match">🟢 Ideal Candidate Match</span>
+        </div>
+
+        <!-- 4-Step Interactive Stepper Bar -->
+        <nav class="flow-stepper" aria-label="Application Steps">
+          <button class="step-btn active" id="step-btn-1" onclick="goToStep(1)">
+            <span class="step-num">1</span>
+            <span class="step-title">Job Overview</span>
+          </button>
+          <div class="step-divider"></div>
+          <button class="step-btn" id="step-btn-2" onclick="goToStep(2)">
+            <span class="step-num">2</span>
+            <span class="step-title">Tailor Resume</span>
+          </button>
+          <div class="step-divider"></div>
+          <button class="step-btn" id="step-btn-3" onclick="goToStep(3)">
+            <span class="step-num">3</span>
+            <span class="step-title">Form Answers</span>
+          </button>
+          <div class="step-divider"></div>
+          <button class="step-btn" id="step-btn-4" onclick="goToStep(4)">
+            <span class="step-num">4</span>
+            <span class="step-title">Apply &amp; Track</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Scrollable Step Content Container -->
+      <div class="modal-body-scrollable">
+
+        <!-- STEP 1: JOB OVERVIEW & EVALUATION -->
+        <section id="step-pane-1" class="step-pane active">
+          <div id="step-1-content"></div>
+        </section>
+
+        <!-- STEP 2: ROLE-SPECIFIC RESUME TAILORING -->
+        <section id="step-pane-2" class="step-pane">
+          <div id="step-2-content"></div>
+        </section>
+
+        <!-- STEP 3: MOBILE FORM AUTO-FILL & SCREENING ANSWERS -->
+        <section id="step-pane-3" class="step-pane">
+          <div id="step-3-content"></div>
+        </section>
+
+        <!-- STEP 4: APPLY ON PORTAL & OFFICIAL TRACKER SYNC -->
+        <section id="step-pane-4" class="step-pane">
+          <div id="step-4-content"></div>
+        </section>
+
+      </div>
+
+      <!-- Sticky Guided Footer Action Bar (Fixed Previous / Next Buttons) -->
+      <div class="modal-footer-sticky">
+        <div class="footer-left">
+          <button id="flow-prev-btn" class="btn btn-outline btn-sm" onclick="prevStep()" disabled>
+            ◀ Back
+          </button>
+        </div>
+        <div class="footer-center">
+          <span id="step-indicator-text" class="step-indicator-text">Step 1 of 4</span>
+        </div>
+        <div class="footer-right">
+          <button id="flow-next-btn" class="btn btn-primary btn-sm" onclick="nextStep()">
+            Next: Tailor Resume ▶
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Loading Overlay -->
+  <!-- Loading Screen Overlay -->
   <div id="loading" class="loading hidden">
-    <div class="spinner"></div>
-    <p id="loading-text">Loading...</p>
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <div id="loading-text" class="loading-text">Analyzing with DeepSeek &amp; career-ops...</div>
+    </div>
   </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
 
   <script src="/app.js"></script>
 </body>

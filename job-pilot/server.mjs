@@ -88,6 +88,96 @@ export function detectJobRole(title = "", desc = "") {
   return "Machine Learning / AI Engineer";
 }
 
+// --- Experience Detection Helper ---
+export function detectExperience(title = "", desc = "") {
+  const text = `${title} ${desc}`.toLowerCase();
+
+  // 1. Fresher / Entry Level / Intern
+  if (/\b(fresher|freshers|entry[- ]level|graduate[- ]engineer|campus|intern|internship|trainee|0[- ]to[- ]1\s*years?|0[- ]1\s*years?|0[- ]to[- ]2\s*years?|0[- ]2\s*years?)\b/i.test(text)) {
+    return {
+      text: "0-1 yrs (Fresher / Entry)",
+      min: 0,
+      max: 1,
+      level: "entry",
+      matchBadge: "Ideal Match (0-2 yrs)"
+    };
+  }
+
+  // 2. Explicit range: e.g. '0-2 years', '1-3 years', '2 to 4 years', '3-5 years', '5 - 8 years'
+  const rangeMatch = text.match(/\b(\d+)\s*(?:-|to)\s*(\d+)\s*\+?\s*(?:years?|yrs?)(?:\s*(?:of\s*)?experience)?\b/i);
+  if (rangeMatch) {
+    const min = parseInt(rangeMatch[1], 10);
+    const max = parseInt(rangeMatch[2], 10);
+    const level = max <= 2 ? "entry" : max <= 5 ? "mid" : "senior";
+    const matchBadge = min <= 1 ? "Ideal Match (0-2 yrs)" : min <= 2 ? "Good Match (1-3 yrs)" : "Stretch (Mid/Senior)";
+    return {
+      text: `${min}-${max} yrs`,
+      min,
+      max,
+      level,
+      matchBadge
+    };
+  }
+
+  // 3. Minimum experience with plus: e.g. '3+ years', '5+ yrs', '2 + years'
+  const plusMatch = text.match(/\b(\d+)\s*\+\s*(?:years?|yrs?)(?:\s*(?:of\s*)?experience)?\b/i);
+  if (plusMatch) {
+    const min = parseInt(plusMatch[1], 10);
+    const level = min <= 2 ? "entry" : min <= 5 ? "mid" : "senior";
+    const matchBadge = min <= 1 ? "Ideal Match (0-2 yrs)" : min <= 2 ? "Good Match (1-3 yrs)" : "Stretch (Mid/Senior)";
+    return {
+      text: `${min}+ yrs`,
+      min,
+      max: min + 3,
+      level,
+      matchBadge
+    };
+  }
+
+  // 4. Pattern like 'at least 3 years', 'minimum 2 years'
+  const minMatch = text.match(/\b(?:at\s*least|minimum|min\.?)\s*(\d+)\s*(?:years?|yrs?)\b/i);
+  if (minMatch) {
+    const min = parseInt(minMatch[1], 10);
+    const level = min <= 2 ? "entry" : min <= 5 ? "mid" : "senior";
+    const matchBadge = min <= 1 ? "Ideal Match (0-2 yrs)" : min <= 2 ? "Good Match (1-3 yrs)" : "Stretch (Mid/Senior)";
+    return {
+      text: `${min}+ yrs`,
+      min,
+      max: min + 3,
+      level,
+      matchBadge
+    };
+  }
+
+  // 5. Pattern like 'experience: 3 years' or '3 years of experience'
+  const ofExpMatch = text.match(/\b(\d+)\s*(?:years?|yrs?)\s+(?:of\s+)?experience\b/i);
+  if (ofExpMatch) {
+    const min = parseInt(ofExpMatch[1], 10);
+    const level = min <= 2 ? "entry" : min <= 5 ? "mid" : "senior";
+    const matchBadge = min <= 1 ? "Ideal Match (0-2 yrs)" : min <= 2 ? "Good Match (1-3 yrs)" : "Stretch (Mid/Senior)";
+    return {
+      text: `${min} yrs`,
+      min,
+      max: min,
+      level,
+      matchBadge
+    };
+  }
+
+  // 6. Infer from Senior / Lead / Principal in title
+  if (/\b(lead|principal|staff|director|architect|head\s*of)\b/i.test(title)) {
+    return { text: "6+ yrs (Lead / Senior)", min: 6, max: 12, level: "senior", matchBadge: "Senior Level" };
+  }
+  if (/\b(senior|sr\.?)\b/i.test(title)) {
+    return { text: "4+ yrs (Senior)", min: 4, max: 8, level: "senior", matchBadge: "Senior Level" };
+  }
+  if (/\b(junior|jr\.?|associate)\b/i.test(title)) {
+    return { text: "0-2 yrs (Junior)", min: 0, max: 2, level: "entry", matchBadge: "Ideal Match (0-2 yrs)" };
+  }
+
+  return { text: "1-3 yrs (Standard)", min: 1, max: 3, level: "entry", matchBadge: "Good Match (1-3 yrs)" };
+}
+
 // --- Jobs Persistence ---
 const JOBS_FILE = join(__dirname, "data", "jobs.json");
 function loadJobs() {
@@ -98,6 +188,15 @@ function loadJobs() {
       for (const j of jobs) {
         if (!j.target_role) {
           j.target_role = detectJobRole(j.title, j.description);
+          updated = true;
+        }
+        if (!j.experience_required || j.experience_min === undefined) {
+          const exp = detectExperience(j.title, j.description);
+          j.experience_required = exp.text;
+          j.experience_min = exp.min;
+          j.experience_max = exp.max;
+          j.experience_level = exp.level;
+          j.experience_match = exp.matchBadge;
           updated = true;
         }
       }

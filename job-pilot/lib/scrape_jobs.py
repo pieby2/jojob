@@ -52,6 +52,57 @@ def detect_job_role(title="", desc=""):
     return "Machine Learning / AI Engineer"
 
 
+def detect_experience(title="", desc=""):
+    """Extract years of experience required from title and description."""
+    import re
+    t = f"{title} {desc}".lower()
+    
+    # 1. Fresher / Entry Level / Intern
+    if re.search(r"\b(fresher|freshers|entry[- ]level|graduate[- ]engineer|campus|intern|internship|trainee|0[- ]to[- ]1\s*years?|0[- ]1\s*years?|0[- ]to[- ]2\s*years?|0[- ]2\s*years?)\b", t):
+        return {
+            "text": "0-1 yrs (Fresher / Entry)",
+            "min": 0,
+            "max": 1,
+            "level": "entry",
+            "matchBadge": "Ideal Match (0-2 yrs)"
+        }
+    
+    # 2. Range e.g. 0-2 years, 1-3 years, 2-4 years
+    range_match = re.search(r"\b(\d+)\s*(?:-|to)\s*(\d+)\s*\+?\s*(?:years?|yrs?)(?:\s*(?:of\s*)?experience)?\b", t)
+    if range_match:
+        mn = int(range_match.group(1))
+        mx = int(range_match.group(2))
+        lvl = "entry" if mx <= 2 else ("mid" if mx <= 5 else "senior")
+        badge = "Ideal Match (0-2 yrs)" if mn <= 1 else ("Good Match (1-3 yrs)" if mn <= 2 else "Stretch (Mid/Senior)")
+        return {"text": f"{mn}-{mx} yrs", "min": mn, "max": mx, "level": lvl, "matchBadge": badge}
+
+    # 3. Plus e.g. 3+ years, 5+ yrs
+    plus_match = re.search(r"\b(\d+)\s*\+\s*(?:years?|yrs?)(?:\s*(?:of\s*)?experience)?\b", t)
+    if plus_match:
+        mn = int(plus_match.group(1))
+        lvl = "entry" if mn <= 2 else ("mid" if mn <= 5 else "senior")
+        badge = "Ideal Match (0-2 yrs)" if mn <= 1 else ("Good Match (1-3 yrs)" if mn <= 2 else "Stretch (Mid/Senior)")
+        return {"text": f"{mn}+ yrs", "min": mn, "max": mn + 3, "level": lvl, "matchBadge": badge}
+
+    # 4. Minimum e.g. at least 3 years
+    min_match = re.search(r"\b(?:at\s*least|minimum|min\.?)\s*(\d+)\s*(?:years?|yrs?)\b", t)
+    if min_match:
+        mn = int(min_match.group(1))
+        lvl = "entry" if mn <= 2 else ("mid" if mn <= 5 else "senior")
+        badge = "Ideal Match (0-2 yrs)" if mn <= 1 else ("Good Match (1-3 yrs)" if mn <= 2 else "Stretch (Mid/Senior)")
+        return {"text": f"{mn}+ yrs", "min": mn, "max": mn + 3, "level": lvl, "matchBadge": badge}
+
+    # 5. Title hints
+    if re.search(r"\b(lead|principal|staff|director|architect|head\s*of)\b", title.lower()):
+        return {"text": "6+ yrs (Lead / Senior)", "min": 6, "max": 12, "level": "senior", "matchBadge": "Senior Level"}
+    if re.search(r"\b(senior|sr\.?)\b", title.lower()):
+        return {"text": "4+ yrs (Senior)", "min": 4, "max": 8, "level": "senior", "matchBadge": "Senior Level"}
+    if re.search(r"\b(junior|jr\.?|associate)\b", title.lower()):
+        return {"text": "0-2 yrs (Junior)", "min": 0, "max": 2, "level": "entry", "matchBadge": "Ideal Match (0-2 yrs)"}
+
+    return {"text": "1-3 yrs (Standard)", "min": 1, "max": 3, "level": "entry", "matchBadge": "Good Match (1-3 yrs)"}
+
+
 def sanitize_with_guard(text):
     """Run text through ai-job-search posting_guard."""
     if not text or not posting_guard:
@@ -166,6 +217,12 @@ def main():
         record["description"] = clean_desc
         record["_security"] = sec_report
         record["target_role"] = detect_job_role(title, clean_desc)
+        exp = detect_experience(title, clean_desc)
+        record["experience_required"] = exp["text"]
+        record["experience_min"] = exp["min"]
+        record["experience_max"] = exp["max"]
+        record["experience_level"] = exp["level"]
+        record["experience_match"] = exp["matchBadge"]
 
     # Ensure UTF-8 output
     sys.stdout.reconfigure(encoding='utf-8')
