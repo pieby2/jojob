@@ -923,6 +923,13 @@ body {
   font-weight: 600;
 }
 
+.badge-exp-unspecified {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  font-weight: 500;
+}
+
 .badge-posted {
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-muted);

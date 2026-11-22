@@ -20,8 +20,8 @@
     "experience_required": "1-3 yrs",
     "experience_min": 1,
     "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)",
+    "experience_level": "mid",
+    "experience_match": "Ideal Match (0-2 yrs)",
     "_tailoredResume": {
       "success": true,
       "jobId": "caseguard-cv-2026",
@@ -76,7 +76,8 @@
         "question": "Why should we hire you for this role?",
         "answer": "I bring proven expertise in real-time computer vision, edge optimization, and production deployment using PyTorch, TensorFlow, OpenCV, and YOLO, with measurable results like 92%+ mAP and sub-100ms latency. My ability to collaborate across Python and C++ teams and my IEEE-published research ensure I can immediately contribute to CaseGuard's mission-critical vision solutions."
       }
-    ]
+    ],
+    "company_name": "CaseGuard"
   },
   {
     "id": "in-0be22acffbbbac65",
@@ -172,7 +173,8 @@
     "experience_min": 6,
     "experience_max": 9,
     "experience_level": "senior",
-    "experience_match": "Stretch (Mid/Senior)"
+    "experience_match": "Senior Level (5+ yrs)",
+    "company_name": "Optum"
   },
   {
     "id": "in-0e179db3ff6d41c0",
@@ -217,7 +219,8 @@
     "experience_min": 3,
     "experience_max": 6,
     "experience_level": "mid",
-    "experience_match": "Stretch (Mid/Senior)"
+    "experience_match": "Mid Level (3-5 yrs)",
+    "company_name": "Optum"
   },
   {
     "id": "in-29650c71a7ddace2",
@@ -258,11 +261,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.722Z",
     "target_role": "Data / ML Systems Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "3-6 yrs",
+    "experience_min": 3,
+    "experience_max": 6,
+    "experience_level": "mid",
+    "experience_match": "Mid Level (3-5 yrs)",
+    "company_name": "Sunseaz Technologies"
   },
   {
     "id": "in-7abbab94cf8a6b58",
@@ -303,11 +307,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.722Z",
     "target_role": "Machine Learning Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "2-5 yrs",
+    "experience_min": 2,
+    "experience_max": 5,
+    "experience_level": "mid",
+    "experience_match": "Good Match (1-3 yrs)",
+    "company_name": "Sunseaz Technologies"
   },
   {
     "id": "in-e7df6a655787d39c",
@@ -348,11 +353,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.722Z",
     "target_role": "MLOps / AI Platform Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "4+ yrs (Senior)",
+    "experience_min": 4,
+    "experience_max": 8,
+    "experience_level": "senior",
+    "experience_match": "Senior Level (4+ yrs)",
+    "company_name": "HCLTech"
   },
   {
     "id": "in-9ce467b19265896a",
@@ -393,11 +399,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.722Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "0-1 yrs (Fresher / Entry)",
+    "experience_required": "0-1 yrs",
     "experience_min": 0,
     "experience_max": 1,
     "experience_level": "entry",
-    "experience_match": "Ideal Match (0-2 yrs)"
+    "experience_match": "Ideal Match (0-2 yrs)",
+    "company_name": "Qualysec Technologies Pvt Ltd"
   },
   {
     "id": "in-ed0f4d42f85d05dd",
@@ -442,7 +449,8 @@
     "experience_min": 0,
     "experience_max": 1,
     "experience_level": "entry",
-    "experience_match": "Ideal Match (0-2 yrs)"
+    "experience_match": "Ideal Match (0-2 yrs)",
+    "company_name": "Procter & Gamble"
   },
   {
     "id": "in-9670d37e71be7a9e",
@@ -487,7 +495,8 @@
     "experience_min": 2,
     "experience_max": 4,
     "experience_level": "mid",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_match": "Good Match (1-3 yrs)",
+    "company_name": "Infor"
   },
   {
     "id": "in-bf46bbd441664498",
@@ -532,7 +541,8 @@
     "experience_min": 3,
     "experience_max": 6,
     "experience_level": "mid",
-    "experience_match": "Stretch (Mid/Senior)"
+    "experience_match": "Mid Level (3-5 yrs)",
+    "company_name": "OneMagnify"
   },
   {
     "id": "in-4c8b8b3b6319e365",
@@ -577,7 +587,8 @@
     "experience_min": 6,
     "experience_max": 12,
     "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_match": "Senior Level (6+ yrs)",
+    "company_name": "HCLTech"
   },
   {
     "id": "in-04e036e450512ae0",
@@ -622,7 +633,8 @@
     "experience_min": 3,
     "experience_max": 6,
     "experience_level": "mid",
-    "experience_match": "Stretch (Mid/Senior)"
+    "experience_match": "Mid Level (3-5 yrs)",
+    "company_name": "Amazon.com"
   },
   {
     "id": "in-b9370320ede73a68",
@@ -667,7 +679,8 @@
     "experience_min": 2,
     "experience_max": 4,
     "experience_level": "mid",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_match": "Good Match (1-3 yrs)",
+    "company_name": "McAfee"
   },
   {
     "id": "in-1b635cc8882ecaa6",
@@ -712,7 +725,8 @@
     "experience_min": 2,
     "experience_max": 5,
     "experience_level": "mid",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_match": "Good Match (1-3 yrs)",
+    "company_name": "GE Vernova"
   },
   {
     "id": "in-34471c4192ea7f26",
@@ -757,7 +771,8 @@
     "experience_min": 8,
     "experience_max": 11,
     "experience_level": "senior",
-    "experience_match": "Stretch (Mid/Senior)"
+    "experience_match": "Senior Level (5+ yrs)",
+    "company_name": "Optum"
   },
   {
     "id": "in-6983ffbe27348cad",
@@ -802,7 +817,8 @@
     "experience_min": 6,
     "experience_max": 9,
     "experience_level": "senior",
-    "experience_match": "Stretch (Mid/Senior)"
+    "experience_match": "Senior Level (5+ yrs)",
+    "company_name": "Northern Trust Corp."
   },
   {
     "id": "li-4488868637",
@@ -847,7 +863,8 @@
     "experience_min": 4,
     "experience_max": 8,
     "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_match": "Senior Level (4+ yrs)",
+    "company_name": "Recrew AI"
   },
   {
     "id": "li-4487903034",
@@ -888,11 +905,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.722Z",
     "target_role": "Machine Learning Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "4+ yrs (Level 3 / Senior)",
+    "experience_min": 4,
+    "experience_max": 8,
+    "experience_level": "senior",
+    "experience_match": "Senior Level (4+ yrs)",
+    "company_name": "Adobe"
   },
   {
     "id": "li-4487683856",
@@ -933,11 +951,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.722Z",
     "target_role": "Machine Learning Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "4+ yrs (Level 3 / Senior)",
+    "experience_min": 4,
+    "experience_max": 8,
+    "experience_level": "senior",
+    "experience_match": "Senior Level (4+ yrs)",
+    "company_name": "Adobe"
   },
   {
     "id": "li-4487192133",
@@ -978,11 +997,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.722Z",
     "target_role": "Machine Learning Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "Not specified",
+    "experience_min": null,
+    "experience_max": null,
+    "experience_level": "unspecified",
+    "experience_match": "Check JD",
+    "company_name": "9Sprints"
   },
   {
     "id": "li-4435122408",
@@ -1023,11 +1043,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.722Z",
     "target_role": "Machine Learning Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "Not specified",
+    "experience_min": null,
+    "experience_max": null,
+    "experience_level": "unspecified",
+    "experience_match": "Check JD",
+    "company_name": "Solventum"
   },
   {
     "id": "li-4488892337",
@@ -1068,11 +1089,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.722Z",
     "target_role": "Machine Learning Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "Not specified",
+    "experience_min": null,
+    "experience_max": null,
+    "experience_level": "unspecified",
+    "experience_match": "Check JD",
+    "company_name": "Accenture in India"
   },
   {
     "id": "li-4471320121",
@@ -1113,11 +1135,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.722Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "Not specified",
+    "experience_min": null,
+    "experience_max": null,
+    "experience_level": "unspecified",
+    "experience_match": "Check JD",
+    "company_name": "Infosys"
   },
   {
     "id": "li-4432390215",
@@ -1158,11 +1181,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.722Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "Not specified",
+    "experience_min": null,
+    "experience_max": null,
+    "experience_level": "unspecified",
+    "experience_match": "Check JD",
+    "company_name": "Litmus7"
   },
   {
     "id": "li-4484644973",
@@ -1203,11 +1227,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.722Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "Not specified",
+    "experience_min": null,
+    "experience_max": null,
+    "experience_level": "unspecified",
+    "experience_match": "Check JD",
+    "company_name": "Empower India"
   },
   {
     "id": "li-4488790815",
@@ -1248,11 +1273,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.722Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "Not specified",
+    "experience_min": null,
+    "experience_max": null,
+    "experience_level": "unspecified",
+    "experience_match": "Check JD",
+    "company_name": "FastSwitch - Great Lakes Pvt Ltd."
   },
   {
     "id": "li-4488486802",
@@ -1293,11 +1319,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "Not specified",
+    "experience_min": null,
+    "experience_max": null,
+    "experience_level": "unspecified",
+    "experience_match": "Check JD",
+    "company_name": "HP"
   },
   {
     "id": "li-4484933468",
@@ -1342,7 +1369,8 @@
     "experience_min": 6,
     "experience_max": 12,
     "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_match": "Senior Level (6+ yrs)",
+    "company_name": "Bain & Company"
   },
   {
     "id": "li-4488721314",
@@ -1387,7 +1415,8 @@
     "experience_min": 7,
     "experience_max": 10,
     "experience_level": "senior",
-    "experience_match": "Stretch (Mid/Senior)"
+    "experience_match": "Senior Level (5+ yrs)",
+    "company_name": "YMinds.AI"
   },
   {
     "id": "li-4484927678",
@@ -1432,7 +1461,8 @@
     "experience_min": 6,
     "experience_max": 12,
     "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_match": "Senior Level (6+ yrs)",
+    "company_name": "Bain & Company"
   },
   {
     "id": "li-4412284880",
@@ -1473,11 +1503,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Machine Learning Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "Not specified",
+    "experience_min": null,
+    "experience_max": null,
+    "experience_level": "unspecified",
+    "experience_match": "Check JD",
+    "company_name": "Universal Robots"
   },
   {
     "id": "nk-101126000099",
@@ -1518,11 +1549,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Software / AI Systems Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "4-7 yrs",
+    "experience_min": 4,
+    "experience_max": 7,
+    "experience_level": "mid",
+    "experience_match": "Mid Level (3-5 yrs)",
+    "company_name": "Mohammed Khaleel Mohiuddin"
   },
   {
     "id": "nk-091126002440",
@@ -1563,11 +1595,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "9-13 yrs",
+    "experience_min": 9,
+    "experience_max": 13,
+    "experience_level": "senior",
+    "experience_match": "Senior Level (5+ yrs)",
+    "company_name": "Criticalriver"
   },
   {
     "id": "nk-021126009486",
@@ -1608,11 +1641,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "3-8 yrs",
+    "experience_min": 3,
+    "experience_max": 8,
+    "experience_level": "mid",
+    "experience_match": "Mid Level (3-5 yrs)",
+    "company_name": "Collabera Talent Solutions"
   },
   {
     "id": "nk-050326022096",
@@ -1653,11 +1687,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "MLOps / AI Platform Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "0-5 yrs",
+    "experience_min": 0,
+    "experience_max": 5,
+    "experience_level": "mid",
+    "experience_match": "Ideal Match (0-2 yrs)",
+    "company_name": "Shivoham Infosolutions"
   },
   {
     "id": "nk-091126007775",
@@ -1698,11 +1733,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Software / AI Systems Engineer",
-    "experience_required": "4+ yrs (Senior)",
-    "experience_min": 4,
-    "experience_max": 8,
+    "experience_required": "5-7 yrs",
+    "experience_min": 5,
+    "experience_max": 7,
     "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_match": "Senior Level (5+ yrs)",
+    "company_name": "Dodge Global Network"
   },
   {
     "id": "nk-091126007764",
@@ -1743,11 +1779,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "3-4 yrs",
+    "experience_min": 3,
+    "experience_max": 4,
+    "experience_level": "mid",
+    "experience_match": "Mid Level (3-5 yrs)",
+    "company_name": "Nxtwave Disruptive Technologies (Hiring for a Client)"
   },
   {
     "id": "nk-091126007763",
@@ -1788,11 +1825,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Machine Learning Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "4-9 yrs",
+    "experience_min": 4,
+    "experience_max": 9,
+    "experience_level": "mid",
+    "experience_match": "Mid Level (3-5 yrs)",
+    "company_name": "Nxtwave Disruptive Technologies(Hiring for a Client)"
   },
   {
     "id": "nk-091126007694",
@@ -1833,11 +1871,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "6+ yrs (Lead / Senior)",
-    "experience_min": 6,
-    "experience_max": 12,
+    "experience_required": "12-20 yrs",
+    "experience_min": 12,
+    "experience_max": 20,
     "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_match": "Senior Level (5+ yrs)",
+    "company_name": "Indegene"
   },
   {
     "id": "nk-091126007567",
@@ -1878,11 +1917,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Software / AI Systems Engineer",
-    "experience_required": "4+ yrs (Senior)",
-    "experience_min": 4,
-    "experience_max": 8,
+    "experience_required": "5-10 yrs",
+    "experience_min": 5,
+    "experience_max": 10,
     "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_match": "Senior Level (5+ yrs)",
+    "company_name": "Yeel India"
   },
   {
     "id": "nk-050426003266",
@@ -1923,11 +1963,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "6+ yrs (Lead / Senior)",
-    "experience_min": 6,
-    "experience_max": 12,
+    "experience_required": "9-14 yrs",
+    "experience_min": 9,
+    "experience_max": 14,
     "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_match": "Senior Level (5+ yrs)",
+    "company_name": "Tiger Analytics"
   },
   {
     "id": "nk-091126007566",
@@ -1968,11 +2009,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "2-4 yrs",
+    "experience_min": 2,
+    "experience_max": 4,
+    "experience_level": "mid",
+    "experience_match": "Good Match (1-3 yrs)",
+    "company_name": "THE Lake And Valley Creative Factory"
   },
   {
     "id": "nk-091126007407",
@@ -2013,11 +2055,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "4+ yrs (Senior)",
-    "experience_min": 4,
-    "experience_max": 8,
-    "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_required": "2-4 yrs",
+    "experience_min": 2,
+    "experience_max": 4,
+    "experience_level": "mid",
+    "experience_match": "Good Match (1-3 yrs)",
+    "company_name": "Toshiba Software India"
   },
   {
     "id": "nk-170826035054",
@@ -2058,11 +2101,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "6+ yrs (Lead / Senior)",
-    "experience_min": 6,
+    "experience_required": "7-12 yrs",
+    "experience_min": 7,
     "experience_max": 12,
     "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_match": "Senior Level (5+ yrs)",
+    "company_name": "Indegene"
   },
   {
     "id": "nk-091126007340",
@@ -2103,11 +2147,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "6+ yrs (Lead / Senior)",
-    "experience_min": 6,
-    "experience_max": 12,
-    "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_required": "3-8 yrs",
+    "experience_min": 3,
+    "experience_max": 8,
+    "experience_level": "mid",
+    "experience_match": "Mid Level (3-5 yrs)",
+    "company_name": "Infosys"
   },
   {
     "id": "nk-091126007288",
@@ -2148,11 +2193,12 @@
     "_status": "new",
     "_scannedAt": "2026-11-09T20:32:52.723Z",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "6+ yrs (Lead / Senior)",
-    "experience_min": 6,
-    "experience_max": 12,
-    "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_required": "3-8 yrs",
+    "experience_min": 3,
+    "experience_max": 8,
+    "experience_level": "mid",
+    "experience_match": "Mid Level (3-5 yrs)",
+    "company_name": "Infosys"
   },
   {
     "site": "wellfound",
@@ -2266,11 +2312,12 @@
       "generatedAt": "2026-11-10T06:42:58.112Z"
     },
     "target_role": "Edge AI / Embedded ML Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "Not specified",
+    "experience_min": null,
+    "experience_max": null,
+    "experience_level": "unspecified",
+    "experience_match": "Check JD",
+    "company": "Simplismart"
   },
   {
     "site": "wellfound",
@@ -2296,7 +2343,8 @@
     "experience_min": 6,
     "experience_max": 12,
     "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_match": "Senior Level (6+ yrs)",
+    "company": "Simplismart"
   },
   {
     "site": "wellfound",
@@ -2318,11 +2366,12 @@
     "_scannedAt": "2026-11-09T20:46:02.321Z",
     "date_posted": "2026-11-09",
     "target_role": "Edge AI / Embedded ML Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
-    "experience_max": 3,
-    "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_required": "Not specified",
+    "experience_min": null,
+    "experience_max": null,
+    "experience_level": "unspecified",
+    "experience_match": "Check JD",
+    "company": "Simplismart"
   },
   {
     "site": "yc",
@@ -2348,7 +2397,8 @@
     "experience_min": 6,
     "experience_max": 12,
     "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_match": "Senior Level (6+ yrs)",
+    "company": "Aios"
   },
   {
     "site": "yc",
@@ -2374,7 +2424,8 @@
     "experience_min": 6,
     "experience_max": 12,
     "experience_level": "senior",
-    "experience_match": "Senior Level"
+    "experience_match": "Senior Level (6+ yrs)",
+    "company": "Cyble"
   },
   {
     "site": "yc",
@@ -2396,10 +2447,299 @@
     "_scannedAt": "2026-11-09T20:46:02.321Z",
     "date_posted": "2026-11-09",
     "target_role": "Machine Learning / AI Engineer",
-    "experience_required": "1-3 yrs (Standard)",
-    "experience_min": 1,
+    "experience_required": "Not specified",
+    "experience_min": null,
+    "experience_max": null,
+    "experience_level": "unspecified",
+    "experience_match": "Check JD",
+    "company": "Retell Ai"
+  },
+  {
+    "site": "wellfound",
+    "title": "Machine Learning Engineer ",
+    "company": "Augury",
+    "company_name": "Augury",
+    "company_logo": "https://photos.wellfound.com/startups/i/900217-294af8a634a5341207ae80e1afffce72-medium_jpg.jpg?buster=1459779194",
+    "company_size": "SIZE_51_200",
+    "location": "Bengaluru",
+    "job_url": "https://wellfound.com/jobs/4289913-machine-learning-engineer",
+    "description": "Augury is building AgenticAI systems that transform how industrial organizations understand and optimize their operations. As a Senior ML Engineer on this team, you will help turn that vision into reality.\n\nYou will be part of the AgenticAI team, you will work closely with central Algorithm and Product teams to design, build, and deploy intelligent systems that power next-generation industrial AI applications.\n\nYou will own the end-to-end lifecycle of machine learning solutions—from problem definition and data exploration to model development, deployment, and production monitoring. Your work will span classical machine learning, time-series modeling, and generative AI to build agent-based systems that turn complex industrial data into actionable intelligence.\n\nYou will architect and implement Agentic applications that leverage heterogeneous data sources, including sensor-based time-series signals, unstructured text, and existing ML frameworks. These systems will directly power customer-facing workflows, delivering measurable operational impact for industrial manufacturers.\n\nThis role sits at the intersection of Agentic AI and Industrial AI, where your work will directly shape how customers interact with Augury’s platform and realize value from their data.\n\n**A Day In Your Life**\n\n- Own the full machine learning lifecycle: problem scoping, data exploration, pipeline development, model training, deployment, and monitoring in production.\n- Design and build Agentic AI systems that combine time-series modeling, signal processing, and generative AI (LLMs, embeddings, orchestration frameworks, and tool use).\n- Develop and deploy machine learning models for forecasting, anomaly detection, and pattern recognition in industrial sensor data.\n- Integrate classical statistical methods, deep learning, and GenAI techniques to generate actionable insights from complex datasets.\n- Build scalable data pipelines and ML systems that operate reliably in production environments.\n- Collaborate with Product, Engineering, and Algorithm teams to define solutions and translate customer needs into technical implementations.\n- Partner with customers and internal stakeholders to identify new data-driven opportunities and emerging use cases.\n- Implement robust evaluation, monitoring, and drift detection systems for live ML/Agentic applications.\n\n**What You Bring**\n\n- Bachelor’s degree in Computer Science, Engineering, or related technical field (B.Tech / B.E. or equivalent).\n- Master’s degree (M.Tech or equivalent) is a plus but not required.\n- Equivalent industry experience will be considered for exceptional candidates.\n- 4+ years of experience in Machine Learning, Applied AI, or related fields.\n- Proven ability to own and deliver end-to-end ML systems in production environments.\n- Strong experience in time-series modeling, forecasting, anomaly detection, and feature engineering.\n- Hands-on experience with Python and ML frameworks (e.g., Pydantic, PTorch, TensorFlow, Scikit-learn, or similar).\n- Familiarity with generative AI systems, including LLMs, embeddings, and agent-based architectures (e.g. Langchain, LangGraph, DSPy)\n- Experience building or working with Agentic applications or LLM-powered systems.\n- Strong understanding of data pipelines and production ML systems (deployment, monitoring, retraining, drift detection).\n- Experience working in Agile, fast-paced, cross-functional environments.\n- Strong collaboration skills with distributed teams across engineering, product, and data functions.\n\n**Nice to Have**\n\n- Experience in industrial AI, IoT, predictive maintenance, or manufacturing systems.\n- Exposure to digital twins, context graphs, or knowledge graph-based systems.\n- Familiarity with modern data platforms such as Databricks, BigQuery, Snowflake, or similar.\n- Understanding of optimization frameworks (e.g., Pyomo, Gurobi, OR-Tools).\n- Experience working with large-scale distributed data systems.\n\n**Perks**\n\n- Stock options\n- Paid parental leave\n- Flex PTO\n",
+    "compensation": "",
+    "job_type": "full-time",
+    "yearsExperienceMin": null,
+    "yearsExperienceMax": null,
+    "date_posted": "2026-06-03",
+    "experience_required": "4+ yrs",
+    "experience_min": 4,
+    "experience_max": 7,
+    "experience_level": "mid",
+    "experience_match": "Mid Level (3-5 yrs)",
+    "target_role": "Deep Learning / Generative AI Engineer",
+    "_scannedAt": "2026-06-03",
+    "_id": "job-wf-53"
+  },
+  {
+    "site": "wellfound",
+    "title": "Machine Learning Engineer",
+    "company": "Prodigal",
+    "company_name": "Prodigal",
+    "company_logo": "https://photos.wellfound.com/startups/i/6151623-9e9c03625e564e377e931654dc9a38db-medium_jpg.jpg?buster=1575356227",
+    "company_size": "SIZE_51_200",
+    "location": "Mumbai",
+    "job_url": "https://wellfound.com/jobs/4574411-machine-learning-engineer",
+    "description": "## **About the DSML Team**\n\nThe Data Science and Machine Learning (DSML) team owns the full lifecycle of Prodigal's ML systems, from data curation to model selection, fine-tuning, and post-training, through to deployment, evaluation, and ongoing monitoring. We sit close to real product and customer problems, and we're expected to move from experiment to production with both speed and rigor.\n\n## **What You'll Do**\n\n- **Understand the problem domain.** Work closely with product, engineering, and customer-facing teams to turn ambiguous, real-world problems into well-scoped ML problems.\n- **Curate datasets.** Source, clean, and structure the data needed to train and evaluate models, often before any \"off-the-shelf\" dataset exists.\n- **Train models across the full spectrum.** Build and train everything from simple classifiers to neural networks, transformers, and small/large language models, choosing the right level of complexity for the problem at hand.\n- **Deploy and scale for inference.** Take models from notebook to production. optimizing for latency, cost, and reliability at scale.\n- **Evaluate and close the loop.** Design evaluation frameworks that actually measure what matters, and build learning loops.\n\n## **What You Bring**\n\n- Strong fundamentals in ML/DL, backed by hands-on experience training and shipping models, not just coursework or competitions.\n- High agency, you take an ambiguous problem and run with it rather than waiting for it to be fully specified.\n- A first-principles approach to problem-solving – you reason from the ground up rather than defaulting to whatever's fashionable or familiar.\n- Genuine curiosity and the comfort to operate at the edge of what you already know.\n\n\n\n## **Job Benefits:** \n\n- **World-class team** - You'll get the chance to learn from (and teach) some of the brightest and most skilled people you'll ever meet. Our team members have been part of BCG, Deloitte, EY, Blackstone, Meta, Amazon and are IIT, IIM, BITS alumnus.\n- **Continuous education** - As relentless seekers of knowledge, we sponsor and support any training materials, books, courses, and exam fees for upskilling yourself in areas related to your role - but that's not where it ends. If you make a good case for some extra learning, we're delighted to foot the tab.\n- **Food at the office** – Meals are on us. We won't let your stomach grumble while you hustle.\n- **Health insurance** - Health always comes first. The health of your family is as important to us, as it is to you. We offer insurance coverage for both you and your family.\n- **Flexible schedule** - We're not a \"clock in, clock out\" company. Morning person? Start work while the world's still sleeping. Night owl? Ramp things up while others are winding down. You're fully trusted to create the right conditions for your own personal peak productivity. We only ask that you be available to your teammates for seamless collaboration.\n- **Generous leave policy** - Take all the time you need to recharge your batteries - no cap on vacation allowance here. Because a rested, relaxed, and refreshed mind is a happy and effective mind.\n- **Recreation & team activities** – We regularly indulge in friendly football, table tennis, pickle ball, team dinner and challenge each other to do those extra push ups or chug that 4th drink (of course that’s Nimbu Pani)\n\n\n\n",
+    "compensation": "",
+    "job_type": "full-time",
+    "yearsExperienceMin": null,
+    "yearsExperienceMax": null,
+    "date_posted": "2026-08-11",
+    "experience_required": "Not specified",
+    "experience_min": null,
+    "experience_max": null,
+    "experience_level": "unspecified",
+    "experience_match": "Check JD",
+    "target_role": "Deep Learning / Generative AI Engineer",
+    "_scannedAt": "2026-08-11",
+    "_id": "job-wf-55"
+  },
+  {
+    "site": "wellfound",
+    "title": "Senior Machine Learning Engineer",
+    "company": "Manthhan Software",
+    "company_name": "Manthhan Software",
+    "company_logo": "https://photos.wellfound.com/startups/i/11348152-3fd4e7327ae8d3bb3c7bcded239d88f5-medium_jpg.jpg?buster=1793599119",
+    "company_size": "SIZE_11_50",
+    "location": "Jaipur",
+    "job_url": "https://wellfound.com/jobs/4965415-senior-machine-learning-engineer",
+    "description": "Key Responsibilities: \n\nDesign, develop, fine-tune, evaluate, and deploy Machine Learning and Generative AI models (LLMs, SLMs, VLMs).  \n\nBuild AI-powered solutions using NLP, Computer Vision, OCR, and Intelligent Document Processing.  \n\nDesign and implement RAG-based and non-RAG AI architectures for enterprise applications.  \n\nDevelop Agentic AI workflows and AI orchestration pipelines.  \n\nBuild scalable ML pipelines, model-serving infrastructure, and inference APIs.  \n\nDevelop intelligent OCR solutions for document digitization, information extraction, and workflow automation.  \n\nCollaborate with Software Engineers, Product teams, and Domain Experts to integrate AI capabilities into enterprise applications.  \n\nOptimize models for latency, scalability, accuracy, and cost-efficient inference.  \n\nImplement model monitoring, evaluation pipelines, retraining strategies, and continuous learning workflows.  \n\nApply MLOps best practices including model versioning, CI/CD, deployment automation, and monitoring.  \n\nEnsure deployed AI systems meet reliability, security, governance, and compliance requirements.  \n\nPrepare technical documentation, architecture documentation, and deployment guides.  \n\nStay updated with emerging AI technologies and evaluate their applicability to business problems. \n\n \n\nRequirements: \n\nBachelor's or master's degree in computer science, Artificial Intelligence, Machine Learning, or a related field.  \n\n3-10 years of experience in Machine Learning Engineering or AI solution development.  \n\nStrong understanding of Machine Learning, Deep Learning, Transformer architectures, and Generative AI.  \n\nPractical experience with RAG architectures, embeddings, vector databases, retrieval pipelines, and non-RAG approaches.  \n\nStrong proficiency in Python and ML frameworks such as PyTorch, TensorFlow, or Scikit-learn.  \n\nHands-on experience with OCR technologies including Tesseract, PaddleOCR, EasyOCR, Azure Document Intelligence, AWS Textract, or Google Vision AI.  \n\nExperience working with NLP, Computer Vision, Deep Learning, and transformer-based models.  \n\nFamiliarity with cloud platforms (AWS, Azure, or GCP), Docker, Kubernetes, and containerized deployments.  \n\nGood understanding of MLOps, model deployment, monitoring, CI/CD, and automation practices.  \n\nStrong software engineering fundamentals including APIs, data structures, algorithms, and distributed systems. \n\n \n\nPreferred Skills: \n\nExperience with LangChain, LangGraph, LlamaIndex, CrewAI, AutoGen, or similar AI orchestration frameworks.  \n\nExperience with Vector Databases such as Pinecone, FAISS, ChromaDB, Milvus, or Weaviate.  \n\nKnowledge of FastAPI, REST APIs, and microservice architecture.  \n\nExperience with model optimization techniques such as LoRA, QLoRA, quantization, and efficient inference.  \n\nExposure to document-heavy enterprise applications or regulated industries is an advantage. \n\n \nWhat We're Looking For: \n\nStrong engineering mindset with excellent analytical and problem-solving skills.  \n\nPassion for AI innovation and emerging technologies.  \n\nExperience building scalable, production-ready AI systems.  \n\nAbility to bridge Machine Learning research with software engineering best practices.  \n\nExcellent collaboration and communication skills.  \n\nFocus on scalability, performance, reliability, and business impact.",
+    "compensation": "₹12L – ₹25L",
+    "job_type": "full-time",
+    "yearsExperienceMin": 4,
+    "yearsExperienceMax": null,
+    "date_posted": "2026-11-02",
+    "experience_required": "4+ yrs",
+    "experience_min": 4,
+    "experience_max": 7,
+    "experience_level": "mid",
+    "experience_match": "Mid Level (3-5 yrs)",
+    "target_role": "Computer Vision Engineer",
+    "_scannedAt": "2026-11-02",
+    "_id": "job-wf-57"
+  },
+  {
+    "site": "wellfound",
+    "title": "Machine Learning Engineer II",
+    "company": "Kawa Space",
+    "company_name": "Kawa Space",
+    "company_logo": "https://photos.wellfound.com/startups/i/6711401-4d6c46622aebae673352228353cdddd8-medium_jpg.jpg?buster=1589734757",
+    "company_size": "SIZE_1_10",
+    "location": "Delhi, Mumbai, Bangalore Urban",
+    "job_url": "https://wellfound.com/jobs/2999827-machine-learning-engineer-ii",
+    "description": "**Position Overview:**\n\nWe are seeking an experienced Machine Learning Engineer II to join our team and take a leading role in the development of machine learning algorithms for RF signal classification. The successful candidate will have a strong background in machine learning and signal processing, with a passion for applying cutting-edge techniques to geospatia satellite information systems.\n\n**Responsibilities:**\n\n* Lead the design, implementation, and optimization of machine learning algorithms and models for RF signal classification, leveraging techniques such as deep learning, feature engineering, and anomaly detection.\n* Collaborate with cross-functional teams to understand the requirements and constraints of satellite payloads, and translate them into effective ML solutions.\n* Conduct research and experimentation to explore new approaches and algorithms for improving the accuracy and efficiency of signal classification in satellite communication systems.\n* Work closely with hardware engineers to optimize ML models for deployment on embedded hardware payloads, considering factors such as computational resources, power consumption, and memory constraints.\n* Lead performance analysis and debugging efforts to identify and address issues related to model inference, execution, and integration with embedded systems.\n* Mentor junior ML engineers and contribute to the technical growth and development of the team.\n\n**Requirements:**\n\n* 3+ years of experience in machine learning, with a focus on signal processing, classification, and anomaly detection.\n* Proficiency in programming languages such as Python, with hands-on experience in ML frameworks (e.g., TensorFlow, PyTorch).\n* Strong understanding of machine learning fundamentals, algorithms, and techniques.\n* Experience with data preprocessing, feature engineering, and model evaluation in the context of satellite communication systems.\n* Familiarity with embedded systems development and hardware-software co-design principles is a plus.\n* Excellent problem-solving skills and ability to work in a fast-paced startup environment.\n* Strong communication and leadership skills.\n\n**Preferred Qualifications:**\n\n* Experience with Geospatial data and RF signal processing.\n* Knowledge of digital signal processing techniques and algorithms.\n* Familiarity with software development tools and version control systems (e.g., Git).\n* Publications or contributions to the machine learning community.",
+    "compensation": "₹30L – ₹30L • No equity",
+    "job_type": "full-time",
+    "yearsExperienceMin": 3,
+    "yearsExperienceMax": null,
+    "date_posted": "2026-10-28",
+    "experience_required": "3+ yrs",
+    "experience_min": 3,
+    "experience_max": 6,
+    "experience_level": "mid",
+    "experience_match": "Mid Level (3-5 yrs)",
+    "target_role": "Deep Learning / Generative AI Engineer",
+    "_scannedAt": "2026-10-28",
+    "_id": "job-wf-59"
+  },
+  {
+    "site": "wellfound",
+    "title": "Senior Machine Learning Engineer",
+    "company": "Javis",
+    "company_name": "Javis",
+    "company_logo": "https://photos.wellfound.com/startups/i/7331007-76768b55a0235fe7820626513510ac87-medium_jpg.jpg?buster=1592322447",
+    "company_size": "SIZE_51_200",
+    "location": "Bangalore Urban",
+    "job_url": "https://wellfound.com/jobs/3051307-senior-machine-learning-engineer",
+    "description": "Javis is looking for highly skilled Senior Machine Learning Engineers who are adept at leveraging large language models to develop innovative solutions and enhance business operations.\n\n**Perks:**\n\n20% ESOPS granted each year for 4 years, excluding the CTC offered.\n\n**Responsibilities:**\n\n* Evaluate, fine-tune, and deploy large-scale language models to solve complex NLP tasks.\n* Lead the development and integration of LLM-based applications, ensuring high performance and alignment with business objectives.\n* Collaborate with cross-functional teams to understand requirements and provide technical leadership in the strategic deployment of LLM technologies.\n* Maintain up-to-date knowledge of industry trends and advancements in large language models.\n* Drive innovation and contribute to the overall growth and success of the AI team.\n\n**Requirements:**\n\n* 2+ years of Experience working with Large Language Models or Computer Vision\n* B.Tech / M.Tech degree in Computer Science, Artificial Intelligence or equivalent from Tier 1 institutes.\n* Proficiency in Python and experience with machine learning libraries such as PyTorch / TensorFlow / Jax, spaCy, NLTK, Hugging Face Transformers, etc.\n* Strong understanding of machine learning algorithms and techniques, including deep learning, reinforcement learning, and natural language processing.\n* Strong communication and interpersonal skills, with the ability to work effectively in a collaborative team environment.",
+    "compensation": "₹27L – ₹45L • No equity",
+    "job_type": "full-time",
+    "yearsExperienceMin": 2,
+    "yearsExperienceMax": null,
+    "date_posted": "2026-08-27",
+    "experience_required": "2+ yrs",
+    "experience_min": 2,
+    "experience_max": 5,
+    "experience_level": "entry",
+    "experience_match": "Good Match (1-3 yrs)",
+    "target_role": "Computer Vision Engineer",
+    "_scannedAt": "2026-08-27",
+    "_id": "job-wf-61"
+  },
+  {
+    "site": "wellfound",
+    "title": "Senior Machine Learning Engineer",
+    "company": "MaxHome.ai",
+    "company_name": "MaxHome.ai",
+    "company_logo": "https://photos.wellfound.com/startups/i/9880490-8ac786c5a56fbc95ae85bcf2088939f7-medium_jpg.jpg?buster=1699400088",
+    "company_size": "SIZE_11_50",
+    "location": "Bangalore Urban, Bengaluru",
+    "job_url": "https://wellfound.com/jobs/3626344-senior-machine-learning-engineer",
+    "description": "**About the Role**\nWe are looking for a Senior Machine Learning Engineer with 5–6 years of industry experience to lead the design, development, and deployment of AI-powered systems. \n\nThis role combines hands-on ML engineering, backend development, LLM integration, and production-grade infrastructure work.\n\nYou will work closely with product and engineering teams to build reliable, scalable, and high-impact machine learning features.\n\n**Key Responsibilities**\n* Machine Learning &amp; LLMs\n* Integrate LLMs (OpenAI, Anthropic, etc.) into pipelines—prompting, workflows, RAG, evaluation, and iteration.\n* Design robust prompt engineering strategies and maintain prompt libraries across environments.\n* Improve model performance via finetuning, quantization, pruning, or distillation when needed.\n* Build, train, finetune, and optimize ML and LLM-based models for production use cases.\n* \n**Backend Engineering**\n* Develop scalable backend systems using Python (FastAPI/Flask preferred).\n* Architect and integrate REST APIs, rate limiting, and monitoring.\n* Debug, profile, and optimize API performance in production.\n\n**Infrastructure &amp; DevOps**\n* Build and deploy containerized applications using Docker.\n* Manage model and service deployments on Kubernetes (EKS, GKE, AKS or self-managed clusters).\n* Work with CI/CD pipelines to ensure smooth releases and automated testing.\n* Implement logging, monitoring, and alerting for ML and backend services.\n\n**Collaboration &amp; Leadership**\n* Work closely with cross-functional teams to convert business problems into ML solutions.\n* Provide technical guidance to junior engineers and contribute to architectural decisions.\n* Bring a strong bias for shipping, iteration, and maintaining high engineering standards.\n\n**Required Skills &amp; Experience**\n* 5–6 years of hands-on experience as an ML Engineer or similar role.\n* Expert-level Python programming and clean code practices.\n* Strong experience designing and integrating production APIs.\n* Practical experience integrating LLM models and writing optimized prompts.\n* Strong understanding of model finetuning, hyperparameter tuning, and inference optimization.\n* Experience with Docker, containerized deployments, and Kubernetes orchestration.\n* Good understanding of microservices architecture, distributed systems, and cloud infrastructure.\n* Solid problem-solving and debugging skills across the ML lifecycle.\n\n**Nice-to-Have**\n* Experience with vector databases (Pinecone, Weaviate, FAISS).\n* Experience with event-driven architecture (Kafka, Pub/Sub, SQS/SNS).\n* Exposure to data pipelines (Airflow, Prefect, Dagster).",
+    "compensation": "₹35L – ₹45L",
+    "job_type": "full-time",
+    "yearsExperienceMin": 5,
+    "yearsExperienceMax": null,
+    "date_posted": "2026-09-07",
+    "experience_required": "5+ yrs",
+    "experience_min": 5,
+    "experience_max": 8,
+    "experience_level": "senior",
+    "experience_match": "Senior Level (5+ yrs)",
+    "target_role": "Edge AI / Embedded ML Engineer",
+    "_scannedAt": "2026-09-07",
+    "_id": "job-wf-63"
+  },
+  {
+    "site": "wellfound",
+    "title": "Machine Learning Engineer",
+    "company": "Artha Labs (part of Attention Tag)",
+    "company_name": "Artha Labs (part of Attention Tag)",
+    "company_logo": "https://photos.wellfound.com/startups/i/9626463-6ac8d468e6d0acb66d0a0d6ed003b130-medium_jpg.jpg?buster=1688637029",
+    "company_size": "SIZE_1_10",
+    "location": "Bangalore Urban",
+    "job_url": "https://wellfound.com/jobs/4844645-machine-learning-engineer",
+    "description": "### **Machine Learning Engineer — Physical AI &amp; Robotics**\n**Location**: Bangalore (India) or Remote\n\n**Type**: Full-time\n**Experience**: 0–2 years, or at least 6 months of industry-quality project experience\n\nThis role focusses on [Physical AI platform](http://arthaa.ai/physicalAI) being build by the team\n\n**Apply**: [Google form](https://forms.gle/HYvJmc8B2EFfrv5U7)\n\n**About the role**\nYou will join a small, early team working at the frontier of ML for robotics and physical AI. Most of your time will go into understanding new papers, evaluating, and turning the ones that work into product. You will see each piece through, from data and models to the backend, frontend and evals around them.\n\n**What you'll do**\n1. Read recent papers in robot learning, simulation and vision. Implement them, find where they break, and propose improvements.\n2. Build data and evaluation pipelines: scene generation, simulated robot rollouts, graders and benchmarks. Most of our work is eval-backed: if we can't measure a change, it doesn't ship.\n3. Work across the product as needed: data models and APIs, React frontends, tests.\n4. Use agentic coding tools (Claude Code, Cursor, Codex etc.) as a normal part of building.\n5. Talk to customers, understand the real problem, and reason from first principles about what to build.\n\n**What we're looking for**\n1. Solid grasp of core ML and data science: model training, losses, generalisation, evaluation, statistics.\n2. Ability to read a recent paper, understand it in depth and implement it, then think about what to try next and how it could become a product.\n3. Experience running the end-to-end ML workflow, including dataset creation, third-party annotator coordination and review, and continuous evaluation.\n4. Experience identifying publicly available models and datasets, such as on Hugging Face, for quick deployments and early testing.\n5. Foundations in application development: data models / ORMs, React component models.\n6. Hands-on experience building with agentic development tools.\n7. Willingness to work on any part of the product: frontend, backend, testing, infra.\n8. Ability to write high-quality code, proven by prior work.\n9. Strong programming and CS skills, preferably through a BE/BTech undergraduate course, with significant ML projects and coursework.\n10. Comfort talking to customers, and the habit of thinking from first principles.\n11. High self-drive, self-structure, and the ability to work hard.\n\n**Our stack**\nPython, TensorFlow / PyTorch and Kubeflow on Google Cloud; Isaac Sim / Isaac Lab and MuJoCo for simulation.\n\n**Nice to have**\n1. Experience with simulators or robot learning stacks (Isaac Lab, MuJoCo, ManiSkill, LeRobot).\n2. Good clarity on image (preferably video) recognition networks, including standard object detection networks; 3D / scene reconstruction.\n3. Experience with end-to-end computer vision: data collection, training, optimization for mobile / on-prem deployment, and observability.\n4. Running GPU workloads on cloud VMs.\n5. Open-source contributions, publications, or a project others have used.\n\n**How to apply**\nPlease apply on this [form](https://forms.gle/HYvJmc8B2EFfrv5U7)\nPlease think through all the fileds in the detailed form. The form also asks you to point us to your favourite project: code, paper, demo or write-up, including\n1. What problem it solved and why it mattered to you.\n2. Your role. What exactly did you build?\n3. The 2–3 key choices you made (model, data, architecture, eval) and the alternatives you rejected.\n4. How you measured whether it worked, and what the results were.\n5. What you would do differently now.\nAlso include: links to GitHub / portfolio, your CV, the agentic tools you use and one thing they changed about how you work, and a recent paper you found exciting and why.\n\n**About the product**\nThe role will focus on building in physical AI data science [platform](http://arthaa.ai/physicalAI): a data and evaluation layer for robotics. It turns video, images or text into simulation-ready scenes, runs graded robot rollouts on simulators such as Isaac Lab and MuJoCo, and produces evaluated training data with sim-to-real checks. This is where this role will spend most of its time.",
+    "compensation": "₹10L – ₹20L • 0.0% – 0.5%",
+    "job_type": "full-time",
+    "yearsExperienceMin": 0,
+    "yearsExperienceMax": null,
+    "date_posted": "2026-10-14",
+    "experience_required": "0+ yrs",
+    "experience_min": 0,
     "experience_max": 3,
     "experience_level": "entry",
-    "experience_match": "Good Match (1-3 yrs)"
+    "experience_match": "Ideal Match (0-2 yrs)",
+    "target_role": "Computer Vision Engineer",
+    "_scannedAt": "2026-10-14",
+    "_id": "job-wf-65"
+  },
+  {
+    "site": "wellfound",
+    "title": "Machine Learning Engineer",
+    "company": "Celex Technology",
+    "company_name": "Celex Technology",
+    "company_logo": "https://photos.wellfound.com/startups/i/11226430-96e840758d50bd845e1a0ae40b571112-medium_jpg.jpg?buster=1789462125",
+    "company_size": "SIZE_501_1000",
+    "location": "Kolkata",
+    "job_url": "https://wellfound.com/jobs/4718613-machine-learning-engineer",
+    "description": "Celex Technologies is looking for a hands-on Machine Learning Engineer to build intelligent systems for real-world manufacturing and operational problems.\nYou’ll work across areas such as computer vision, quality control, production optimization, process monitoring and operational automation.\nThe role involves owning problems end-to-end — understanding the operational need, working with available data, researching possible approaches, building and evaluating solutions, and deploying them for real-world use.\nWe're looking for someone who is comfortable figuring things out rather than someone who already knows every tool or technique required.\n\nResponsibilities\n\n1. Build ML and optimization solutions for manufacturing and operational use cases.\n2. Work on problems involving computer vision, image/video analysis, OCR, forecasting, optimization and decision-making.\n3. Analyze production and operational data to identify bottlenecks and opportunities for improvement.\n4. Develop solutions for problems such as production planning, scheduling, resource allocation and process optimization.\n5. Own projects from problem definition and data collection through research, implementation, evaluation and deployment.\n6. Build the software and data pipelines required to turn models and algorithms into usable systems.\n7. Evaluate solutions against real operational outcomes and improve them over time.\n8. Work directly with manufacturing and operations teams to understand processes and identify opportunities for ML, optimization and automation.\n\nRequired / Preferred:\n\nStrong Python and software engineering skills.\nSolid understanding of machine learning, statistics and quantitative problem-solving.\nPractical experience building ML or data-driven systems.\nAbility to independently research and implement unfamiliar algorithms and techniques.\nComfortable working with messy, real-world datasets.\nAbility to translate ambiguous business or operational problems into technical solutions.\nAbility to take a project from experimentation to a usable implementation.\n\nAdded advantage, but not required:\n\nComputer vision, OCR or video analytics experience.\nOptimization, operations research, simulation or forecasting experience.\nExperience deploying ML systems into production.\nCloud or GPU infrastructure experience.\nExperience with manufacturing, logistics, supply chains, robotics or industrial automation.",
+    "compensation": "₹6L – ₹8L • No equity",
+    "job_type": "full-time",
+    "yearsExperienceMin": 1,
+    "yearsExperienceMax": null,
+    "date_posted": "2026-09-15",
+    "experience_required": "1+ yrs",
+    "experience_min": 1,
+    "experience_max": 4,
+    "experience_level": "entry",
+    "experience_match": "Ideal Match (0-2 yrs)",
+    "target_role": "Computer Vision Engineer",
+    "_scannedAt": "2026-09-15",
+    "_id": "job-wf-67"
+  },
+  {
+    "site": "wellfound",
+    "title": "Machine Learning Engineer (Voice AI)",
+    "company": "ViH Labs and Innovation",
+    "company_name": "ViH Labs and Innovation",
+    "company_logo": "https://photos.wellfound.com/startups/i/10988173-2fbe06ee17cd71e293bc24e89e35dcca-medium_jpg.jpg?buster=1778452835",
+    "company_size": "SIZE_51_200",
+    "location": "Hyderabad, Bhopal, Gurugram",
+    "job_url": "https://wellfound.com/jobs/4203466-machine-learning-engineer-voice-ai",
+    "description": "Machine Learning Engineer – Voice AI (Traditional Speech Architectures)\n\nAbout the Role\n\nWe are looking for a passionate and highly skilled Machine Learning Engineer – Voice AI to lead the development of our multilingual and multi-dialect speech systems. The ideal candidate should have hands-on experience in traditional speech processing, Text-to-Speech (TTS), Automatic Speech Recognition (ASR), audio signal processing, and Voice AI technologies.\n\nThis role is critical to our long-term vision of building and self-hosting production-grade Voice AI solutions tailored for multiple industry use cases across India. Since we work extensively with regional Indian languages and dialects, we are looking for someone who can take ownership of the Voice AI domain with strong technical leadership and a research-driven mindset.\n\nKey Responsibilities\n\n• Design, develop, and optimize Voice AI systems using traditional and modern speech processing techniques.\n• Build multilingual and multi-dialect speech solutions for Indian regional languages.\n• Develop and improve Text-to-Speech (TTS), speech enhancement, pronunciation modeling, and voice adaptation pipelines.\n• Work on Automatic Speech Recognition (ASR), speaker identification, speaker verification, and keyword spotting systems.\n• Design robust audio preprocessing, feature extraction, and post-processing pipelines.\n• Improve speech quality, intelligibility, naturalness, and dialect adaptation.\n• Work with traditional speech processing techniques, digital signal processing (DSP), and statistical speech models where applicable.\n• Build scalable training and inference pipelines for self-hosted Voice AI systems.\n• Optimize low-latency inference for production deployments.\n• Collaborate with product, engineering, and data teams to deploy production-ready Voice AI solutions.\n• Evaluate models using objective speech quality metrics and human evaluation.\n• Stay up to date with advancements in speech processing, Voice AI, and audio machine learning.\n\nRequired Skills &amp; Qualifications\n\n• 2+ years of experience in Machine Learning, Speech Processing, Voice AI, or related domains.\n• Strong understanding of traditional speech processing techniques, including:\n\nDigital Signal Processing (DSP)\nMFCC, LPC, PLP, Mel Spectrograms\nFourier Transform (FFT), Short-Time Fourier Transform (STFT), and Filter Banks\nSpeech segmentation and Voice Activity Detection (VAD)\n• Experience with traditional Text-to-Speech systems, statistical parametric speech synthesis, concatenative synthesis, or modern neural TTS architectures.\n• Good understanding of speech feature extraction, spectrograms, vocoders, and audio codecs.\n• Experience with Automatic Speech Recognition (ASR) pipelines and acoustic modeling is preferred.\n• Strong Python programming skills.\n• Hands-on experience with PyTorch, TensorFlow, or similar machine learning frameworks.\n• Experience handling multilingual speech datasets and audio corpora.\n• Familiarity with Linux, Docker, GPU training, and inference optimization.\n• Understanding of speech evaluation metrics such as WER, CER, MOS, PESQ, and STOI.\n• Ability to independently own and drive Voice AI research and production initiatives.\n\nPreferred Qualifications\n\n• Experience working with Indian language datasets and dialect adaptation.\n• Experience with speaker recognition, speaker diarization, or voice biometrics.\n• Familiarity with Kaldi, ESPnet, HTK, CMU Sphinx, OpenSMILE, Praat, or similar speech processing toolkits.\n• Experience building self-hosted Voice AI infrastructure.\n• Knowledge of conversational AI, telephony systems, and speech analytics.\n• Research contributions, open-source projects, or published work in speech processing or speech synthesis.\n\nWhat We Offer\n\n• Opportunity to work on cutting-edge multilingual Voice AI systems.\n• Access to large proprietary speech datasets.\n• Freedom to experiment, research, and build production-grade Voice AI infrastructure.\n• High-impact role with ownership and technical leadership opportunities.\n• Collaborative and innovation-driven work environment.\n\nIdeal Candidate\n\nWe are looking for someone who is deeply interested in speech processing and Voice AI, comfortable taking ownership of the complete speech pipeline—from audio preprocessing and feature engineering to speech synthesis, recognition, and deployment. The ideal candidate is excited about solving challenges in Indian languages and dialects, capable of leading Voice AI initiatives end-to-end, and committed to building scalable, production-ready speech systems using both traditional speech processing techniques and modern machine learning approaches.",
+    "compensation": "₹8L – ₹12L",
+    "job_type": "full-time",
+    "yearsExperienceMin": 2,
+    "yearsExperienceMax": null,
+    "date_posted": "2026-08-22",
+    "experience_required": "2+ yrs",
+    "experience_min": 2,
+    "experience_max": 5,
+    "experience_level": "entry",
+    "experience_match": "Good Match (1-3 yrs)",
+    "target_role": "Computer Vision Engineer",
+    "_scannedAt": "2026-08-22",
+    "_id": "job-wf-69"
+  },
+  {
+    "site": "wellfound",
+    "title": "Senior Machine Learning Engineer",
+    "company": "IDfy - Baldor Technologies ",
+    "company_name": "IDfy - Baldor Technologies ",
+    "company_logo": "https://photos.wellfound.com/startups/i/238874-91d2f466a2547165f294a080e1f1dd66-medium_jpg.jpg?buster=1578546027",
+    "company_size": "SIZE_501_1000",
+    "location": "Pune, Mumbai",
+    "job_url": "https://wellfound.com/jobs/3721613-senior-machine-learning-engineer",
+    "description": "**Job Location: Mumbai, Pune.**\n\n**The scale you will operate at**\nWe run 40+ production ML models across two large families, on a mixed CPU and GPU fleet.\n\nDocuments: Region of Interest detection, Photocopy Classifier, Text Tampering, Photo Tampering, Readability, OCR, Named Entity Recognition, PII Masking.\n\nFaces: Face Detection, Face Quality, Sunglass Detection, NSFW, Face Mask Detection, Face Match, Liveness Detection, Deepfake Detection.\n\nThe production footprint:\n\n2000 requests per second at peak\n\n25 TB of serving RAM\n\n~18,000 CPUs\n\n120 NVIDIA L4 GPUs\n\n2M+ verifications per day\n\nAt this scale, cost-to-serve is a first-class engineering constraint. A model that is 2 percentage points more accurate but 10x more expensive to run may be the wrong model. You will own that tradeoff with numbers, not opinions.\n\n**What you will do**\nFrame ambiguous problems mathematically. Turn a business requirement like \"catch deepfakes in KYC\" into a well-posed objective: the right positive class, the right operating point, the right validation protocol that does not leak, and a metric that survives class-prevalence shift.\n\nTrain models, end to end. Own the full lifecycle for one or more model families: problem framing, data strategy, architecture choice, training, evaluation, deployment, monitoring, and retraining. You are accountable for the model in production, not just the notebook.\n\nEvaluate with rigor. Design evaluation that predicts production behavior. Confusion matrices, ROC and PR curves, TPR at a fixed low FPR, calibration error, and cross-distribution generalization. Know why AUC can lie about a model you operate at FPR = 1e-4.\n\nOptimize for inference at scale. Quantize, prune, and re-architect models so they serve within latency, throughput, and cost budgets. Move workloads off GPU to quantized CPU inference where the numbers justify it, and prove the accuracy held with a production canary before, not after. Deploy and operate resilient production systems that run 24x7\n\nReproduce and improve on research. Read a paper, reproduce its results, strip it down to what actually matters for our constraints, and ship it. We value simplification that preserves accuracy. A smaller, cheaper model that matches a heavier one is treated as a genuine result here, not a compromise.\n\nLead. Mentor 3 to 6 junior engineers on math-driven problem solving, experiment design, and ML systems. Set the bar for source discipline and reproducibility. Review models, not just code.\n\n**What you bring**\nML fundamentals, deeply held.\n\nProbability and statistics: distributions, estimation, hypothesis testing, class prevalence and its effect on precision, sampling.\n\nOptimization: gradient descent and its variants, loss landscapes, convergence behavior, why training diverges and how to fix it.\n\nLinear algebra: enough to reason about embeddings, projections, and what a layer is actually computing.\n\nYou can derive, not just import. If asked why a loss is shaped the way it is, or what changes when you quantize a layer to INT8, you can work it out on a whiteboard.\n\nProven model-training experience.\n\nYou have trained deep learning models from scratch and fine-tuned pretrained networks, in PyTorch. Training loops, data pipelines, augmentation, and loss design are things you have written, not things you have called.\n\nDepth in at least one of Computer Vision (detection, classification, metric or embedding learning, anti-spoofing) or NLP (sequence labeling, NER, transformer models), with working literacy in the other.\n\nYou have shipped at least two models into production, operated them at some scale and kept them healthy through drift and adversarial pressure.\n\nEvaluation and calibration.\n\nYou design evaluations that do not overstate performance: leakage-free splits, cross-generator or cross-source generalization tests, and operating points chosen for the real cost asymmetry.\n\nYou understand calibration and can reason about decision thresholds under changing prevalence.\n\nProduction ML at scale.\n\n4+ years building and operating large-scale ML systems: real-time inference, monitoring, drift detection, and retraining.\n\nInference optimization: quantization (INT8, BF16), and hands-on with at least one of OpenVINO, CTranslate2, Triton, or vLLM. You reason about latency, throughput, and cost-to-serve as engineering targets.\n\nComfortable on Kubernetes and a major cloud (we run primarily on GCP and AWS).\n\nWorking with LLMs, the right way.\n\nIf you work with LLMs, you work with the model, not only the API: fine-tuning, embedding geometry, retrieval statistics, and transformer internals. You can build a RAG system and also explain why the retriever is failing at the embedding level.\n\n**What makes you stand out**\nFace recognition, liveness, or presentation-attack and deepfake detection experience.\n\nMetric learning and large-scale vector search (millions of vectors and up).\n\nOCR, document forensics, or tampering detection on real-world degraded documents.\n\nContributions to open-source ML, published papers, or teaching and speaking in the community.\n\nFamiliarity with Indian regulatory context: DPDP, RBI KYC modes, UIDAI, PCI DSS.\n\n**Why this role is rare**\nMost \"AI\" roles today are integration roles: call a hosted model, shape a prompt, ship. This is not that. Here you build the models that have real world impact on 2 million people a day, in an adversarial setting where accuracy and cost both have real consequences. You get production traffic at 2000 RPS, a fleet of 40+ models to learn from, and a mandate to make them faster, better and cheaper.\n\nThis is a place for people who are still excited by the math.",
+    "compensation": "₹20L – ₹35L",
+    "job_type": "full-time",
+    "yearsExperienceMin": 3,
+    "yearsExperienceMax": null,
+    "date_posted": "2026-09-02",
+    "experience_required": "3+ yrs",
+    "experience_min": 3,
+    "experience_max": 6,
+    "experience_level": "mid",
+    "experience_match": "Mid Level (3-5 yrs)",
+    "target_role": "Computer Vision Engineer",
+    "_scannedAt": "2026-09-02",
+    "_id": "job-wf-71"
+  },
+  {
+    "site": "wellfound",
+    "title": "Machine Learning Engineer II- ML Systems, Models and Analysis",
+    "company": "Clear Demand",
+    "company_name": "Clear Demand",
+    "company_logo": "https://photos.wellfound.com/startups/i/5364650-e9af35ff1bb51a30dff863e85057d130-medium_jpg.jpg?buster=1746645078",
+    "company_size": "SIZE_51_200",
+    "location": "Chennai",
+    "job_url": "https://wellfound.com/jobs/4701959-machine-learning-engineer-ii-ml-systems-models-and-analysis",
+    "description": "**Role Summary**\nThis role is suited for a candidate with deeper interest and capability in machine learning systems, model development, model evaluation, inference workflows, experimentation, and analytical problem-solving. The candidate will work on model-driven systems that support product matching, classification, similarity search, explainability, automated decisioning, and quality improvement.\nThe role requires someone who can understand ML model behavior, analyze outputs, improve inference pipelines, measure performance, and collaborate with science and engineering teams to translate model capabilities into production workflows.\n\n**Key Responsibilities**\n\n* \tBuild, improve, and maintain ML inference pipelines and model-serving workflows.\n* \tWork on model evaluation, error analysis, performance tracking, and experimentation.\n* \tAnalyze model outputs to identify patterns, failure modes, precision / recall trade-offs, and           improvement opportunities.\n* \tCollaborate with Data Scientists to operationalize models into production-ready systems.\n* \tSupport model training data preparation, labeling strategy, validation sample analysis, and benchmark creation.\n* \tWork on ML systems involving embeddings, vector search, retrieval, classification, ranking, and match verdict generation.\n* \tDevelop analytical scripts, notebooks, dashboards, and reports to measure model performance and business impact.\n* \tHelp improve model explainability by surfacing signals, evidence, decision factors, and confidence indicators.\n* \tSupport automation workflows where model predictions are used for decisioning and downstream product workflows.\n* \tDebug production ML issues related to model outputs, drift, thresholds, retrieval quality, and data inconsistencies.\n* \tContribute to building reusable ML utilities, evaluation frameworks, and experimentation workflows.\n\n* **Required Skills**\n*\tBachelor’s or Master’s degree in Computer Science, Data Science, Machine Learning, Engineering, Mathematics, Statistics, or a related field.\n*\t2–5 years of relevant experience in ML Engineering, Data Engineering, Data Science Engineering, or Analytics Engineering.\n*\tStrong academic or project experience may be considered for candidates with lower industry experience\n*\tGood understanding of machine learning fundamentals, including classification, embeddings, similarity search, evaluation metrics, and model validation.\n*\tExperience with ML libraries such as scikit-learn, PyTorch, TensorFlow, Hugging Face, sentence-transformers, or similar frameworks.\n*\tAbility to perform model output analysis, error analysis, and metric-driven evaluation.\n*\tStrong analytical skills with the ability to work with datasets, derive insights, and identify improvement opportunities.\n*\tGood understanding of precision, recall, F1 score, confidence thresholds, false positives, false negatives, and sampling strategies.\n*\tStrong in SQL , Python ML Libraries and data extraction for ML analysis.\n*\tFamiliarity with model inference pipelines and production ML workflows.\n*\tExperience with LLMs, prompt-based evaluation, RAG systems, or agentic AI workflows.\n*\tAbility to write clean, modular, maintainable code.\n*\tGood communication skills to explain model behavior, analysis findings, and technical trade-offs.\n \n**Good to Have**\n* Experience with NLP, product matching, entity resolution, semantic search, or recommendation systems.\n* Exposure to vector databases or retrieval systems such as Milvus, FAISS, OpenSearch, Pinecone, S3 Vectors, or similar technologies.\n* Familiarity with ML Ops tools, model monitoring, experiment tracking, and deployment workflows.\n* Experience working with e-commerce catalog data, product attributes, brand, size, pack, and taxonomy-related problems.\n* Ability to build dashboards or analysis reports",
+    "compensation": "₹26L – ₹35L • No equity",
+    "job_type": "full-time",
+    "yearsExperienceMin": 5,
+    "yearsExperienceMax": null,
+    "date_posted": "2026-09-11",
+    "experience_required": "5+ yrs",
+    "experience_min": 5,
+    "experience_max": 8,
+    "experience_level": "senior",
+    "experience_match": "Senior Level (5+ yrs)",
+    "target_role": "Deep Learning / Generative AI Engineer",
+    "_scannedAt": "2026-09-11",
+    "_id": "job-wf-73"
+  },
+  {
+    "site": "wellfound",
+    "title": "ML Intern",
+    "company": "Entrupy",
+    "company_name": "Entrupy",
+    "company_logo": "https://photos.wellfound.com/startups/i/204754-d69f252d7edb64a90f6487bb2e79696a-medium_jpg.jpg?buster=1404780403",
+    "company_size": "SIZE_51_200",
+    "location": "Bengaluru",
+    "job_url": "https://wellfound.com/jobs/3347585-3-ml-intern",
+    "description": " \n\n**About the role**\n\nWe are seeking a Machine Learning Engineer Intern to contribute to the development of computer vision algorithms focused on item authentication and fingerprinting. In this role, you will support the research, development, and deployment of algorithms and models aimed at accurately determining the authenticity of items through the analysis of their unique visual characteristics and assigning unique digital identities based on image data.   \nYou will also assist in refining the image capture experience on edge devices and contribute to ensuring model interpretability.\n\n**Reports to:** ML Lead  \n**Location:** Remote or Hybrid in Bangalore, India  \n**Duration:**  6 months internship with an opportunity for PPO\n\n**What You'll Do:**\n\n- **Algorithm Research & Support:** Assist in researching, designing, and training computer vision models for authentication, fingerprinting, image capture, and other customer-centric computer vision applications.\n- **Code Quality & Testing:** Write clean, modular, and well-tested code. Develop unit and integration tests to maintain high standards of code quality and reliability. Participate in code reviews, contributing to pull requests and collaborating with team members.\n- **Model Deployment Support:** Provide support in building and maintaining APIs to efficiently deploy models in production.\n- **Continuous Learning:** Stay current with advancements in Computer Vision and Machine Learning.\n- **Collaboration:** Work with internal teams to understand needs and gather feedback on algorithm performance.\n- **Documentation:** Contribute to clear and concise documentation of algorithms and models.\n\n#### **Who you are:**\n\n- Currently pursuing a Bachelor's or Master's degree in Electronics, Physics, Computer Science, or a related field.\n- Foundational understanding of Computer Vision algorithm development.\n- Familiarity with Python.\n- Basic understanding of PyTorch and OpenCV.\n- Strong foundational skills in probability & statistics, calculus, geometry, optimization, and linear algebra.\n- Ability to rapidly acquire new skills and technologies.\n- Strong problem-solving skills and attention to detail.\n- Willingness to contribute to code reviews and collaborate with peers.\n\n**What we offer**\n\n- Market-competitive compensation structure\n- Opportunities to gain hands-on experience in cutting-edge computer vision solutions.\n- A collaborative, mission-driven work culture with direct product impact.\n- Mentorship from experienced Machine Learning Engineers.\n- Opportunities to learn about deploying models on edge devices.\n\nWe have had an incredible run so far and laying the foundation for a culture that is fast-paced, entrepreneurial, and rooted in passion, kindness, and positivity. We live by these values – we hire by them, promote them, and celebrate them every day. \n\nIf you are a passionate and eager individual looking to kickstart your career in Computer Vision and Machine Learning, we'd love to connect!\n\n",
+    "compensation": "",
+    "job_type": "full-time",
+    "yearsExperienceMin": null,
+    "yearsExperienceMax": null,
+    "date_posted": "2026-11-09",
+    "experience_required": "0-1 yrs (Fresher / Intern)",
+    "experience_min": 0,
+    "experience_max": 1,
+    "experience_level": "entry",
+    "experience_match": "Ideal Match (0-2 yrs)",
+    "target_role": "Computer Vision Engineer",
+    "_scannedAt": "2026-11-09",
+    "_id": "job-wf-75"
   }
 ]

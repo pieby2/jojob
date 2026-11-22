@@ -95,93 +95,130 @@ export function detectJobRole(title = "", desc = "") {
 }
 
 // --- Experience Detection Helper ---
-export function detectExperience(title = "", desc = "") {
-  const text = `${title} ${desc}`.toLowerCase();
+export function detectExperience(jobOrTitle = "", desc = "", url = "", nativeJob = {}) {
+  let title = "";
+  let fullDesc = "";
+  let jobUrl = "";
+  let jMin = null;
+  let jMax = null;
 
-  // 1. Fresher / Entry Level / Intern
-  if (/\b(fresher|freshers|entry[- ]level|graduate[- ]engineer|campus|intern|internship|trainee|0[- ]to[- ]1\s*years?|0[- ]1\s*years?|0[- ]to[- ]2\s*years?|0[- ]2\s*years?)\b/i.test(text)) {
-    return {
-      text: "0-1 yrs (Fresher / Entry)",
-      min: 0,
-      max: 1,
-      level: "entry",
-      matchBadge: "Ideal Match (0-2 yrs)"
-    };
+  if (typeof jobOrTitle === "object" && jobOrTitle !== null) {
+    title = String(jobOrTitle.title || "");
+    fullDesc = String(jobOrTitle.description || "");
+    jobUrl = String(jobOrTitle.job_url || jobOrTitle.link || "");
+    jMin = jobOrTitle.yearsExperienceMin !== undefined ? jobOrTitle.yearsExperienceMin : null;
+    jMax = jobOrTitle.yearsExperienceMax !== undefined ? jobOrTitle.yearsExperienceMax : null;
+  } else {
+    title = String(jobOrTitle || "");
+    fullDesc = String(desc || "");
+    jobUrl = String(url || "");
+    jMin = nativeJob?.yearsExperienceMin !== undefined ? nativeJob.yearsExperienceMin : null;
+    jMax = nativeJob?.yearsExperienceMax !== undefined ? nativeJob.yearsExperienceMax : null;
   }
 
-  // 2. Explicit range: e.g. '0-2 years', '1-3 years', '2 to 4 years', '3-5 years', '5 - 8 years'
-  const rangeMatch = text.match(/\b(\d+)\s*(?:-|to)\s*(\d+)\s*\+?\s*(?:years?|yrs?)(?:\s*(?:of\s*)?experience)?\b/i);
+  // 0. Native portal fields (e.g. Wellfound)
+  if (jMin !== null || jMax !== null) {
+    if (jMin !== null && jMax !== null) {
+      const lvl = jMax <= 2 ? "entry" : jMin < 5 ? "mid" : "senior";
+      const badge = jMin <= 1 ? "Ideal Match (0-2 yrs)" : jMin <= 2 ? "Good Match (1-3 yrs)" : (jMin < 5 ? "Mid Level (3-5 yrs)" : "Senior Level (5+ yrs)");
+      return { text: `${jMin}-${jMax} yrs`, min: jMin, max: jMax, level: lvl, matchBadge: badge };
+    } else if (jMin !== null) {
+      const lvl = jMin <= 2 ? "entry" : jMin < 5 ? "mid" : "senior";
+      const badge = jMin <= 1 ? "Ideal Match (0-2 yrs)" : jMin <= 2 ? "Good Match (1-3 yrs)" : (jMin < 5 ? "Mid Level (3-5 yrs)" : "Senior Level (5+ yrs)");
+      return { text: `${jMin}+ yrs`, min: jMin, max: jMin + 3, level: lvl, matchBadge: badge };
+    }
+  }
+
+  // 1. Naukri / portal URL slug range e.g. 4-to-7-years, 9-to-13-years
+  const urlRange = jobUrl.match(/(\d+)-to-(\d+)-years/i);
+  if (urlRange) {
+    const min = parseInt(urlRange[1], 10);
+    const max = parseInt(urlRange[2], 10);
+    const level = max <= 2 ? "entry" : min >= 5 ? "senior" : "mid";
+    const matchBadge = min <= 1 ? "Ideal Match (0-2 yrs)" : min <= 2 ? "Good Match (1-3 yrs)" : (min >= 5 ? "Senior Level (5+ yrs)" : "Mid Level (3-5 yrs)");
+    return { text: `${min}-${max} yrs`, min, max, level, matchBadge };
+  }
+
+  const text = `${title}\n${fullDesc}`;
+
+  // 2. Explicit range with ASCII or Unicode dash e.g. 3–6 Years, 2–5 Years
+  const rangeMatch = text.match(/\b([0-9]|1[0-9])\s*(?:[-–—]|to|\/)\s*([0-9]|[1-2][0-9])\s*\+?\s*(?:years?|yrs?)(?:\s*(?:of\s*)?(?:relevant\s+)?experience)?\b/i);
   if (rangeMatch) {
     const min = parseInt(rangeMatch[1], 10);
     const max = parseInt(rangeMatch[2], 10);
-    const level = max <= 2 ? "entry" : max <= 5 ? "mid" : "senior";
-    const matchBadge = min <= 1 ? "Ideal Match (0-2 yrs)" : min <= 2 ? "Good Match (1-3 yrs)" : "Stretch (Mid/Senior)";
-    return {
-      text: `${min}-${max} yrs`,
-      min,
-      max,
-      level,
-      matchBadge
-    };
+    if (min < max && max <= 30) {
+      const level = max <= 2 ? "entry" : min >= 5 ? "senior" : "mid";
+      const matchBadge = min <= 1 ? "Ideal Match (0-2 yrs)" : min <= 2 ? "Good Match (1-3 yrs)" : (min >= 5 ? "Senior Level (5+ yrs)" : "Mid Level (3-5 yrs)");
+      return { text: `${min}-${max} yrs`, min, max, level, matchBadge };
+    }
   }
 
-  // 3. Minimum experience with plus: e.g. '3+ years', '5+ yrs', '2 + years'
-  const plusMatch = text.match(/\b(\d+)\s*\+\s*(?:years?|yrs?)(?:\s*(?:of\s*)?experience)?\b/i);
+  // 3. Explicit plus pattern: e.g. 3+ years, 5+ yrs, 8+ years
+  const plusMatch = text.match(/\b([0-9]|1[0-9])\s*\+\s*(?:years?|yrs?)(?:\s*(?:of\s*)?(?:relevant\s+)?experience)?\b/i);
   if (plusMatch) {
     const min = parseInt(plusMatch[1], 10);
-    const level = min <= 2 ? "entry" : min <= 5 ? "mid" : "senior";
-    const matchBadge = min <= 1 ? "Ideal Match (0-2 yrs)" : min <= 2 ? "Good Match (1-3 yrs)" : "Stretch (Mid/Senior)";
-    return {
-      text: `${min}+ yrs`,
-      min,
-      max: min + 3,
-      level,
-      matchBadge
-    };
+    if (min <= 25) {
+      const level = min <= 2 ? "entry" : min < 5 ? "mid" : "senior";
+      const matchBadge = min <= 1 ? "Ideal Match (0-2 yrs)" : min <= 2 ? "Good Match (1-3 yrs)" : (min >= 5 ? "Senior Level (5+ yrs)" : "Mid Level (3-5 yrs)");
+      return { text: `${min}+ yrs`, min, max: min + 3, level, matchBadge };
+    }
   }
 
   // 4. Pattern like 'at least 3 years', 'minimum 2 years'
-  const minMatch = text.match(/\b(?:at\s*least|minimum|min\.?)\s*(\d+)\s*(?:years?|yrs?)\b/i);
+  const minMatch = text.match(/\b(?:at\s*least|minimum|min\.?)\s*([0-9]|1[0-9])\s*(?:years?|yrs?)\b/i);
   if (minMatch) {
     const min = parseInt(minMatch[1], 10);
-    const level = min <= 2 ? "entry" : min <= 5 ? "mid" : "senior";
-    const matchBadge = min <= 1 ? "Ideal Match (0-2 yrs)" : min <= 2 ? "Good Match (1-3 yrs)" : "Stretch (Mid/Senior)";
-    return {
-      text: `${min}+ yrs`,
-      min,
-      max: min + 3,
-      level,
-      matchBadge
-    };
+    if (min <= 25) {
+      const level = min <= 2 ? "entry" : min < 5 ? "mid" : "senior";
+      const matchBadge = min <= 1 ? "Ideal Match (0-2 yrs)" : min <= 2 ? "Good Match (1-3 yrs)" : (min >= 5 ? "Senior Level (5+ yrs)" : "Mid Level (3-5 yrs)");
+      return { text: `${min}+ yrs`, min, max: min + 3, level, matchBadge };
+    }
   }
 
-  // 5. Pattern like 'experience: 3 years' or '3 years of experience'
-  const ofExpMatch = text.match(/\b(\d+)\s*(?:years?|yrs?)\s+(?:of\s+)?experience\b/i);
+  // 5. Pattern like 'N years of experience' or 'experience: N years'
+  let ofExpMatch = text.match(/\b([0-9]|1[0-9])\s*(?:years?|yrs?)\s+(?:of\s+)?(?:relevant\s+)?experience\b/i);
+  if (!ofExpMatch) {
+    ofExpMatch = text.match(/\b(?:experience|exp)[\s:]+([0-9]|1[0-9])\+?\s*(?:years?|yrs?)\b/i);
+  }
   if (ofExpMatch) {
     const min = parseInt(ofExpMatch[1], 10);
-    const level = min <= 2 ? "entry" : min <= 5 ? "mid" : "senior";
-    const matchBadge = min <= 1 ? "Ideal Match (0-2 yrs)" : min <= 2 ? "Good Match (1-3 yrs)" : "Stretch (Mid/Senior)";
-    return {
-      text: `${min} yrs`,
-      min,
-      max: min,
-      level,
-      matchBadge
-    };
+    if (min <= 25) {
+      const level = min <= 2 ? "entry" : min < 5 ? "mid" : "senior";
+      const matchBadge = min <= 1 ? "Ideal Match (0-2 yrs)" : min <= 2 ? "Good Match (1-3 yrs)" : (min >= 5 ? "Senior Level (5+ yrs)" : "Mid Level (3-5 yrs)");
+      return { text: `${min}+ yrs`, min, max: min + 2, level, matchBadge };
+    }
   }
 
-  // 6. Infer from Senior / Lead / Principal in title
-  if (/\b(lead|principal|staff|director|architect|head\s*of)\b/i.test(title)) {
-    return { text: "6+ yrs (Lead / Senior)", min: 6, max: 12, level: "senior", matchBadge: "Senior Level" };
+  // 6. Seniority heuristics from title (when JD does not specify explicit years)
+  const t = title.toLowerCase();
+  if (/(?:^|[\s_-])(?:lead|principal|staff|director|architect|head\s+of)(?:$|[\s_-])/i.test(t)) {
+    return { text: "6+ yrs (Lead / Senior)", min: 6, max: 12, level: "senior", matchBadge: "Senior Level (6+ yrs)" };
   }
-  if (/\b(senior|sr\.?)\b/i.test(title)) {
-    return { text: "4+ yrs (Senior)", min: 4, max: 8, level: "senior", matchBadge: "Senior Level" };
+  if (/(?:^|[\s_-])(?:senior|sr\.?)(?:[a-z\s_-]|$)/i.test(t) || t.includes("senior")) {
+    return { text: "4+ yrs (Senior)", min: 4, max: 8, level: "senior", matchBadge: "Senior Level (4+ yrs)" };
   }
-  if (/\b(junior|jr\.?|associate)\b/i.test(title)) {
+  if (/\b(?:engineer\s*3|engineer\s*iii|sde\s*3|sde\s*iii|level\s*3|l3)\b/i.test(t)) {
+    return { text: "4+ yrs (Level 3 / Senior)", min: 4, max: 8, level: "senior", matchBadge: "Senior Level (4+ yrs)" };
+  }
+  if (/\b(?:engineer\s*2|engineer\s*ii|sde\s*2|sde\s*ii|level\s*2|l2)\b/i.test(t)) {
+    return { text: "2-5 yrs (Mid Level)", min: 2, max: 5, level: "mid", matchBadge: "Mid Level (2-5 yrs)" };
+  }
+  if (/\b(?:intern|internship|trainee|fresher|graduate\s+engineer)\b/i.test(t)) {
+    return { text: "0-1 yrs (Fresher / Intern)", min: 0, max: 1, level: "entry", matchBadge: "Ideal Match (0-2 yrs)" };
+  }
+
+  // 7. Explicit Fresher in description (ensuring not 'mentor entry-level')
+  if (/\b(fresher|freshers|campus\s+hire|entry[- ]level)\b/i.test(text) && !/mentor\s+(?:junior|entry|intern)/i.test(text)) {
+    return { text: "0-1 yrs (Fresher / Entry)", min: 0, max: 1, level: "entry", matchBadge: "Ideal Match (0-2 yrs)" };
+  }
+
+  // 8. Title hints for Junior
+  if (/\b(junior|jr\.?|associate)\b/i.test(t)) {
     return { text: "0-2 yrs (Junior)", min: 0, max: 2, level: "entry", matchBadge: "Ideal Match (0-2 yrs)" };
   }
 
-  return { text: "1-3 yrs (Standard)", min: 1, max: 3, level: "entry", matchBadge: "Good Match (1-3 yrs)" };
+  // 9. Conservative fallback: Do NOT hallucinate '1-3 yrs (Standard)'
+  return { text: "Not specified", min: null, max: null, level: "unspecified", matchBadge: "Check JD" };
 }
 
 // --- Jobs Persistence (In-Memory Cached) ---
@@ -199,12 +236,21 @@ function loadJobs() {
       const jobs = JSON.parse(readFileSync(JOBS_FILE, "utf-8"));
       let updated = false;
       for (const j of jobs) {
+        // Normalize company name
+        const cName = j.company_name || j.company || "Company";
+        if (j.company !== cName || j.company_name !== cName) {
+          j.company = cName;
+          j.company_name = cName;
+          updated = true;
+        }
+
         if (!j.target_role) {
           j.target_role = detectJobRole(j.title, j.description);
           updated = true;
         }
-        if (!j.experience_required || j.experience_min === undefined) {
-          const exp = detectExperience(j.title, j.description);
+
+        const exp = detectExperience(j);
+        if (j.experience_required !== exp.text || j.experience_min !== exp.min || j.experience_level !== exp.level) {
           j.experience_required = exp.text;
           j.experience_min = exp.min;
           j.experience_max = exp.max;
@@ -368,10 +414,10 @@ app.get("/api/stats", async (_req, res) => {
 
 // 3. GET /api/scan — runs JobSpy scraper with ai-job-search posting_guard & safety timeout
 app.get("/api/scan", (req, res) => {
-  const search = req.query.search || "Machine Learning Engineer";
+  const search = req.query.search || "all";
   const location = req.query.location || "India";
   const results = req.query.results || "15";
-  const sites = req.query.sites || "indeed,linkedin";
+  const sites = req.query.sites || "indeed,linkedin,naukri,wellfound,yc";
 
   const pyBin = getPythonBin();
   console.log(`[scan] Invoking scraper with ${pyBin}: search="${search}", location="${location}", sites="${sites}"`);
@@ -457,14 +503,31 @@ app.get("/api/scan", (req, res) => {
     try {
       const jobs = JSON.parse(stdout);
       const existing = loadJobs();
-      const existingUrls = new Set(existing.map((j) => j.job_url));
+      const existingUrls = new Set(existing.map((j) => (j.job_url || j.link || "").trim()).filter(Boolean));
       let newCount = 0;
 
       for (const job of jobs) {
-        if (!existingUrls.has(job.job_url)) {
+        const u = (job.job_url || job.link || "").trim();
+        if (u && !existingUrls.has(u)) {
+          existingUrls.add(u);
           job._id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
           job._status = "new";
           job._scannedAt = new Date().toISOString();
+          
+          // Normalize company and experience
+          const cName = job.company_name || job.company || "Company";
+          job.company = cName;
+          job.company_name = cName;
+          if (!job.target_role) {
+            job.target_role = detectJobRole(job.title, job.description);
+          }
+          const exp = detectExperience(job);
+          job.experience_required = exp.text;
+          job.experience_min = exp.min;
+          job.experience_max = exp.max;
+          job.experience_level = exp.level;
+          job.experience_match = exp.matchBadge;
+
           existing.unshift(job);
           newCount++;
         }
