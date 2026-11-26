@@ -10,6 +10,7 @@ let currentSort = "exp-match"; // Default: Best Experience Match (0-2 yrs / Entr
 let currentExpFilter = "all";   // "all", "entry", "mid", "senior"
 let currentRoleFilter = "all";  // "all", "Computer Vision", "Machine Learning", "Edge AI", etc.
 let currentTimeFilter = "all";  // "all", "24h", "3d", "7d"
+let currentTypeFilter = "all";  // "all", "fulltime", "internship", "contract"
 let searchQuery = "";
 let recommendedProjects = [];
 let currentSocialPlatform = "all";
@@ -440,6 +441,24 @@ function setRoleFilter(role) {
   applySortAndFilter();
 }
 
+function setTypeFilter(type) {
+  currentTypeFilter = type;
+  document.querySelectorAll("[data-type]").forEach((p) => {
+    p.classList.toggle("active", p.dataset.type === type);
+  });
+  applySortAndFilter();
+}
+
+function detectJobTypeClient(job) {
+  const jt = String(job.job_type || "").toLowerCase();
+  const title = String(job.title || "").toLowerCase();
+  const desc = String(job.description || "").toLowerCase();
+  const combined = `${jt} ${title}`;
+  if (combined.includes("intern") || /\binternship\b/i.test(desc)) return "internship";
+  if (combined.includes("contract") || combined.includes("freelance") || combined.includes("consultant") || /\bcontract\s+(?:role|position|basis|engineer)\b/i.test(desc)) return "contract";
+  return "fulltime";
+}
+
 function setTimeFilter(time) {
   currentTimeFilter = time;
   document.querySelectorAll("[data-time]").forEach((p) => {
@@ -508,6 +527,11 @@ function applySortAndFilter() {
       const ts = getJobTimestamp(j);
       return now - ts <= maxAgeMs;
     });
+  }
+
+  // 4b. Job Type Filter (fulltime, internship, contract)
+  if (currentTypeFilter !== "all") {
+    filtered = filtered.filter((j) => detectJobTypeClient(j) === currentTypeFilter);
   }
 
   // 5. Ranking & Sorting
@@ -624,6 +648,15 @@ function createJobCardHtml(job) {
   if (site.includes("wellfound")) portalBadge = `<span class="tag-badge badge-wf">🌟 Wellfound</span>`;
   else if (site.includes("yc")) portalBadge = `<span class="tag-badge badge-yc">🚀 YC Startup</span>`;
 
+  // Job Type Badge (Intern / Contract)
+  const jType = detectJobTypeClient(job);
+  const typeBadgeHtml =
+    jType === "internship"
+      ? `<span class="tag-badge" style="background:rgba(56,189,248,0.14);color:#38bdf8;border:1px solid rgba(56,189,248,0.35);">🎓 Internship</span>`
+      : jType === "contract"
+      ? `<span class="tag-badge" style="background:rgba(245,158,11,0.14);color:#fbbf24;border:1px solid rgba(245,158,11,0.35);">📝 Contract</span>`
+      : "";
+
   return `
     <article class="job-card" onclick="openJobFlow('${job._id}', 1)">
       <div class="job-card-top-row">
@@ -640,6 +673,7 @@ function createJobCardHtml(job) {
 
       <div class="job-meta-tags">
         <span class="tag-badge badge-role">🎯 ${escHtml(targetRole)}</span>
+        ${typeBadgeHtml}
         <span class="tag-badge ${expBadgeClass}">⏳ Exp: ${escHtml(exp.text)}</span>
         <span class="tag-badge badge-posted">${postedTime}</span>
         ${portalBadge}
@@ -1292,6 +1326,15 @@ function renderStep3(job) {
 
 function createCopyAnswerCardHtml(promptText, answerText) {
   const cardId = "qa-" + Math.random().toString(36).substring(2, 9);
+  // Job Type Badge (Intern / Contract)
+  const jType = detectJobTypeClient(job);
+  const typeBadgeHtml =
+    jType === "internship"
+      ? `<span class="tag-badge" style="background:rgba(56,189,248,0.14);color:#38bdf8;border:1px solid rgba(56,189,248,0.35);">🎓 Internship</span>`
+      : jType === "contract"
+      ? `<span class="tag-badge" style="background:rgba(245,158,11,0.14);color:#fbbf24;border:1px solid rgba(245,158,11,0.35);">📝 Contract</span>`
+      : "";
+
   return `
     <div class="copy-answer-card">
       <div class="copy-answer-header">
@@ -2133,7 +2176,16 @@ function renderRecommendedProjects() {
     const isSaved = savedIds.has(proj.id);
     const pKey = proj.platformKey || "github";
     const icon = platformIcon[pKey] || "🚀";
-    return `
+    // Job Type Badge (Intern / Contract)
+  const jType = detectJobTypeClient(job);
+  const typeBadgeHtml =
+    jType === "internship"
+      ? `<span class="tag-badge" style="background:rgba(56,189,248,0.14);color:#38bdf8;border:1px solid rgba(56,189,248,0.35);">🎓 Internship</span>`
+      : jType === "contract"
+      ? `<span class="tag-badge" style="background:rgba(245,158,11,0.14);color:#fbbf24;border:1px solid rgba(245,158,11,0.35);">📝 Contract</span>`
+      : "";
+
+  return `
       <article class="social-project-card">
         <div class="social-card-top">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">

@@ -23,6 +23,8 @@ def _resolve_role_slugs(query="machine-learning-engineer"):
         return ["machine-learning-engineer", "computer-vision-engineer", "ai-engineer"]
     
     slugs = []
+    if "intern" in q or "contract" in q:
+        slugs.extend(["machine-learning-engineer", "ai-engineer", "software-engineer"])
     if "forward" in q or "deployed" in q or "solutions" in q:
         slugs.extend(["software-engineer", "ai-engineer"])
     if "vision" in q or "opencv" in q or "yolo" in q or "image" in q or "perception" in q:
@@ -178,7 +180,7 @@ def scrape_yc(query="engineering", location="india", max_results=15):
     role_path = "software-engineer"
     q_lower = query.lower()
 
-    if "ai" in q_lower or "machine" in q_lower or "deep" in q_lower or "vision" in q_lower:
+    if "ai" in q_lower or "machine" in q_lower or "deep" in q_lower or "vision" in q_lower or "intern" in q_lower or "contract" in q_lower:
         role_path = "ai-engineer"
 
     if "india" in loc_lower or "bengaluru" in loc_lower or "delhi" in loc_lower:

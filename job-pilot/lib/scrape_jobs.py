@@ -188,6 +188,8 @@ def main():
             "Machine Learning Engineer",
             "Computer Vision Engineer",
             "Forward Deployed Engineer",
+            "AI Machine Learning Intern",
+            "AI ML Contract Engineer",
         ]
 
     all_records = []
@@ -228,15 +230,21 @@ def main():
 
         for query in search_queries:
             try:
-                per_query_results = max(4, min(8, args.results // len(search_queries)))
-                jobs = scrape_jobs(
-                    site_name=jobspy_sites,
-                    search_term=query,
-                    location=args.location,
-                    results_wanted=per_query_results,
-                    hours_old=args.hours_old,
-                    country_indeed="India" if is_india else args.location,
-                )
+                per_query_results = max(3, min(8, args.results // len(search_queries)))
+                q_lower = query.lower()
+                jobspy_kwargs = {
+                    "site_name": jobspy_sites,
+                    "search_term": query,
+                    "location": args.location,
+                    "results_wanted": per_query_results,
+                    "hours_old": args.hours_old,
+                    "country_indeed": "India" if is_india else args.location,
+                }
+                if "intern" in q_lower:
+                    jobspy_kwargs["job_type"] = "internship"
+                elif "contract" in q_lower or "freelance" in q_lower:
+                    jobspy_kwargs["job_type"] = "contract"
+                jobs = scrape_jobs(**jobspy_kwargs)
 
                 if not jobs.empty:
                     for _, row in jobs.iterrows():
@@ -272,6 +280,15 @@ def main():
         record["description"] = clean_desc
         record["_security"] = sec_report
         record["target_role"] = detect_job_role(title, clean_desc)
+
+        raw_jt = str(record.get("job_type") or "").lower()
+        combined_jt = f"{raw_jt} {title}".lower()
+        if "intern" in combined_jt:
+            record["job_type"] = "internship"
+        elif any(k in combined_jt for k in ["contract", "freelance", "consultant"]):
+            record["job_type"] = "contract"
+        elif not raw_jt or raw_jt in ("none", "nan"):
+            record["job_type"] = "full-time"
 
         exp = detect_experience(record)
         record["experience_required"] = exp["text"]

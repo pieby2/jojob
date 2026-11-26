@@ -152,10 +152,12 @@
             <div class="form-col flex-2">
               <label class="input-lbl">Target Role Focus</label>
               <select id="scan-query" class="styled-select">
-                <option value="all" selected>🌟 All Roles (CV, ML, Forward Deployed, Edge AI, DL, MLOps)</option>
+                <option value="all" selected>🌟 All Roles (Full-time, Intern, Contract · CV, ML, FDE)</option>
                 <option value="Forward Deployed Engineer">🚀 Forward Deployed Engineer</option>
                 <option value="Computer Vision Engineer">👁️ Computer Vision Engineer</option>
                 <option value="Machine Learning Engineer">🤖 Machine Learning Engineer</option>
+                <option value="AI Machine Learning Intern">🎓 Internships (AI / ML / CV Intern)</option>
+                <option value="AI ML Contract Engineer">📝 Contract / Freelance AI &amp; ML Roles</option>
                 <option value="Edge AI Engineer">⚡ Edge AI / Embedded ML Engineer</option>
                 <option value="Deep Learning Engineer">🧠 Deep Learning Engineer</option>
                 <option value="Perception Engineer">📡 Perception / Autonomy Engineer</option>
@@ -303,6 +305,17 @@
               <button class="filter-pill" data-time="24h" onclick="setTimeFilter('24h')">⚡ Past 24h</button>
               <button class="filter-pill" data-time="3d" onclick="setTimeFilter('3d')">📅 Past 3 Days</button>
               <button class="filter-pill" data-time="7d" onclick="setTimeFilter('7d')">🗓️ Past 7 Days</button>
+            </div>
+          </div>
+
+          <!-- Job Type Filter Row -->
+          <div class="pill-group-row">
+            <span class="pill-group-label">TYPE:</span>
+            <div class="pill-scroll-list type-filter-pills">
+              <button class="filter-pill active" data-type="all" onclick="setTypeFilter('all')">All Types</button>
+              <button class="filter-pill" data-type="fulltime" onclick="setTypeFilter('fulltime')">💼 Full-Time</button>
+              <button class="filter-pill" data-type="internship" onclick="setTypeFilter('internship')">🎓 Internship / Intern</button>
+              <button class="filter-pill" data-type="contract" onclick="setTypeFilter('contract')">📝 Contract / Freelance</button>
             </div>
           </div>
         </div>
