@@ -927,7 +927,7 @@ function renderStep2(job) {
             </div>
           </div>
           <span class="tag-badge" style="background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.35);">
-            ✨ Custom for ${escHtml(targetRole)}
+            ${tailored.atsScore ? `🎯 ATS ${tailored.atsScore}% · ` : ""}✨ Custom for ${escHtml(targetRole)}
           </span>
         </div>
 

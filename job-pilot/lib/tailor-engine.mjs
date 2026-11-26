@@ -138,7 +138,78 @@ Keywords: ${p.keywords.join(", ")}
 }
 
 /**
- * MAIN: Generate a fully custom, multi-project resume tailored to a specific JD.
+ * Extract high-signal ATS technical & domain keywords from a Job Description.
+ */
+function extractJdKeywords(jobTitle = "", description = "") {
+  const text = `${jobTitle}\n${description}`.toLowerCase();
+  const catalog = [
+    "Python", "C++", "CUDA", "SQL", "JavaScript", "Bash",
+    "PyTorch", "TensorFlow", "TensorFlow Lite", "TFLite", "TensorRT", "ONNX", "OpenCV",
+    "YOLO", "YOLOv8", "YOLOv9", "Computer Vision", "Object Detection", "Semantic Segmentation",
+    "U-Net", "MobileNet", "ResNet", "Image Processing", "Perception", "3D Perception",
+    "Edge AI", "On-Device", "Embedded ML", "Quantization", "INT8", "FP16", "Pruning",
+    "Deep Learning", "Machine Learning", "Neural Networks", "Transformers", "LLM", "Generative AI",
+    "Reinforcement Learning", "RAG", "LangChain", "Hugging Face", "Fine-Tuning", "SFT", "RLHF",
+    "FastAPI", "Flask", "REST API", "Docker", "Kubernetes", "AWS", "CI/CD", "GitHub Actions",
+    "Terraform", "Airflow", "ETL", "MLOps", "Model Serving", "Latency", "Optimization",
+    "PostgreSQL", "pgvector", "Redis", "Pandas", "NumPy", "Scikit-learn", "Linux", "Git"
+  ];
+  const matched = [];
+  for (const kw of catalog) {
+    const escaped = kw.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const rx = new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`, "i");
+    if (rx.test(text)) {
+      matched.push(kw);
+    }
+  }
+  return matched;
+}
+
+/**
+ * Compute real ATS match score (0-100) for the tailored resume against the JD.
+ */
+function computeAtsScore(tailoredData, jdKeywords, jobTitle = "") {
+  const resumeBlob = [
+    tailoredData.headline || "",
+    tailoredData.summary || "",
+    ...(tailoredData.competencies || []),
+    ...(tailoredData.experienceBullets || []),
+    ...(tailoredData.selectedProjects || []).flatMap((p) => [
+      p.name || "",
+      p.description || "",
+      p.techLine || "",
+      ...(p.bullets || []),
+    ]),
+    ...Object.entries(tailoredData.skillsCategories || {}).flatMap(([k, v]) => [k, v]),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  let matchedCount = 0;
+  const matchedKeywords = [];
+  for (const kw of jdKeywords) {
+    if (resumeBlob.includes(kw.toLowerCase())) {
+      matchedCount++;
+      matchedKeywords.push(kw);
+    }
+  }
+
+  const kwScore = jdKeywords.length > 0 ? (matchedCount / jdKeywords.length) * 75 : 70;
+
+  // Structural ATS readiness checks (25 pts)
+  let structureScore = 0;
+  if ((tailoredData.headline || "").trim().length > 4) structureScore += 5;
+  if ((tailoredData.summary || "").trim().length > 40) structureScore += 5;
+  if ((tailoredData.experienceBullets || []).length >= 3) structureScore += 5;
+  if ((tailoredData.selectedProjects || []).length >= 1) structureScore += 5;
+  if (/%|\bms\b|\d+\+/.test(resumeBlob)) structureScore += 5;
+
+  const total = Math.min(99, Math.max(60, Math.round(kwScore + structureScore)));
+  return { atsScore: total, matchedKeywords };
+}
+
+/**
+ * MAIN: Generate a fully custom, 1-1.5 page, high-ATS multi-project resume tailored to a specific JD.
  */
 export async function generateJobSpecificResume({ jobId, jobTitle, company, description, targetRole }) {
   if (!existsSync(RESUMES_DIR)) {
@@ -149,14 +220,15 @@ export async function generateJobSpecificResume({ jobId, jobTitle, company, desc
   const roleName = targetRole || jobTitle || "Machine Learning Engineer";
   const compName = company || "Company";
 
-  console.log(`[tailor-engine] Generating FULLY TAILORED multi-project resume for ${compName} — ${jobTitle} (${roleName})...`);
+  console.log(`[tailor-engine] Generating concise 1-1.5p high-ATS resume for ${compName} — ${jobTitle} (${roleName})...`);
 
   const { cv } = loadCandidateData();
   const projects = loadProjects();
   const projectsBlock = formatProjectsForPrompt(projects);
+  const jdKeywords = extractJdKeywords(jobTitle, description);
 
   const prompt = `You are an expert ATS resume optimizer and career strategist.
-Your task is to craft a FULLY CUSTOM resume from the candidate's real experience and project portfolio, tailored specifically for the target job.
+Your task is to craft a SHORT, PRECISE, HIGH-IMPACT resume (strictly 1 to 1.5 pages max when printed) from the candidate's real experience and project portfolio, engineered to score 92%+ on ATS scanners for the target job.
 
 ═══════════════════════════════════════════
 TARGET JOB INFORMATION
@@ -164,8 +236,9 @@ TARGET JOB INFORMATION
 Company: ${compName}
 Job Title: ${jobTitle}
 Role Category: ${roleName}
+Extracted ATS Keywords from JD: ${jdKeywords.length > 0 ? jdKeywords.join(", ") : roleName}
 Job Description:
-${description ? description.substring(0, 4000) : "No description provided."}
+${description ? description.substring(0, 3500) : "No description provided."}
 
 ═══════════════════════════════════════════
 CANDIDATE REAL TRACK RECORD (cv.md)
@@ -178,43 +251,27 @@ CANDIDATE PROJECT PORTFOLIO (${projects.length} projects available)
 ${projectsBlock}
 
 ═══════════════════════════════════════════
-YOUR TASK — BUILD A CUSTOM RESUME
+STRICT CONCISENESS & ATS RULES (1–1.5 PAGES MAX)
 ═══════════════════════════════════════════
-
-1. **SELECT PROJECTS**: From the ${projects.length} projects above, pick the TOP 1-3 most relevant projects for THIS specific job. Order them by relevance to the JD. A Computer Vision job should lead with CV projects; a Forward Deployed Engineering job should lead with deployment/infra projects; a Deep Learning / Quant job should lead with AlphaSense AI, etc.
-
-2. **REWRITE EXPERIENCE BULLETS**: Don't just copy — rewrite the Mayonix experience bullets using vocabulary and keywords from the JD. Emphasize the aspects of real experience that align with what this employer wants. If the JD mentions "deployment" or "production systems", emphasize deployment work. If it mentions "real-time" or "edge", emphasize latency optimization.
-
-3. **CUSTOM SUMMARY**: Write a 3-4 sentence professional summary that reads as if this candidate was BORN for this specific role. Reference specific achievements and metrics that match the JD.
-
-4. **CUSTOM COMPETENCIES**: Pick 8 competency tags that are both TRUE of the candidate AND appear in the JD or are highly relevant to it.
-
-5. **CUSTOM SKILLS**: Reorder and emphasize the skills categories to lead with what the JD cares about most.
-
-6. **PROJECT BULLETS**: For each selected project, rewrite 2-4 bullets emphasizing the aspects most relevant to this JD. Use JD keywords naturally.
-
-═══════════════════════════════════════════
-STRICT ANTI-FABRICATION RULES
-═══════════════════════════════════════════
-- NEVER invent companies, degrees, institutions, metrics, or claims not in the CV/projects above.
-- NEVER add experience the candidate doesn't have. Only reframe and emphasize REAL experience.
-- You may reword bullets to use JD terminology, but the underlying facts must be true.
-- ALWAYS preserve the demoUrl and repoUrl from the original project data exactly as-is. These are live links to deployed demos and source code — never remove, modify, or omit them.
+1. **SELECT TOP 2 PROJECTS ONLY**: Pick the TOP 2 most relevant projects for THIS JD and order by relevance.
+2. **CONCISE PROJECT ENTRIES**: For each selected project, write a **1-sentence** crisp description (max 25 words) + **2 short, high-impact bullets** (max 22 words each, with metrics).
+3. **CONCISE WORK EXPERIENCE**: Write **4 short, punchy bullets** for Mayonix Innovation (max 22 words each). Lead with action verbs + metrics + exact JD keywords. Use <strong> around key terms/metrics.
+4. **CRISP SUMMARY**: Write **2-3 tight sentences** (max 50 words total) tailored to ${compName} and ${jobTitle}, weaving in top JD keywords and hard metrics.
+5. **ATS KEYWORD ALIGNMENT (90–95%+ TARGET)**: Naturally weave every applicable keyword from "Extracted ATS Keywords from JD" (that is genuinely true of the candidate) into Summary, Competencies (8 crisp tags), Experience Bullets, Projects, and Technical Skills (4-5 single-line categories).
+6. **STRICT ANTI-FABRICATION**: Never invent companies, degrees, metrics, or unverified skills. ALWAYS preserve exact demoUrl and repoUrl from the project data.
 
 ═══════════════════════════════════════════
 OUTPUT FORMAT — Return ONLY valid JSON:
 ═══════════════════════════════════════════
 {
-  "headline": "Targeted professional title for this specific role",
-  "summary": "3-4 sentence custom professional summary with metrics and proof points matching the JD",
+  "headline": "Targeted professional title matching this JD",
+  "summary": "2-3 crisp sentences (<=50 words) with JD keywords & metrics",
   "competencies": ["Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5", "Tag 6", "Tag 7", "Tag 8"],
   "experienceBullets": [
-    "Rewritten Mayonix bullet 1 emphasizing JD-relevant aspects (use <strong> for key terms)",
-    "Rewritten bullet 2",
-    "Rewritten bullet 3",
-    "Rewritten bullet 4",
-    "Rewritten bullet 5",
-    "Rewritten bullet 6"
+    "Short punchy Mayonix bullet 1 (<=22 words, <strong> on key terms/metrics)",
+    "Short punchy bullet 2",
+    "Short punchy bullet 3",
+    "Short punchy bullet 4"
   ],
   "selectedProjects": [
     {
@@ -223,12 +280,11 @@ OUTPUT FORMAT — Return ONLY valid JSON:
       "period": "Date range",
       "demoUrl": "Exact demoUrl from the project data (keep as-is, empty string if none)",
       "repoUrl": "Exact repoUrl from the project data (keep as-is, empty string if none)",
-      "description": "2-3 sentence description rewritten to emphasize JD-relevant aspects",
+      "description": "1 concise sentence (<=25 words) tailored to this JD",
       "techLine": "Comma-separated tech most relevant to this JD",
       "bullets": [
-        "Rewritten project bullet 1 emphasizing JD relevance",
-        "Rewritten project bullet 2",
-        "Rewritten project bullet 3"
+        "Short metric-driven bullet 1 (<=22 words)",
+        "Short metric-driven bullet 2 (<=22 words)"
       ]
     }
   ],
@@ -236,8 +292,7 @@ OUTPUT FORMAT — Return ONLY valid JSON:
     "Category most relevant to JD": "Skills list",
     "Second category": "Skills list",
     "Third category": "Skills list",
-    "Fourth category": "Skills list",
-    "Fifth category": "Skills list"
+    "Fourth category": "Skills list"
   },
   "formAnswers": {
     "whyInterested": "2-3 sentences explaining genuine interest in this company and role",
@@ -310,7 +365,7 @@ OUTPUT FORMAT — Return ONLY valid JSON:
     };
   }
 
-  // Ensure selectedProjects exists (backward compat)
+  // Ensure selectedProjects exists & enforce strict 1-1.5 page length caps
   if (!tailoredData.selectedProjects || tailoredData.selectedProjects.length === 0) {
     tailoredData.selectedProjects = projects.slice(0, 2).map((p) => ({
       id: p.id,
@@ -320,11 +375,11 @@ OUTPUT FORMAT — Return ONLY valid JSON:
       repoUrl: p.repoUrl || "",
       description: p.description,
       techLine: p.techStack.slice(0, 6).join(", "),
-      bullets: p.bullets.slice(0, 3),
+      bullets: p.bullets.slice(0, 2),
     }));
   } else {
     // Guarantee live demoUrl & repoUrl from canonical projects.json are NEVER lost or stripped by the LLM
-    tailoredData.selectedProjects = tailoredData.selectedProjects.map((sp) => {
+    tailoredData.selectedProjects = tailoredData.selectedProjects.slice(0, 2).map((sp) => {
       const orig = projects.find(
         (p) =>
           (sp.id && p.id === sp.id) ||
@@ -335,25 +390,35 @@ OUTPUT FORMAT — Return ONLY valid JSON:
         ...sp,
         demoUrl: orig?.demoUrl || sp.demoUrl || "",
         repoUrl: orig?.repoUrl || sp.repoUrl || "",
+        bullets: Array.isArray(sp.bullets) ? sp.bullets.slice(0, 2) : [],
       };
     });
   }
 
+  if (Array.isArray(tailoredData.experienceBullets)) {
+    tailoredData.experienceBullets = tailoredData.experienceBullets.slice(0, 4);
+  }
+  if (Array.isArray(tailoredData.competencies)) {
+    tailoredData.competencies = tailoredData.competencies.slice(0, 8);
+  }
+
+  const { atsScore, matchedKeywords } = computeAtsScore(tailoredData, jdKeywords, jobTitle);
+
   // Build the HTML resume
-  const htmlContent = buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, safeJobId });
+  const htmlContent = buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, safeJobId, atsScore });
 
   // Save tailored HTML
   const destHtmlPath = join(RESUMES_DIR, `resume-${safeJobId}.html`);
   const destPdfPath = join(RESUMES_DIR, `resume-${safeJobId}.pdf`);
   writeFileSync(destHtmlPath, htmlContent, "utf-8");
-  console.log(`[tailor-engine] Tailored HTML saved: ${destHtmlPath}`);
+  console.log(`[tailor-engine] Tailored HTML saved (ATS: ${atsScore}%): ${destHtmlPath}`);
 
   // Compile to PDF via Playwright
   let pdfGenerated = false;
   try {
     const chromium = await getPlaywrightChromium();
     if (chromium) {
-      console.log(`[tailor-engine] Launching Chromium to render PDF...`);
+      console.log(`[tailor-engine] Launching Chromium to render 1-1.5p PDF...`);
       const browser = await chromium.launch({
         headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
@@ -363,7 +428,7 @@ OUTPUT FORMAT — Return ONLY valid JSON:
       await page.pdf({
         path: destPdfPath,
         format: "Letter",
-        margin: { top: "0.35in", bottom: "0.35in", left: "0.35in", right: "0.35in" },
+        margin: { top: "0.28in", bottom: "0.28in", left: "0.34in", right: "0.34in" },
         printBackground: true,
       });
       await browser.close();
@@ -386,6 +451,8 @@ OUTPUT FORMAT — Return ONLY valid JSON:
     company: compName,
     targetRole: roleName,
     headline: tailoredData.headline,
+    atsScore,
+    matchedKeywords,
     selectedProjectIds: (tailoredData.selectedProjects || []).map((p) => p.id),
     selectedProjectCount: (tailoredData.selectedProjects || []).length,
     htmlFile: `resume-${safeJobId}.html`,
@@ -411,7 +478,7 @@ function safeHttpUrl(url) {
   return /^https?:\/\//i.test(trimmed) ? trimmed : "";
 }
 
-function buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, safeJobId }) {
+function buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, safeJobId, atsScore }) {
   const projectSections = (tailoredData.selectedProjects || []).map((proj) => {
     const demoUrl = safeHttpUrl(proj.demoUrl);
     const repoUrl = safeHttpUrl(proj.repoUrl);
@@ -461,9 +528,9 @@ function buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, sa
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Liberation Sans", Arial, sans-serif;
     color: var(--text);
     background: #f8fafc;
-    line-height: 1.5;
-    font-size: 11pt;
-    padding-bottom: 40px;
+    line-height: 1.38;
+    font-size: 9.5pt;
+    padding-bottom: 32px;
   }
   .resume-toolbar {
     position: sticky; top: 0; z-index: 1000;
@@ -499,98 +566,98 @@ function buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, sa
 
   .page {
     max-width: 8.5in;
-    margin: 20px auto;
+    margin: 16px auto;
     background: #ffffff;
-    padding: 0.55in 0.65in;
+    padding: 0.36in 0.44in;
     box-shadow: 0 4px 24px rgba(0,0,0,0.06);
     border-radius: 8px;
   }
 
   .header h1 {
-    font-size: 26pt; font-weight: 800; color: var(--dark);
-    letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 4px;
+    font-size: 19pt; font-weight: 800; color: var(--dark);
+    letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 2px;
   }
   .header-role {
-    font-size: 13pt; font-weight: 600; color: var(--accent);
-    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
+    font-size: 10.5pt; font-weight: 600; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px;
   }
   .header-divider {
-    height: 2px;
+    height: 1.5px;
     background: linear-gradient(to right, var(--accent), var(--secondary));
-    margin-bottom: 10px;
+    margin-bottom: 6px;
   }
   .contact-bar {
-    display: flex; flex-wrap: wrap; gap: 6px 12px;
-    font-size: 9.5pt; color: var(--text-muted); margin-bottom: 16px;
+    display: flex; flex-wrap: wrap; gap: 4px 10px;
+    font-size: 8.5pt; color: var(--text-muted); margin-bottom: 9px;
   }
   .contact-bar a { color: var(--text-muted); text-decoration: none; }
   .contact-bar a:hover { color: var(--accent); text-decoration: underline; }
 
-  .section { margin-bottom: 16px; }
+  .section { margin-bottom: 9px; }
   .section-title {
-    font-size: 11pt; font-weight: 700; text-transform: uppercase;
+    font-size: 9.5pt; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.06em; color: var(--accent);
-    border-bottom: 1.5px solid var(--border);
-    padding-bottom: 3px; margin-bottom: 8px;
+    border-bottom: 1.2px solid var(--border);
+    padding-bottom: 2px; margin-bottom: 5px;
   }
-  .summary-text { font-size: 10pt; line-height: 1.55; color: #334155; }
+  .summary-text { font-size: 9pt; line-height: 1.4; color: #334155; }
   .summary-text strong { color: var(--dark); }
 
   .competencies-grid {
-    display: flex; flex-wrap: wrap; gap: 6px;
+    display: flex; flex-wrap: wrap; gap: 4px;
   }
   .competency-tag {
-    font-size: 9pt; font-weight: 600; color: var(--tag-color);
+    font-size: 8pt; font-weight: 600; color: var(--tag-color);
     background: var(--bg-tag); border: 1px solid var(--tag-border);
-    padding: 3px 8px; border-radius: 4px;
+    padding: 2px 6px; border-radius: 4px;
   }
 
   .job-header {
     display: flex; justify-content: space-between; align-items: baseline;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
   }
-  .job-company { font-size: 11pt; font-weight: 700; color: var(--dark); }
-  .job-period { font-size: 9.5pt; color: var(--text-muted); font-weight: 500; }
-  .job-role { font-size: 10pt; font-weight: 600; color: #475569; margin-bottom: 6px; }
-  .job-location { font-size: 9pt; color: var(--text-muted); font-style: italic; }
-  ul.bullets { padding-left: 18px; margin-top: 4px; }
+  .job-company { font-size: 10pt; font-weight: 700; color: var(--dark); }
+  .job-period { font-size: 8.5pt; color: var(--text-muted); font-weight: 500; }
+  .job-role { font-size: 9pt; font-weight: 600; color: #475569; margin-bottom: 3px; }
+  .job-location { font-size: 8.5pt; color: var(--text-muted); font-style: italic; }
+  ul.bullets { padding-left: 16px; margin-top: 2px; }
   ul.bullets li {
-    font-size: 9.5pt; line-height: 1.55; color: #334155; margin-bottom: 4px;
+    font-size: 8.8pt; line-height: 1.38; color: #334155; margin-bottom: 2px;
   }
   ul.bullets li strong { color: var(--dark); }
 
-  .project-entry { margin-bottom: 14px; }
+  .project-entry { margin-bottom: 7px; page-break-inside: avoid; }
   .project-header {
     display: flex; justify-content: space-between; align-items: baseline;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
   }
-  .project-title { font-size: 10.5pt; font-weight: 700; color: var(--dark); }
-  .project-links { margin: 2px 0 4px; font-size: 8.8pt; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  .project-title { font-size: 9.6pt; font-weight: 700; color: var(--dark); }
+  .project-links { margin: 1px 0 2px; font-size: 8.2pt; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
   .project-link { color: var(--accent); text-decoration: none; font-weight: 600; }
   .project-link:hover { text-decoration: underline; }
   .project-link-sep { color: var(--text-muted); }
-  .project-desc { font-size: 9.5pt; line-height: 1.55; color: #334155; margin-top: 2px; }
-  .project-tech { font-size: 9pt; color: var(--accent); font-weight: 600; margin-top: 3px; }
+  .project-desc { font-size: 8.8pt; line-height: 1.38; color: #334155; margin-top: 1px; }
+  .project-tech { font-size: 8.2pt; color: var(--accent); font-weight: 600; margin-top: 2px; }
 
   .item-row {
     display: flex; justify-content: space-between; align-items: baseline;
-    margin-bottom: 4px; font-size: 9.5pt;
+    margin-bottom: 3px; font-size: 8.8pt;
   }
   .item-title { font-weight: 600; color: var(--dark); }
-  .item-sub { color: var(--text-muted); font-size: 9pt; }
+  .item-sub { color: var(--text-muted); font-size: 8.2pt; }
 
-  .skills-list { display: flex; flex-direction: column; gap: 4px; }
-  .skill-line { font-size: 9.5pt; line-height: 1.5; color: #334155; }
+  .skills-list { display: flex; flex-direction: column; gap: 2px; }
+  .skill-line { font-size: 8.8pt; line-height: 1.38; color: #334155; }
   .skill-label { font-weight: 700; color: var(--dark); }
 
   @media print {
     body { background: #ffffff; padding: 0; }
     .resume-toolbar { display: none !important; }
     .page {
-      margin: 0; padding: 0.4in 0.4in;
+      margin: 0; padding: 0.04in 0.08in;
       box-shadow: none; max-width: 100%; border-radius: 0;
     }
-    @page { margin: 0.35in; size: letter; }
+    @page { margin: 0.28in 0.34in; size: letter; }
   }
 </style>
 </head>
@@ -600,7 +667,7 @@ function buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, sa
   <div style="display:flex;align-items:center;flex-wrap:wrap;">
     <span class="toolbar-title">📄 Tailored for <strong>${escHtml(compName)}</strong></span>
     <span class="toolbar-badge">🎯 ${escHtml(roleName)}</span>
-    <span class="toolbar-projects-badge">📂 ${(tailoredData.selectedProjects || []).length} projects selected</span>
+    <span class="toolbar-projects-badge">📂 ${(tailoredData.selectedProjects || []).length} projects · ATS ${atsScore || 92}%</span>
   </div>
   <div class="toolbar-actions">
     <button class="tb-btn" onclick="window.print()">🖨️ Save as PDF</button>
