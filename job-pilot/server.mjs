@@ -738,8 +738,25 @@ app.post("/api/jobs/:id/tailor-resume", async (req, res) => {
   try {
     const { id } = req.params;
     const jobs = loadJobs();
-    const job = jobs.find((j) => j._id === id);
-    if (!job) return res.status(404).json({ error: "Job not found" });
+    const clientJob = req.body?.job || null;
+    let job = jobs.find((j) => j._id === id);
+
+    // Re-hydrate job from client payload if Render's ephemeral disk reset after redeploy
+    if (!job && clientJob) {
+      const clientUrl = (clientJob.job_url || clientJob.link || "").trim();
+      job = clientUrl ? jobs.find((j) => (j.job_url || j.link || "").trim() === clientUrl) : null;
+      if (!job) {
+        job = {
+          ...clientJob,
+          _id: id,
+          _status: clientJob._status || "new",
+          _scannedAt: clientJob._scannedAt || new Date().toISOString(),
+        };
+        jobs.unshift(job);
+      }
+    }
+
+    if (!job) return res.status(404).json({ error: "Job not found. Please tap Refresh Feed or re-scan." });
 
     const jobTitle = job.title || "Machine Learning Engineer";
     const company = job.company_name || job.company || "Company";
@@ -748,7 +765,7 @@ app.post("/api/jobs/:id/tailor-resume", async (req, res) => {
 
     console.log(`[resume] Tailoring personal resume for job ${id}: ${company} — ${jobTitle} (${targetRole})`);
     const result = await tailorResumeForJob({
-      jobId: id,
+      jobId: job._id || id,
       jobTitle,
       company,
       description,
@@ -771,13 +788,12 @@ app.get("/api/jobs/:id/resume.pdf", async (req, res) => {
     const { id } = req.params;
     const jobs = loadJobs();
     const job = jobs.find((j) => j._id === id);
-    if (!job) return res.status(404).send("Job not found");
 
     const safeJobId = id.replace(/[^a-zA-Z0-9_-]/g, "_");
     const localPdf = join(__dirname, "data", "resumes", `resume-${safeJobId}.pdf`);
     const localHtml = join(__dirname, "data", "resumes", `resume-${safeJobId}.html`);
 
-    if (!existsSync(localPdf)) {
+    if (!existsSync(localPdf) && job) {
       try {
         console.log(`[resume] Auto-generating role-specific resume PDF on-demand for ${id}...`);
         const jobTitle = job.title || "Machine Learning Engineer";
@@ -792,7 +808,7 @@ app.get("/api/jobs/:id/resume.pdf", async (req, res) => {
       }
     }
 
-    const compSlug = (job.company_name || job.company || "Company").replace(/[^a-zA-Z0-9]/g, "_");
+    const compSlug = (job?.company_name || job?.company || "Company").replace(/[^a-zA-Z0-9]/g, "_");
     if (existsSync(localPdf)) {
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `inline; filename="Prakhar_Chaubey_Resume_${compSlug}.pdf"`);
@@ -804,6 +820,7 @@ app.get("/api/jobs/:id/resume.pdf", async (req, res) => {
       return res.sendFile(localHtml);
     }
 
+    if (!job) return res.status(404).send("Job not found. Please tap Refresh Feed and re-tailor.");
     res.status(404).send("Resume not found. Click 'Tailor My Resume' in Job Pilot to generate.");
   } catch (err) {
     res.status(500).send("Error serving resume: " + err.message);

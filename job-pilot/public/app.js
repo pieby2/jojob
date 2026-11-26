@@ -1413,12 +1413,14 @@ async function evaluateJobInFlow(jobId) {
 
 async function tailorResumeInFlow(jobId) {
   showLoading("🔍 Analyzing your project portfolio against this JD...\n📂 Selecting most relevant projects for this role...\n✍️ Rewriting experience bullets with JD keywords...\n📄 Generating custom HTML + PDF resume...");
+  const job = allJobs.find((j) => j._id === jobId);
   try {
     const res = await fetchWithRetry(
       `/api/jobs/${encodeURIComponent(jobId)}/tailor-resume`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ job }),
         timeoutMs: 45000,
       },
       1
@@ -1426,7 +1428,6 @@ async function tailorResumeInFlow(jobId) {
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
-    const job = allJobs.find((j) => j._id === jobId);
     if (job) {
       job._tailoredResume = data;
     }
