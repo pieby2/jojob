@@ -72,6 +72,9 @@ function loadCV() {
 // --- Role Detection Helper ---
 export function detectJobRole(title = "", desc = "") {
   const text = `${title} ${desc}`.toLowerCase();
+  if (text.includes("forward deployed") || text.includes("forward-deployed") || text.includes("solutions engineer") || text.includes("field ai") || text.includes("customer engineer")) {
+    return "Forward Deployed Engineer";
+  }
   if (text.includes("computer vision") || text.includes("opencv") || text.includes("yolo") || text.includes("image processing") || text.includes("perception") || text.includes("segmentation")) {
     return "Computer Vision Engineer";
   }

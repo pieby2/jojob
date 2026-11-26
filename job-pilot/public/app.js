@@ -354,6 +354,9 @@ function getJobExperience(job) {
 
 function detectRoleClient(title = "", desc = "") {
   const text = `${title} ${desc}`.toLowerCase();
+  if (text.includes("forward deployed") || text.includes("forward-deployed") || text.includes("solutions engineer") || text.includes("field ai") || text.includes("customer engineer")) {
+    return "Forward Deployed Engineer";
+  }
   if (text.includes("computer vision") || text.includes("opencv") || text.includes("yolo") || text.includes("image processing") || text.includes("perception") || text.includes("segmentation") || text.includes("camera") || text.includes("video analytics")) {
     return "Computer Vision Engineer";
   }

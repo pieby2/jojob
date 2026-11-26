@@ -36,6 +36,8 @@ from jobspy import scrape_jobs
 def detect_job_role(title="", desc=""):
     """Detect matching candidate target role category from title and description."""
     t = f"{title} {desc}".lower()
+    if any(k in t for k in ["forward deployed", "forward-deployed", "fde", "solutions engineer", "field ai engineer", "customer engineer"]):
+        return "Forward Deployed Engineer"
     if any(k in t for k in ["computer vision", "opencv", "yolo", "image processing", "perception", "segmentation", "camera", "video analytics"]):
         return "Computer Vision Engineer"
     if any(k in t for k in ["edge ai", "embedded ml", "tensorrt", "tflite", "quantization", "on-device", "edge device", "sub-100ms", "cuda"]):
@@ -185,6 +187,7 @@ def main():
         search_queries = [
             "Machine Learning Engineer",
             "Computer Vision Engineer",
+            "Forward Deployed Engineer",
         ]
 
     all_records = []

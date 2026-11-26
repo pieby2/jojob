@@ -23,6 +23,8 @@ def _resolve_role_slugs(query="machine-learning-engineer"):
         return ["machine-learning-engineer", "computer-vision-engineer", "ai-engineer"]
     
     slugs = []
+    if "forward" in q or "deployed" in q or "solutions" in q:
+        slugs.extend(["software-engineer", "ai-engineer"])
     if "vision" in q or "opencv" in q or "yolo" in q or "image" in q or "perception" in q:
         slugs.append("computer-vision-engineer")
     if "machine" in q or "ml" in q:
