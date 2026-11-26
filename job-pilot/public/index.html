@@ -47,6 +47,11 @@
           <span class="tab-text">All Jobs</span>
           <span class="badge-count" id="header-jobs-badge">0</span>
         </button>
+        <button class="tab-btn" data-view="recommended-projects" role="tab" aria-selected="false">
+          <span class="tab-icon">✨</span>
+          <span class="tab-text">Projects</span>
+          <span class="badge-count" id="header-projects-badge">0</span>
+        </button>
         <button class="tab-btn" data-view="history" role="tab" aria-selected="false">
           <span class="tab-icon">📜</span>
           <span class="tab-text">Tracker</span>
@@ -65,6 +70,10 @@
       <span class="mobile-tab-icon">💼</span>
       <span class="mobile-tab-label">Jobs</span>
       <span class="mobile-badge" id="mobile-jobs-badge">0</span>
+    </button>
+    <button class="mobile-tab-btn" data-view="recommended-projects">
+      <span class="mobile-tab-icon">✨</span>
+      <span class="mobile-tab-label">Projects</span>
     </button>
     <button class="mobile-tab-btn" data-view="history">
       <span class="mobile-tab-icon">📜</span>
@@ -190,6 +199,11 @@
             </button>
           </div>
 
+          <div class="search-projects-hint" style="margin-top:10px;">
+            <span>✨ Want to see real projects people showcased on X, LinkedIn &amp; dev socials for this role?</span>
+            <button class="btn btn-ghost btn-sm" onclick="openRecommendedProjectsFromScanner()">View Recommended Projects →</button>
+          </div>
+
           <div id="scan-status" class="status-msg hidden"></div>
         </div>
       </section>
@@ -230,6 +244,10 @@
           <span class="search-icon">🔎</span>
           <input type="text" id="job-search-input" class="search-input" placeholder="Search by title, company, technology (e.g. YOLO, PyTorch, TensorRT, Optum)..." oninput="applySortAndFilter()">
           <button class="clear-search-btn" onclick="clearSearch()" id="clear-search-btn" style="display:none;">✕</button>
+        </div>
+        <div id="job-search-projects-hint" class="search-projects-hint">
+          <span id="job-search-projects-hint-text">✨ Discover social-media project showcases for this role in the Recommended Projects tab</span>
+          <button class="btn btn-ghost btn-sm" onclick="openRecommendedProjectsFromJobSearch()">Explore Recommended Projects →</button>
         </div>
 
         <!-- Ranking Dropdown & Experience Priority -->
@@ -297,7 +315,79 @@
       </div>
     </main>
 
-    <!-- VIEW 3: Career-Ops Tracker -->
+    <!-- VIEW 3: Recommended Projects (Social & Dev Showcases) -->
+    <main id="view-recommended-projects" class="view">
+      <div class="view-header-row">
+        <div>
+          <h2>✨ Recommended Projects from Social Showcases</h2>
+          <p class="view-sub">Discover real projects engineers built &amp; shared on X/Twitter, LinkedIn, Hacker News, Dev.to, Hugging Face, Medium &amp; GitHub for a target role</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="searchRecommendedProjects(true)">↻ Refresh</button>
+      </div>
+
+      <section class="filter-panel">
+        <div class="social-search-row">
+          <div class="search-bar-wrap" style="flex:1;margin-bottom:0;">
+            <span class="search-icon">🚀</span>
+            <input type="text" id="social-project-query" class="search-input" value="Computer Vision Engineer" placeholder="Enter target role or domain (e.g. Forward Deployed Engineer, Computer Vision, Edge AI)..." onkeydown="if(event.key==='Enter'){searchRecommendedProjects();}">
+          </div>
+          <button id="btn-search-social-projects" class="btn btn-primary" onclick="searchRecommendedProjects()">
+            🔎 Search Social Projects
+          </button>
+        </div>
+
+        <!-- Quick Role Presets -->
+        <div class="filter-pills-container" style="margin-top:12px;">
+          <div class="pill-group-row">
+            <span class="pill-group-label">ROLE:</span>
+            <div class="pill-scroll-list">
+              <button class="filter-pill" onclick="setSocialRolePreset('Computer Vision Engineer')">👁️ Computer Vision</button>
+              <button class="filter-pill" onclick="setSocialRolePreset('Forward Deployed Engineer')">🚀 Forward Deployed Eng</button>
+              <button class="filter-pill" onclick="setSocialRolePreset('Machine Learning Engineer')">🤖 ML Engineer</button>
+              <button class="filter-pill" onclick="setSocialRolePreset('Edge AI Engineer')">⚡ Edge AI</button>
+              <button class="filter-pill" onclick="setSocialRolePreset('Deep Learning LLM Engineer')">🧠 Deep Learning / LLM</button>
+              <button class="filter-pill" onclick="setSocialRolePreset('MLOps Engineer')">⚙️ MLOps</button>
+            </div>
+          </div>
+
+          <!-- Platform Filter Row -->
+          <div class="pill-group-row">
+            <span class="pill-group-label">SOURCE:</span>
+            <div class="pill-scroll-list social-platform-pills">
+              <button class="filter-pill active" data-platform="all" onclick="setSocialPlatformFilter('all')">🌐 All Platforms</button>
+              <button class="filter-pill" data-platform="x" onclick="setSocialPlatformFilter('x')">𝕏 X / Twitter</button>
+              <button class="filter-pill" data-platform="linkedin" onclick="setSocialPlatformFilter('linkedin')">💼 LinkedIn</button>
+              <button class="filter-pill" data-platform="hackernews" onclick="setSocialPlatformFilter('hackernews')">🟧 Hacker News</button>
+              <button class="filter-pill" data-platform="devto" onclick="setSocialPlatformFilter('devto')">👩‍💻 Dev.to</button>
+              <button class="filter-pill" data-platform="huggingface" onclick="setSocialPlatformFilter('huggingface')">🤗 Hugging Face</button>
+              <button class="filter-pill" data-platform="medium" onclick="setSocialPlatformFilter('medium')">✍️ Medium</button>
+              <button class="filter-pill" data-platform="github" onclick="setSocialPlatformFilter('github')">🐙 GitHub</button>
+              <button class="filter-pill" data-platform="saved" onclick="setSocialPlatformFilter('saved')">📌 Saved (<span id="saved-projects-count">0</span>)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Direct Live Search Links for X/Twitter & LinkedIn -->
+        <div class="social-direct-bar">
+          <span class="social-direct-label">Live Social Feeds for "<strong id="social-query-label">Computer Vision Engineer</strong>":</span>
+          <div class="social-direct-actions">
+            <a id="direct-x-search-link" href="https://x.com/search?q=computer%20vision%20built%20project&f=live" target="_blank" rel="noopener" class="btn btn-outline btn-sm">𝕏 Search Posts on X</a>
+            <a id="direct-linkedin-search-link" href="https://www.linkedin.com/search/results/content/?keywords=computer%20vision%20project%20built" target="_blank" rel="noopener" class="btn btn-outline btn-sm">💼 Search Posts on LinkedIn</a>
+          </div>
+        </div>
+      </section>
+
+      <div id="recommended-projects-meta" class="recommended-projects-meta hidden"></div>
+
+      <div id="recommended-projects-list" class="recommended-projects-grid">
+        <div class="empty-state">
+          <div class="empty-icon">✨</div>
+          <p>Choose a role above or click <strong>Search Social Projects</strong> to discover showcased projects and descriptions.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- VIEW 4: Career-Ops Tracker -->
     <main id="view-history" class="view">
       <div class="view-header-row">
         <div>

@@ -11,6 +11,18 @@ let currentExpFilter = "all";   // "all", "entry", "mid", "senior"
 let currentRoleFilter = "all";  // "all", "Computer Vision", "Machine Learning", "Edge AI", etc.
 let currentTimeFilter = "all";  // "all", "24h", "3d", "7d"
 let searchQuery = "";
+let recommendedProjects = [];
+let currentSocialPlatform = "all";
+let lastSocialQuery = "";
+let lastSocialSources = {};
+const SAVED_PROJECTS_KEY = "job_pilot_saved_social_projects_v1";
+let savedSocialProjects = (() => {
+  try {
+    return JSON.parse(localStorage.getItem(SAVED_PROJECTS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+})();
 
 // Wizard / Stepper Flow State
 let activeFlowJobId = null;
@@ -145,6 +157,13 @@ function initNavigation() {
       loadTracked();
     } else if (viewName === "dashboard") {
       loadStats();
+    } else if (viewName === "recommended-projects") {
+      updateSavedProjectsCount();
+      if (recommendedProjects.length === 0) {
+        searchRecommendedProjects();
+      } else {
+        renderRecommendedProjects();
+      }
     }
   };
 
@@ -443,6 +462,7 @@ function applySortAndFilter() {
   searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : "";
   const clearBtn = document.getElementById("clear-search-btn");
   if (clearBtn) clearBtn.style.display = searchQuery ? "block" : "none";
+  updateJobSearchProjectsHint();
 
   let filtered = allJobs.filter((j) => j._status === "new" || j._status === "saved");
 
@@ -1743,6 +1763,10 @@ async function scanJobs() {
     if (data.new > 0) {
       document.querySelector('[data-view="jobs"]')?.click();
     }
+    if (query && query !== "all") {
+      const spInput = document.getElementById("social-project-query");
+      if (spInput) spInput.value = query;
+    }
   } catch (e) {
     console.error("Scan error:", e);
     const isNetwork = e.message.includes("fetch") || e.name === "AbortError" || e.name === "TypeError";
@@ -1890,4 +1914,259 @@ function escHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+// =========================================================================
+// RECOMMENDED PROJECTS (SOCIAL SHOWCASE SEARCH TAB)
+// =========================================================================
+
+function getActiveRoleOrSearchTerm() {
+  const rawSearch = document.getElementById("job-search-input")?.value?.trim();
+  if (rawSearch) return rawSearch;
+  if (currentRoleFilter && currentRoleFilter !== "all") return `${currentRoleFilter} Engineer`;
+  const scanVal = document.getElementById("scan-query")?.value;
+  if (scanVal && scanVal !== "all") return scanVal;
+  return "Computer Vision Engineer";
+}
+
+function updateJobSearchProjectsHint() {
+  const hintEl = document.getElementById("job-search-projects-hint-text");
+  if (!hintEl) return;
+  const term = getActiveRoleOrSearchTerm();
+  hintEl.innerHTML = `✨ Discover real projects people showcased on X, LinkedIn &amp; dev socials for <strong>"${escHtml(term)}"</strong>`;
+}
+
+function openRecommendedProjectsFromJobSearch() {
+  const term = getActiveRoleOrSearchTerm();
+  openRecommendedProjectsFor(term);
+}
+
+function openRecommendedProjectsFromScanner() {
+  const scanVal = document.getElementById("scan-query")?.value;
+  const term = scanVal && scanVal !== "all" ? scanVal : "Computer Vision Engineer";
+  openRecommendedProjectsFor(term);
+}
+
+function openRecommendedProjectsFor(roleOrQuery) {
+  const input = document.getElementById("social-project-query");
+  if (input && roleOrQuery) input.value = roleOrQuery;
+  document.querySelector('.tab-btn[data-view="recommended-projects"]')?.click();
+  searchRecommendedProjects(true);
+}
+
+function setSocialRolePreset(role) {
+  const input = document.getElementById("social-project-query");
+  if (input) input.value = role;
+  searchRecommendedProjects(true);
+}
+
+function setSocialPlatformFilter(platform) {
+  currentSocialPlatform = platform;
+  document.querySelectorAll(".social-platform-pills .filter-pill").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.platform === platform);
+  });
+  renderRecommendedProjects();
+}
+
+function updateSavedProjectsCount() {
+  setElText("saved-projects-count", savedSocialProjects.length);
+}
+
+function updateSocialDirectLinks(query) {
+  const clean = (query || "Computer Vision Engineer").trim();
+  setElText("social-query-label", clean);
+  const xLink = document.getElementById("direct-x-search-link");
+  const liLink = document.getElementById("direct-linkedin-search-link");
+  if (xLink) {
+    const q = encodeURIComponent(`("${clean}") (built OR project OR showcase OR demo)`);
+    xLink.href = `https://x.com/search?q=${q}&f=live`;
+  }
+  if (liLink) {
+    const q = encodeURIComponent(`${clean} project built demo`);
+    liLink.href = `https://www.linkedin.com/search/results/content/?keywords=${q}&sortBy=%22relevance%22`;
+  }
+}
+
+async function searchRecommendedProjects(forceRefresh = false) {
+  const input = document.getElementById("social-project-query");
+  const query = (input?.value || "Computer Vision Engineer").trim() || "Computer Vision Engineer";
+  updateSocialDirectLinks(query);
+
+  if (!forceRefresh && lastSocialQuery.toLowerCase() === query.toLowerCase() && recommendedProjects.length > 0) {
+    renderRecommendedProjects();
+    return;
+  }
+
+  const btn = document.getElementById("btn-search-social-projects");
+  const list = document.getElementById("recommended-projects-list");
+  const meta = document.getElementById("recommended-projects-meta");
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "⏳ Searching Social Showcases...";
+  }
+  if (list) {
+    list.innerHTML = `
+      <div class="empty-state" style="grid-column:1 / -1;">
+        <div class="empty-icon">🔍</div>
+        <p>Searching X/Twitter, LinkedIn, Hacker News, Dev.to, Hugging Face, Medium &amp; GitHub for <strong>${escHtml(query)}</strong> projects...</p>
+      </div>`;
+  }
+  if (meta) meta.classList.add("hidden");
+
+  try {
+    const res = await fetchWithRetry(
+      `/api/recommended-projects?query=${encodeURIComponent(query)}&platform=all`,
+      { timeoutMs: 32000 },
+      1,
+      800
+    );
+    const data = await res.json();
+    if (data.error && (!data.projects || data.projects.length === 0)) {
+      throw new Error(data.error);
+    }
+
+    recommendedProjects = data.projects || [];
+    lastSocialQuery = query;
+    lastSocialSources = data.sources || {};
+
+    if (data.socialSearchLinks?.xUrl) {
+      const xLink = document.getElementById("direct-x-search-link");
+      if (xLink) xLink.href = data.socialSearchLinks.xUrl;
+    }
+    if (data.socialSearchLinks?.linkedinUrl) {
+      const liLink = document.getElementById("direct-linkedin-search-link");
+      if (liLink) liLink.href = data.socialSearchLinks.linkedinUrl;
+    }
+
+    setElText("header-projects-badge", recommendedProjects.length);
+    updateSavedProjectsCount();
+    renderRecommendedProjects();
+  } catch (e) {
+    console.error("Social projects search error:", e);
+    if (list) {
+      list.innerHTML = `
+        <div class="empty-state" style="grid-column:1 / -1;">
+          <div class="empty-icon">⚠️</div>
+          <p>Could not fetch social project showcases: ${escHtml(e.message)}</p>
+          <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="searchRecommendedProjects(true)">↻ Try Again</button>
+        </div>`;
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "🔎 Search Social Projects";
+    }
+  }
+}
+
+function toggleSaveRecommendedProject(projectId) {
+  const existingIdx = savedSocialProjects.findIndex((p) => p.id === projectId);
+  if (existingIdx !== -1) {
+    savedSocialProjects.splice(existingIdx, 1);
+    showToast("Removed from saved project ideas");
+  } else {
+    const found = recommendedProjects.find((p) => p.id === projectId);
+    if (!found) return;
+    savedSocialProjects.unshift(found);
+    showToast(`Saved "${found.projectName}" to Ideas`);
+  }
+  try {
+    localStorage.setItem(SAVED_PROJECTS_KEY, JSON.stringify(savedSocialProjects.slice(0, 40)));
+  } catch {}
+  updateSavedProjectsCount();
+  renderRecommendedProjects();
+}
+
+function renderRecommendedProjects() {
+  const list = document.getElementById("recommended-projects-list");
+  const meta = document.getElementById("recommended-projects-meta");
+  if (!list) return;
+
+  const savedIds = new Set(savedSocialProjects.map((p) => p.id));
+  let items = currentSocialPlatform === "saved" ? savedSocialProjects : recommendedProjects;
+
+  if (currentSocialPlatform !== "all" && currentSocialPlatform !== "saved") {
+    items = items.filter((p) => p.platformKey === currentSocialPlatform);
+  }
+
+  if (meta) {
+    const sourceSummary = Object.entries(lastSocialSources || {})
+      .filter(([, count]) => count > 0)
+      .map(([name, count]) => `${name}: ${count}`)
+      .join(" · ");
+    meta.innerHTML = `
+      <span>Showing <strong>${items.length}</strong> showcased project(s) for <strong>${escHtml(lastSocialQuery || getActiveRoleOrSearchTerm())}</strong></span>
+      <span>${sourceSummary ? `Sources: ${escHtml(sourceSummary)}` : ""}</span>
+    `;
+    meta.classList.remove("hidden");
+  }
+
+  if (items.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state" style="grid-column:1 / -1;">
+        <div class="empty-icon">✨</div>
+        <p>${
+          currentSocialPlatform === "saved"
+            ? "No saved project ideas yet. Click '📌 Save Idea' on any showcased project!"
+            : "No showcased posts returned for this source filter. Try '🌐 All Platforms' or use the live X / LinkedIn search buttons above."
+        }</p>
+      </div>`;
+    return;
+  }
+
+  const platformIcon = {
+    x: "𝕏",
+    linkedin: "💼",
+    hackernews: "🟧",
+    devto: "👩‍💻",
+    huggingface: "🤗",
+    medium: "✍️",
+    github: "🐙",
+  };
+
+  list.innerHTML = items.map((proj) => {
+    const isSaved = savedIds.has(proj.id);
+    const pKey = proj.platformKey || "github";
+    const icon = platformIcon[pKey] || "🚀";
+    return `
+      <article class="social-project-card">
+        <div class="social-card-top">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="platform-badge platform-${escHtml(pKey)}">${icon} ${escHtml(proj.platform)}</span>
+            ${proj.targetRole ? `<span class="tag-badge badge-role">🎯 ${escHtml(proj.targetRole)}</span>` : ""}
+          </div>
+          <span class="social-engagement">${escHtml(proj.engagement || "")}</span>
+        </div>
+
+        <div class="project-what-box">
+          <div class="project-what-label">What the Project Was</div>
+          <div class="project-what-title">${escHtml(proj.projectName)}</div>
+          <div class="project-author-line">By <strong>${escHtml(proj.author || "Builder")}</strong> · Post: ${escHtml(proj.postTitle)}</div>
+        </div>
+
+        <div>
+          <div class="project-what-label" style="color:#a78bfa;">Project Description</div>
+          <p class="project-desc-text">${escHtml(proj.projectDescription)}</p>
+        </div>
+
+        ${proj.roleRelevance ? `<div class="project-role-fit">💡 <strong>Why it works for this role:</strong> ${escHtml(proj.roleRelevance)}</div>` : ""}
+
+        ${proj.techTags && proj.techTags.length > 0 ? `
+        <div class="job-meta-tags">
+          ${proj.techTags.map((t) => `<span class="tag-badge">${escHtml(t)}</span>`).join("")}
+        </div>` : ""}
+
+        <div class="social-card-actions">
+          <a href="${escHtml(proj.postUrl)}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
+            🔗 View Original Post
+          </a>
+          ${proj.demoUrl ? `<a href="${escHtml(proj.demoUrl)}" target="_blank" rel="noopener" class="btn btn-outline btn-sm">🚀 Live Demo</a>` : ""}
+          <button class="btn btn-ghost btn-sm" onclick="toggleSaveRecommendedProject('${escHtml(proj.id)}')">
+            ${isSaved ? "✅ Saved" : "📌 Save Idea"}
+          </button>
+        </div>
+      </article>
+    `;
+  }).join("");
 }

@@ -30,6 +30,7 @@ import {
 
 import { autofillJobApplication } from "./lib/form-autofiller.mjs";
 import { loadProjects, saveProjects } from "./lib/tailor-engine.mjs";
+import { searchRecommendedProjects } from "./lib/social-projects.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -1098,6 +1099,20 @@ app.delete("/api/projects/:id", (req, res) => {
     res.json({ ok: true, remaining: projects.length });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// 22. GET /api/recommended-projects — Search real social/dev project showcases for a role
+app.get("/api/recommended-projects", async (req, res) => {
+  try {
+    const query = (req.query.query || req.query.role || "Computer Vision Engineer").toString().trim();
+    const platform = (req.query.platform || "all").toString().trim();
+    console.log(`[recommended-projects] Searching social showcases: query="${query}", platform="${platform}"`);
+    const result = await searchRecommendedProjects(query, platform);
+    res.json(result);
+  } catch (err) {
+    console.error("Recommended projects search error:", err);
+    res.status(500).json({ error: err.message, projects: [] });
   }
 });
 
