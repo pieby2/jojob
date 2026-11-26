@@ -4,6 +4,8 @@
     "name": "AlphaSense AI — Multi-Model Deep Learning Trading System",
     "domain": "Deep Learning / Generative AI",
     "period": "2025 – 2026",
+    "demoUrl": "https://huggingface.co/spaces/pieby2/AlphaSense-AI",
+    "repoUrl": "https://github.com/pieby2/AlphaSense-AI",
     "description": "Built a multi-branch deep learning system fusing Temporal Fusion Transformer, Bidirectional Mamba, Stockformer (CNN-Transformer), and Graph Attention Network outputs with regime-conditioned gating. Implemented Deep Reinforcement Learning ensemble (PPO, A2C, DDPG) on Stable-Baselines3. Deployed the full-stack system with FastAPI on Hugging Face Spaces with real-time indicators and Gemini API integration.",
     "techStack": ["PyTorch", "Temporal Fusion Transformer", "Bidirectional Mamba", "Stockformer", "Graph Attention Network", "Stable-Baselines3", "PPO", "A2C", "DDPG", "FastAPI", "Hugging Face Spaces", "Gemini API"],
     "bullets": [
@@ -19,6 +21,8 @@
     "name": "Real-Time Edge Computer Vision System — Mayonix Innovation",
     "domain": "Computer Vision / Edge AI",
     "period": "Feb 2026 – Present",
+    "demoUrl": "",
+    "repoUrl": "",
     "description": "Developed and deployed production computer vision models on mobile edge devices for real-time item detection and visual search. Achieved 92%+ mAP with YOLOv8/v9 and sub-100ms inference latency on iOS/Android via INT8/FP16 quantization, TensorRT, TFLite, and structured pruning.",
     "techStack": ["YOLOv8", "YOLOv9", "TensorRT", "TFLite", "ONNX", "INT8/FP16 Quantization", "MobileNetV3", "U-Net", "OpenCV", "NumPy", "PyTorch", "React Native", "CUDA"],
     "bullets": [
@@ -36,6 +40,8 @@
     "name": "Client-Facing ML Solutions Platform — Forward Deployed Engineering",
     "domain": "Forward Deployed Engineering / ML Systems",
     "period": "2025 – 2026",
+    "demoUrl": "",
+    "repoUrl": "https://github.com/pieby2",
     "description": "Built and deployed end-to-end ML solutions for enterprise clients, integrating custom models into existing infrastructure. Designed APIs, data pipelines, and deployment workflows that bridge research prototypes and production systems, working directly with stakeholders to understand requirements and deliver measurable outcomes.",
     "techStack": ["Python", "FastAPI", "Docker", "Kubernetes", "AWS", "PostgreSQL", "Redis", "CI/CD", "GitHub Actions", "Terraform", "Apache Airflow", "SQL", "REST APIs"],
     "bullets": [

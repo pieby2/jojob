@@ -127,6 +127,8 @@ PROJECT ${i + 1} [ID: ${p.id}]
 Domain: ${p.domain}
 Name: ${p.name}
 Period: ${p.period}
+Live Demo: ${p.demoUrl || "N/A"}
+Repository: ${p.repoUrl || "N/A"}
 Description: ${p.description}
 Tech Stack: ${p.techStack.join(", ")}
 Key Bullets:
@@ -197,6 +199,7 @@ STRICT ANTI-FABRICATION RULES
 - NEVER invent companies, degrees, institutions, metrics, or claims not in the CV/projects above.
 - NEVER add experience the candidate doesn't have. Only reframe and emphasize REAL experience.
 - You may reword bullets to use JD terminology, but the underlying facts must be true.
+- ALWAYS preserve the demoUrl and repoUrl from the original project data exactly as-is. These are live links to deployed demos and source code — never remove, modify, or omit them.
 
 ═══════════════════════════════════════════
 OUTPUT FORMAT — Return ONLY valid JSON:
@@ -218,6 +221,8 @@ OUTPUT FORMAT — Return ONLY valid JSON:
       "id": "project-id from portfolio",
       "name": "Project Name",
       "period": "Date range",
+      "demoUrl": "Exact demoUrl from the project data (keep as-is, empty string if none)",
+      "repoUrl": "Exact repoUrl from the project data (keep as-is, empty string if none)",
       "description": "2-3 sentence description rewritten to emphasize JD-relevant aspects",
       "techLine": "Comma-separated tech most relevant to this JD",
       "bullets": [
@@ -283,6 +288,8 @@ OUTPUT FORMAT — Return ONLY valid JSON:
         id: p.id,
         name: p.name,
         period: p.period,
+        demoUrl: p.demoUrl || "",
+        repoUrl: p.repoUrl || "",
         description: p.description,
         techLine: p.techStack.slice(0, 6).join(", "),
         bullets: p.bullets.slice(0, 3),
@@ -309,10 +316,27 @@ OUTPUT FORMAT — Return ONLY valid JSON:
       id: p.id,
       name: p.name,
       period: p.period,
+      demoUrl: p.demoUrl || "",
+      repoUrl: p.repoUrl || "",
       description: p.description,
       techLine: p.techStack.slice(0, 6).join(", "),
       bullets: p.bullets.slice(0, 3),
     }));
+  } else {
+    // Guarantee live demoUrl & repoUrl from canonical projects.json are NEVER lost or stripped by the LLM
+    tailoredData.selectedProjects = tailoredData.selectedProjects.map((sp) => {
+      const orig = projects.find(
+        (p) =>
+          (sp.id && p.id === sp.id) ||
+          (sp.name && p.name.toLowerCase() === sp.name.toLowerCase()) ||
+          (sp.name && p.name.toLowerCase().includes(sp.name.toLowerCase()))
+      );
+      return {
+        ...sp,
+        demoUrl: orig?.demoUrl || sp.demoUrl || "",
+        repoUrl: orig?.repoUrl || sp.repoUrl || "",
+      };
+    });
   }
 
   // Build the HTML resume
@@ -381,20 +405,38 @@ OUTPUT FORMAT — Return ONLY valid JSON:
 // ═══════════════════════════════════════════
 // HTML RESUME BUILDER
 // ═══════════════════════════════════════════
+function safeHttpUrl(url) {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+  return /^https?:\/\//i.test(trimmed) ? trimmed : "";
+}
+
 function buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, safeJobId }) {
-  const projectSections = (tailoredData.selectedProjects || []).map((proj) => `
+  const projectSections = (tailoredData.selectedProjects || []).map((proj) => {
+    const demoUrl = safeHttpUrl(proj.demoUrl);
+    const repoUrl = safeHttpUrl(proj.repoUrl);
+    const linkItems = [];
+    if (demoUrl) {
+      linkItems.push(`<a class="project-link" href="${escHtml(demoUrl)}" target="_blank" rel="noopener">🔗 Live Demo: ${escHtml(demoUrl.replace(/^https?:\/\//i, ""))}</a>`);
+    }
+    if (repoUrl) {
+      linkItems.push(`<a class="project-link" href="${escHtml(repoUrl)}" target="_blank" rel="noopener">💻 Code: ${escHtml(repoUrl.replace(/^https?:\/\//i, ""))}</a>`);
+    }
+    return `
     <div class="project-entry">
       <div class="project-header">
         <span class="project-title">${escHtml(proj.name)}</span>
         <span class="job-period">${escHtml(proj.period)}</span>
       </div>
+      ${linkItems.length > 0 ? `<div class="project-links">${linkItems.join('<span class="project-link-sep"> · </span>')}</div>` : ""}
       <div class="project-desc">${escHtml(proj.description)}</div>
       <div class="project-tech">Tech: ${escHtml(proj.techLine)}</div>
       ${proj.bullets && proj.bullets.length > 0 ? `
       <ul class="bullets">
         ${proj.bullets.map((b) => `<li>${b}</li>`).join("")}
       </ul>` : ""}
-    </div>`).join("\n");
+    </div>`;
+  }).join("\n");
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -523,6 +565,10 @@ function buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, sa
     margin-bottom: 2px;
   }
   .project-title { font-size: 10.5pt; font-weight: 700; color: var(--dark); }
+  .project-links { margin: 2px 0 4px; font-size: 8.8pt; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  .project-link { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .project-link:hover { text-decoration: underline; }
+  .project-link-sep { color: var(--text-muted); }
   .project-desc { font-size: 9.5pt; line-height: 1.55; color: #334155; margin-top: 2px; }
   .project-tech { font-size: 9pt; color: var(--accent); font-weight: 600; margin-top: 3px; }
 

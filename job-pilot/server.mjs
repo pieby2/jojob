@@ -1013,7 +1013,7 @@ app.get("/api/projects", (_req, res) => {
 // 19. POST /api/projects — Add a new project to the portfolio
 app.post("/api/projects", (req, res) => {
   try {
-    const { name, domain, period, description, techStack, bullets, keywords } = req.body;
+    const { name, domain, period, demoUrl, repoUrl, description, techStack, bullets, keywords } = req.body;
     if (!name || !description) {
       return res.status(400).json({ error: "Project name and description are required." });
     }
@@ -1030,6 +1030,8 @@ app.post("/api/projects", (req, res) => {
       name,
       domain: domain || "General",
       period: period || new Date().getFullYear().toString(),
+      demoUrl: (demoUrl || "").trim(),
+      repoUrl: (repoUrl || "").trim(),
       description,
       techStack: Array.isArray(techStack) ? techStack : (techStack || "").split(",").map((s) => s.trim()).filter(Boolean),
       bullets: Array.isArray(bullets) ? bullets : (bullets || "").split("\n").map((s) => s.trim()).filter(Boolean),
@@ -1061,6 +1063,8 @@ app.put("/api/projects/:id", (req, res) => {
     if (updates.name !== undefined) project.name = updates.name;
     if (updates.domain !== undefined) project.domain = updates.domain;
     if (updates.period !== undefined) project.period = updates.period;
+    if (updates.demoUrl !== undefined) project.demoUrl = String(updates.demoUrl || "").trim();
+    if (updates.repoUrl !== undefined) project.repoUrl = String(updates.repoUrl || "").trim();
     if (updates.description !== undefined) project.description = updates.description;
     if (updates.techStack !== undefined) {
       project.techStack = Array.isArray(updates.techStack) ? updates.techStack : (updates.techStack || "").split(",").map((s) => s.trim()).filter(Boolean);

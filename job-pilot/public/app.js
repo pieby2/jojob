@@ -1001,6 +1001,7 @@ async function loadPortfolioPreview() {
             <div style="font-size:0.82rem;font-weight:700;color:#e2e8f0;margin-bottom:2px;">${escHtml(p.name)}</div>
             <div style="font-size:0.72rem;color:#8b5cf6;font-weight:600;margin-bottom:4px;">${escHtml(p.domain)}</div>
             <div style="font-size:0.72rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(p.techStack?.slice(0, 5).join(", "))}</div>
+            ${p.demoUrl ? `<div style="margin-top:4px;"><a href="${escHtml(p.demoUrl)}" target="_blank" rel="noopener" style="font-size:0.7rem;color:#38bdf8;text-decoration:none;">🔗 Live Demo</a></div>` : ""}
           </div>
         `).join("")}
       </div>
@@ -1038,6 +1039,10 @@ function openProjectManager() {
           <div style="display:flex;gap:8px;">
             <input id="pm-domain" placeholder="Domain (e.g., Computer Vision)" style="flex:1;background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:0.88rem;">
             <input id="pm-period" placeholder="Period (e.g., 2025–2026)" style="width:150px;background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:0.88rem;">
+          </div>
+          <div style="display:flex;gap:8px;">
+            <input id="pm-demo-url" placeholder="Live Demo URL (e.g., https://huggingface.co/spaces/...)" style="flex:1;background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:0.88rem;">
+            <input id="pm-repo-url" placeholder="GitHub Repo URL (optional)" style="flex:1;background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:0.88rem;">
           </div>
           <textarea id="pm-description" rows="3" placeholder="Project description (2-4 sentences about what you built and the impact)" style="background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:0.88rem;resize:vertical;"></textarea>
           <input id="pm-tech" placeholder="Tech Stack (comma-separated: PyTorch, Docker, FastAPI, AWS...)" style="background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:0.88rem;">
@@ -1082,6 +1087,11 @@ async function loadProjectList() {
               <span style="font-size:0.74rem;color:#64748b;">${escHtml(p.period)}</span>
             </div>
             <div style="font-size:0.78rem;color:#94a3b8;margin-top:6px;line-height:1.45;">${escHtml(p.description?.substring(0, 180))}${p.description?.length > 180 ? "..." : ""}</div>
+            ${(p.demoUrl || p.repoUrl) ? `
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;font-size:0.74rem;">
+              ${p.demoUrl ? `<a href="${escHtml(p.demoUrl)}" target="_blank" rel="noopener" style="color:#38bdf8;text-decoration:none;">🔗 Live Demo</a>` : ""}
+              ${p.repoUrl ? `<a href="${escHtml(p.repoUrl)}" target="_blank" rel="noopener" style="color:#a78bfa;text-decoration:none;">💻 GitHub Repo</a>` : ""}
+            </div>` : ""}
             <div style="font-size:0.72rem;color:#0284c7;margin-top:4px;font-weight:600;">${escHtml(p.techStack?.slice(0, 6).join(" · "))}</div>
             <div style="font-size:0.68rem;color:#64748b;margin-top:2px;">${p.bullets?.length || 0} bullets · ${p.keywords?.length || 0} keywords</div>
           </div>
@@ -1098,6 +1108,8 @@ async function addProjectFromForm() {
   const name = document.getElementById("pm-name")?.value?.trim();
   const domain = document.getElementById("pm-domain")?.value?.trim();
   const period = document.getElementById("pm-period")?.value?.trim();
+  const demoUrl = document.getElementById("pm-demo-url")?.value?.trim();
+  const repoUrl = document.getElementById("pm-repo-url")?.value?.trim();
   const description = document.getElementById("pm-description")?.value?.trim();
   const techStack = document.getElementById("pm-tech")?.value?.trim();
   const bulletsRaw = document.getElementById("pm-bullets")?.value?.trim();
@@ -1117,13 +1129,13 @@ async function addProjectFromForm() {
     const res = await fetch("/api/projects", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, domain, period, description, techStack, bullets, keywords }),
+      body: JSON.stringify({ name, domain, period, demoUrl, repoUrl, description, techStack, bullets, keywords }),
     });
     const data = await res.json();
     if (data.ok) {
       showToast(`✅ Added project: ${name}`);
       // Clear form
-      ["pm-name", "pm-domain", "pm-period", "pm-description", "pm-tech", "pm-bullets", "pm-keywords"].forEach((id) => {
+      ["pm-name", "pm-domain", "pm-period", "pm-demo-url", "pm-repo-url", "pm-description", "pm-tech", "pm-bullets", "pm-keywords"].forEach((id) => {
         const el = document.getElementById(id);
         if (el) el.value = "";
       });
