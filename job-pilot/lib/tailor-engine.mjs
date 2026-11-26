@@ -1,11 +1,13 @@
 /**
- * tailor-engine.mjs — Job-Specific Personal Resume Tailoring Engine
+ * tailor-engine.mjs — Multi-Project Job-Specific Resume Tailoring Engine
  *
- * Generates role-specific tailored resumes (HTML & PDF) for EACH unique job:
- * - Reads candidate track record strictly from cv.md & profile.yml (zero hallucination)
- * - DeepSeek customizes Summary, Competencies, Experience ordering, and Skills for the JD
- * - Produces beautiful ATS-optimized HTML with print-to-PDF support
- * - Compiles to clean A4/Letter PDF via Playwright
+ * Major overhaul: Instead of a fixed single-project resume that only updates the summary,
+ * this engine now:
+ * 1. Loads a PROJECT PORTFOLIO from data/projects.json (user-uploaded multi-domain projects)
+ * 2. Sends ALL projects + the JD to DeepSeek and asks it to SELECT the most relevant ones
+ * 3. Crafts a FULLY CUSTOM resume: headline, summary, competencies, experience bullets,
+ *    project selection & ordering, skills — ALL tailored to the specific JD
+ * 4. Renders ATS-optimized HTML + PDF via Playwright
  */
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
@@ -15,8 +17,9 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CAREER_OPS_DIR = resolve(join(__dirname, "..", "..", "career-ops"));
 const RESUMES_DIR = resolve(join(__dirname, "..", "data", "resumes"));
+const PROJECTS_FILE = resolve(join(__dirname, "..", "data", "projects.json"));
 
-// Dynamically resolve Playwright
+// --- Playwright resolution ---
 async function getPlaywrightChromium() {
   const attempts = [
     () => import("playwright"),
@@ -36,6 +39,7 @@ async function getPlaywrightChromium() {
   return null;
 }
 
+// --- Env loading ---
 function ensureEnvLoaded() {
   if (process.env.DEEPSEEK_API_KEY) return;
   const envPaths = [
@@ -56,19 +60,35 @@ function ensureEnvLoaded() {
   }
 }
 
+// --- Load candidate data ---
 function loadCandidateData() {
   ensureEnvLoaded();
   const cvPath = join(CAREER_OPS_DIR, "cv.md");
   const profilePath = join(CAREER_OPS_DIR, "config", "profile.yml");
-  const templatePath = join(CAREER_OPS_DIR, "templates", "cv-template.html");
 
   const cv = existsSync(cvPath) ? readFileSync(cvPath, "utf-8") : "";
   const profile = existsSync(profilePath) ? readFileSync(profilePath, "utf-8") : "";
-  const template = existsSync(templatePath) ? readFileSync(templatePath, "utf-8") : "";
 
-  return { cv, profile, template };
+  return { cv, profile };
 }
 
+// --- Load project portfolio ---
+export function loadProjects() {
+  if (existsSync(PROJECTS_FILE)) {
+    try {
+      return JSON.parse(readFileSync(PROJECTS_FILE, "utf-8"));
+    } catch (e) {
+      console.warn("[tailor-engine] Failed to parse projects.json:", e.message);
+    }
+  }
+  return [];
+}
+
+export function saveProjects(projects) {
+  writeFileSync(PROJECTS_FILE, JSON.stringify(projects, null, 2), "utf-8");
+}
+
+// --- DeepSeek API call ---
 async function callDeepSeekChat(messages, temperature = 0.25) {
   const apiKey = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || "";
   const endpoint = "https://api.deepseek.com/v1/chat/completions";
@@ -83,7 +103,7 @@ async function callDeepSeekChat(messages, temperature = 0.25) {
       model: "deepseek-chat",
       messages,
       temperature,
-      max_tokens: 3000,
+      max_tokens: 4096,
     }),
   });
 
@@ -97,7 +117,26 @@ async function callDeepSeekChat(messages, temperature = 0.25) {
 }
 
 /**
- * Tailor personal resume specifically for this job role and company.
+ * Build a formatted portfolio block for the AI prompt.
+ */
+function formatProjectsForPrompt(projects) {
+  if (!projects || projects.length === 0) return "No projects available.";
+
+  return projects.map((p, i) => `
+PROJECT ${i + 1} [ID: ${p.id}]
+Domain: ${p.domain}
+Name: ${p.name}
+Period: ${p.period}
+Description: ${p.description}
+Tech Stack: ${p.techStack.join(", ")}
+Key Bullets:
+${p.bullets.map((b) => `  • ${b}`).join("\n")}
+Keywords: ${p.keywords.join(", ")}
+`).join("\n---\n");
+}
+
+/**
+ * MAIN: Generate a fully custom, multi-project resume tailored to a specific JD.
  */
 export async function generateJobSpecificResume({ jobId, jobTitle, company, description, targetRole }) {
   if (!existsSync(RESUMES_DIR)) {
@@ -108,12 +147,14 @@ export async function generateJobSpecificResume({ jobId, jobTitle, company, desc
   const roleName = targetRole || jobTitle || "Machine Learning Engineer";
   const compName = company || "Company";
 
-  console.log(`[tailor-engine] Generating tailored resume for ${compName} — ${jobTitle} (${roleName})...`);
+  console.log(`[tailor-engine] Generating FULLY TAILORED multi-project resume for ${compName} — ${jobTitle} (${roleName})...`);
 
-  const { cv, template } = loadCandidateData();
+  const { cv } = loadCandidateData();
+  const projects = loadProjects();
+  const projectsBlock = formatProjectsForPrompt(projects);
 
   const prompt = `You are an expert ATS resume optimizer and career strategist.
-Your task is to tailor a real software/AI candidate's CV for a SPECIFIC target job.
+Your task is to craft a FULLY CUSTOM resume from the candidate's real experience and project portfolio, tailored specifically for the target job.
 
 ═══════════════════════════════════════════
 TARGET JOB INFORMATION
@@ -122,7 +163,7 @@ Company: ${compName}
 Job Title: ${jobTitle}
 Role Category: ${roleName}
 Job Description:
-${description ? description.substring(0, 3000) : "No description provided."}
+${description ? description.substring(0, 4000) : "No description provided."}
 
 ═══════════════════════════════════════════
 CANDIDATE REAL TRACK RECORD (cv.md)
@@ -130,55 +171,74 @@ CANDIDATE REAL TRACK RECORD (cv.md)
 ${cv}
 
 ═══════════════════════════════════════════
-STRICT ANTI-FABRICATION RULES
+CANDIDATE PROJECT PORTFOLIO (${projects.length} projects available)
 ═══════════════════════════════════════════
-1. NEVER invent past companies, degrees, institutions, or unverified claims.
-2. The candidate's real experience is:
-   - Machine Learning Engineer at Mayonix Innovation (Feb 2026 - Present): YOLOv8/v9 item detection (92%+ mAP), sub-100ms edge inference latency on iOS/Android, INT8/FP16 quantization, structured pruning, MobileNetV3-Small, U-Net semantic segmentation, OpenCV/NumPy pipelines.
-   - Project: AlphaSense AI (PyTorch, Temporal Fusion Transformer, Bidirectional Mamba, Stockformer, Stable-Baselines3 DRL ensemble PPO/A2C/DDPG, FastAPI backend, Hugging Face Spaces).
-   - Publications: IEEE WAMS 2025 (Chennai) & INCSTIC-2025.
-   - Education: B.Tech Computer Science & Engineering, ABES Engineering College (Expected July 2026).
-3. Reformulate bullets using vocabulary and keywords from the Job Description to maximize ATS match.
-4. Craft a custom Professional Summary specifically targeted at ${compName} and ${jobTitle}.
+${projectsBlock}
 
 ═══════════════════════════════════════════
-OUTPUT FORMAT
+YOUR TASK — BUILD A CUSTOM RESUME
 ═══════════════════════════════════════════
-Return ONLY valid JSON matching this exact structure:
+
+1. **SELECT PROJECTS**: From the ${projects.length} projects above, pick the TOP 1-3 most relevant projects for THIS specific job. Order them by relevance to the JD. A Computer Vision job should lead with CV projects; a Forward Deployed Engineering job should lead with deployment/infra projects; a Deep Learning / Quant job should lead with AlphaSense AI, etc.
+
+2. **REWRITE EXPERIENCE BULLETS**: Don't just copy — rewrite the Mayonix experience bullets using vocabulary and keywords from the JD. Emphasize the aspects of real experience that align with what this employer wants. If the JD mentions "deployment" or "production systems", emphasize deployment work. If it mentions "real-time" or "edge", emphasize latency optimization.
+
+3. **CUSTOM SUMMARY**: Write a 3-4 sentence professional summary that reads as if this candidate was BORN for this specific role. Reference specific achievements and metrics that match the JD.
+
+4. **CUSTOM COMPETENCIES**: Pick 8 competency tags that are both TRUE of the candidate AND appear in the JD or are highly relevant to it.
+
+5. **CUSTOM SKILLS**: Reorder and emphasize the skills categories to lead with what the JD cares about most.
+
+6. **PROJECT BULLETS**: For each selected project, rewrite 2-4 bullets emphasizing the aspects most relevant to this JD. Use JD keywords naturally.
+
+═══════════════════════════════════════════
+STRICT ANTI-FABRICATION RULES
+═══════════════════════════════════════════
+- NEVER invent companies, degrees, institutions, metrics, or claims not in the CV/projects above.
+- NEVER add experience the candidate doesn't have. Only reframe and emphasize REAL experience.
+- You may reword bullets to use JD terminology, but the underlying facts must be true.
+
+═══════════════════════════════════════════
+OUTPUT FORMAT — Return ONLY valid JSON:
+═══════════════════════════════════════════
 {
-  "headline": "Targeted Title (e.g. Computer Vision & Edge AI Engineer)",
-  "summary": "3-4 sentence powerful summary highlighting proof points directly answering this JD",
-  "competencies": [
-    "Competency 1 (exact tech keyword from JD matching real experience)",
-    "Competency 2",
-    "Competency 3",
-    "Competency 4",
-    "Competency 5",
-    "Competency 6",
-    "Competency 7",
-    "Competency 8"
-  ],
+  "headline": "Targeted professional title for this specific role",
+  "summary": "3-4 sentence custom professional summary with metrics and proof points matching the JD",
+  "competencies": ["Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5", "Tag 6", "Tag 7", "Tag 8"],
   "experienceBullets": [
-    "First strongest matching bullet for Mayonix Innovation emphasizing JD tech & metrics (use <strong> for keywords)",
-    "Second matching bullet",
-    "Third matching bullet",
-    "Fourth matching bullet",
-    "Fifth matching bullet",
-    "Sixth matching bullet"
+    "Rewritten Mayonix bullet 1 emphasizing JD-relevant aspects (use <strong> for key terms)",
+    "Rewritten bullet 2",
+    "Rewritten bullet 3",
+    "Rewritten bullet 4",
+    "Rewritten bullet 5",
+    "Rewritten bullet 6"
   ],
-  "projectDescription": "2-3 sentences describing AlphaSense AI emphasizing technologies relevant to this JD (e.g. PyTorch, Transformers, Mamba, FastAPI, optimization)",
+  "selectedProjects": [
+    {
+      "id": "project-id from portfolio",
+      "name": "Project Name",
+      "period": "Date range",
+      "description": "2-3 sentence description rewritten to emphasize JD-relevant aspects",
+      "techLine": "Comma-separated tech most relevant to this JD",
+      "bullets": [
+        "Rewritten project bullet 1 emphasizing JD relevance",
+        "Rewritten project bullet 2",
+        "Rewritten project bullet 3"
+      ]
+    }
+  ],
   "skillsCategories": {
-    "Core Focus": "Comma-separated skills most critical to this JD",
-    "Machine Learning & Frameworks": "PyTorch, TensorFlow, OpenCV, YOLOv8/v9, etc.",
-    "Optimization & Edge": "TensorRT, TFLite, ONNX, INT8/FP16 quantization, structured pruning, CUDA",
-    "Deployment & Backend": "FastAPI, Docker, REST APIs, AWS, CI/CD, Git",
-    "Languages & Tools": "Python, C++, CUDA, SQL, Bash, JavaScript"
+    "Category most relevant to JD": "Skills list",
+    "Second category": "Skills list",
+    "Third category": "Skills list",
+    "Fourth category": "Skills list",
+    "Fifth category": "Skills list"
   },
   "formAnswers": {
-    "whyInterested": "2-3 sentences explaining why you want to join this company and role, citing real candidate achievements",
-    "relevantExperience": "2-3 sentences describing real Mayonix/AlphaSense experience matching this JD",
-    "coverLetter": "Compelling 3-paragraph tailored cover letter for this company and role",
-    "whyHireMe": "2 sentences summarizing candidate edge/ML skills and immediate value to the team"
+    "whyInterested": "2-3 sentences explaining genuine interest in this company and role",
+    "relevantExperience": "2-3 sentences about matching experience from Mayonix + selected projects",
+    "coverLetter": "Compelling 3-paragraph cover letter for this specific role",
+    "whyHireMe": "2 sentences on immediate value the candidate brings"
   }
 }`;
 
@@ -189,46 +249,154 @@ Return ONLY valid JSON matching this exact structure:
     tailoredData = JSON.parse(jsonStr);
   } catch (err) {
     console.warn("[tailor-engine] DeepSeek tailoring parse fallback:", err.message);
+    // Intelligent fallback: select projects by keyword overlap with JD
+    const jdLower = (description || "").toLowerCase();
+    const scored = projects.map((p) => ({
+      ...p,
+      score: p.keywords.filter((k) => jdLower.includes(k.toLowerCase())).length,
+    }));
+    scored.sort((a, b) => b.score - a.score);
+    const topProjects = scored.slice(0, 2);
+
     tailoredData = {
-      headline: `${roleName}`,
-      summary: `Final-year Computer Science engineer and Machine Learning Engineer at Mayonix Innovation with hands-on experience deploying edge-optimized models (92%+ mAP, sub-100ms inference on iOS/Android via TensorRT, TFLite, and INT8/FP16 quantization). Published IEEE researcher seeking to contribute to ${compName} in ${jobTitle}.`,
+      headline: roleName,
+      summary: `Machine Learning Engineer at Mayonix Innovation with production experience in edge-optimized computer vision (92%+ mAP YOLOv8/v9, sub-100ms inference via TensorRT/TFLite/INT8 quantization), deep learning systems, and full-stack ML deployment. Published IEEE researcher seeking to contribute to ${compName} as ${jobTitle}.`,
       competencies: [
         "Real-Time Object Detection (YOLOv8/v9)",
         "Edge Optimization (TensorRT, TFLite, ONNX)",
-        "INT8 / FP16 Model Quantization & Pruning",
-        "Semantic Segmentation (U-Net)",
-        "PyTorch, C++, and OpenCV Pipelines",
-        "Sub-100ms On-Device Latency Acceleration",
-        "FastAPI, Docker & Production ML Serving",
-        "Published IEEE Computer Vision Research",
+        "INT8/FP16 Model Quantization & Pruning",
+        "PyTorch & Deep Learning Systems",
+        "FastAPI & Production ML Serving",
+        "Docker, Kubernetes & CI/CD",
+        "Data Engineering & ETL Pipelines",
+        "Published IEEE Research",
       ],
       experienceBullets: [
-        "Optimized trained models for edge deployment through <strong>INT8 and FP16 quantization</strong>, structured pruning, and GPU delegate configuration, reaching <strong>sub-100ms end-to-end inference latency</strong> on Android and iOS edge devices.",
-        "Trained and evaluated multiple object detection models (<strong>YOLOv8 and YOLOv9</strong> architectures) for garment and item recognition, tuning precision-recall trade-offs to <strong>92%+ mAP</strong> on real-world mobile camera inputs.",
-        "Developed on-device computer vision features for a React Native mobile application using <strong>TensorFlow Lite, MobileNetV3-Small, and U-Net segmentation</strong> models optimized for real-time mobile inference.",
-        "Designed image and video preprocessing pipelines for clothing classification, background removal via semantic segmentation, and automated RGB color extraction using <strong>OpenCV and NumPy</strong>.",
-        "Built an image-embedding-based recommendation system using deep feature extraction and cosine similarity search to suggest visually similar items, improving click-through rates.",
-        "Designed a feedback-loop pipeline capturing user corrections to enable continuous model improvement through online learning, improving model robustness under distribution shift.",
+        "Trained and evaluated <strong>YOLOv8 and YOLOv9</strong> object detection models for item recognition, achieving <strong>92%+ mAP</strong> on real-world mobile camera inputs.",
+        "Optimized models for edge deployment through <strong>INT8 and FP16 quantization</strong>, structured pruning, and GPU delegate configuration, reaching <strong>sub-100ms inference latency</strong> on Android and iOS.",
+        "Developed on-device CV features using <strong>TensorFlow Lite, MobileNetV3-Small, and U-Net segmentation</strong> for real-time mobile inference.",
+        "Designed image/video preprocessing pipelines for classification, segmentation, and color extraction using <strong>OpenCV and NumPy</strong>.",
+        "Built an image-embedding-based recommendation system using deep feature extraction and cosine similarity search.",
+        "Designed a feedback-loop pipeline for continuous model improvement through online learning under distribution shift.",
       ],
-      projectDescription: "Built a multi-branch deep learning system fusing Temporal Fusion Transformer, Bidirectional Mamba, Stockformer (CNN-Transformer), and Graph Attention Network outputs with regime-conditioned gating. Implemented Deep Reinforcement Learning ensemble (PPO, A2C, DDPG) on Stable-Baselines3. Deployed the full-stack system with FastAPI on Hugging Face Spaces with real-time indicators and Gemini API integration.",
+      selectedProjects: topProjects.map((p) => ({
+        id: p.id,
+        name: p.name,
+        period: p.period,
+        description: p.description,
+        techLine: p.techStack.slice(0, 6).join(", "),
+        bullets: p.bullets.slice(0, 3),
+      })),
       skillsCategories: {
-        "Core Technologies": "YOLOv8/v9, PyTorch, TensorRT, TensorFlow Lite, OpenCV, CUDA, ONNX",
-        "Edge & Acceleration": "INT8/FP16 quantization, structured pruning, GPU delegates, sub-100ms latency",
+        "Core ML & Vision": "PyTorch, TensorFlow, YOLOv8/v9, OpenCV, TensorRT, TFLite, ONNX",
+        "Edge & Optimization": "INT8/FP16 quantization, structured pruning, CUDA, GPU delegates",
         "Languages": "Python, C++, CUDA, SQL, Bash, JavaScript",
-        "Deployment & Infra": "FastAPI, Docker, AWS (S3, Redshift, EKS), GitHub Actions, CI/CD",
-        "Databases & Tools": "PostgreSQL, pgvector, Redis, Pandas, NumPy",
+        "Deployment & Infra": "FastAPI, Docker, Kubernetes, AWS, GitHub Actions, CI/CD",
+        "Databases & Data": "PostgreSQL, pgvector, Redis, Pandas, NumPy, Apache Airflow",
       },
       formAnswers: {
-        whyInterested: `I am strongly drawn to ${compName}'s focus on innovation in ${roleName}. My hands-on experience optimizing YOLOv8/v9 computer vision models and edge inference to sub-100ms latency at Mayonix Innovation directly aligns with your technical requirements.`,
-        relevantExperience: `At Mayonix Innovation, I engineered and deployed YOLOv8/v9 item detection models achieving 92%+ mAP and sub-100ms inference on mobile edge devices using INT8/FP16 quantization and TensorRT/TFLite. In addition, I built AlphaSense AI fusing multi-branch transformers with FastAPI serving.`,
-        coverLetter: `Dear Hiring Team at ${compName},\n\nI am writing to express my strong interest in the ${jobTitle} role. As a Machine Learning Engineer at Mayonix Innovation and published IEEE researcher, I specialize in computer vision, real-time object detection (YOLOv8/v9, 92%+ mAP), and edge model optimization (INT8/FP16 quantization, TensorRT, TFLite).\n\nMy background matches your requirements for high-performance ML engineering and latency-critical systems. I look forward to the opportunity to discuss how my hands-on experience can support ${compName}'s engineering goals.\n\nSincerely,\nPrakhar Pragyan Chaubey`,
-        whyHireMe: `I bring proven production experience taking deep learning models from training to sub-100ms edge deployment, backed by 2 published IEEE papers and a relentless drive for engineering excellence.`,
+        whyInterested: `I am excited to apply for the ${jobTitle} role at ${compName}. My production ML experience deploying edge-optimized models and full-stack ML systems directly aligns with your technical requirements.`,
+        relevantExperience: `At Mayonix Innovation, I developed and deployed production computer vision models with YOLOv8/v9 (92%+ mAP, sub-100ms edge latency) and built full-stack ML systems with FastAPI, Docker, and cloud infrastructure.`,
+        coverLetter: `Dear Hiring Team at ${compName},\n\nI am writing to express my strong interest in the ${jobTitle} role. As a Machine Learning Engineer at Mayonix Innovation and published IEEE researcher, I bring hands-on production experience in computer vision, edge optimization, and full-stack ML deployment.\n\nMy technical background and project portfolio directly match your requirements. I look forward to discussing how I can contribute to ${compName}'s engineering goals.\n\nSincerely,\nPrakhar Pragyan Chaubey`,
+        whyHireMe: `I bring proven production experience taking deep learning models from research to deployment, backed by IEEE publications and a diverse project portfolio spanning computer vision, deep learning, and ML systems engineering.`,
       },
     };
   }
 
-  // Build clean, standalone, responsive HTML resume
-  const htmlContent = `<!DOCTYPE html>
+  // Ensure selectedProjects exists (backward compat)
+  if (!tailoredData.selectedProjects || tailoredData.selectedProjects.length === 0) {
+    tailoredData.selectedProjects = projects.slice(0, 2).map((p) => ({
+      id: p.id,
+      name: p.name,
+      period: p.period,
+      description: p.description,
+      techLine: p.techStack.slice(0, 6).join(", "),
+      bullets: p.bullets.slice(0, 3),
+    }));
+  }
+
+  // Build the HTML resume
+  const htmlContent = buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, safeJobId });
+
+  // Save tailored HTML
+  const destHtmlPath = join(RESUMES_DIR, `resume-${safeJobId}.html`);
+  const destPdfPath = join(RESUMES_DIR, `resume-${safeJobId}.pdf`);
+  writeFileSync(destHtmlPath, htmlContent, "utf-8");
+  console.log(`[tailor-engine] Tailored HTML saved: ${destHtmlPath}`);
+
+  // Compile to PDF via Playwright
+  let pdfGenerated = false;
+  try {
+    const chromium = await getPlaywrightChromium();
+    if (chromium) {
+      console.log(`[tailor-engine] Launching Chromium to render PDF...`);
+      const browser = await chromium.launch({
+        headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+      });
+      const page = await browser.newPage();
+      await page.setContent(htmlContent, { waitUntil: "load" });
+      await page.pdf({
+        path: destPdfPath,
+        format: "Letter",
+        margin: { top: "0.35in", bottom: "0.35in", left: "0.35in", right: "0.35in" },
+        printBackground: true,
+      });
+      await browser.close();
+      pdfGenerated = true;
+      console.log(`[tailor-engine] Tailored PDF generated: ${destPdfPath}`);
+    }
+  } catch (err) {
+    console.warn(`[tailor-engine] Playwright PDF notice: ${err.message}`);
+  }
+
+  // Build form answers payload
+  const candidateAnswers = buildCandidateAnswers(tailoredData, compName, roleName, jobTitle);
+  const copyAllText = buildCopyAllText(candidateAnswers);
+  const bookmarklet = buildBookmarklet(candidateAnswers);
+
+  return {
+    success: true,
+    jobId,
+    jobTitle,
+    company: compName,
+    targetRole: roleName,
+    headline: tailoredData.headline,
+    selectedProjectIds: (tailoredData.selectedProjects || []).map((p) => p.id),
+    selectedProjectCount: (tailoredData.selectedProjects || []).length,
+    htmlFile: `resume-${safeJobId}.html`,
+    pdfFile: `resume-${safeJobId}.pdf`,
+    destHtmlPath,
+    destPdfPath: pdfGenerated ? destPdfPath : destHtmlPath,
+    hasPdf: pdfGenerated,
+    htmlUrl: `/api/jobs/${encodeURIComponent(jobId)}/resume.html`,
+    pdfUrl: `/api/jobs/${encodeURIComponent(jobId)}/resume.pdf`,
+    formAnswers: candidateAnswers,
+    copyAllText,
+    bookmarklet,
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+// ═══════════════════════════════════════════
+// HTML RESUME BUILDER
+// ═══════════════════════════════════════════
+function buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, safeJobId }) {
+  const projectSections = (tailoredData.selectedProjects || []).map((proj) => `
+    <div class="project-entry">
+      <div class="project-header">
+        <span class="project-title">${escHtml(proj.name)}</span>
+        <span class="job-period">${escHtml(proj.period)}</span>
+      </div>
+      <div class="project-desc">${escHtml(proj.description)}</div>
+      <div class="project-tech">Tech: ${escHtml(proj.techLine)}</div>
+      ${proj.bullets && proj.bullets.length > 0 ? `
+      <ul class="bullets">
+        ${proj.bullets.map((b) => `<li>${b}</li>`).join("")}
+      </ul>` : ""}
+    </div>`).join("\n");
+
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -255,7 +423,6 @@ Return ONLY valid JSON matching this exact structure:
     font-size: 11pt;
     padding-bottom: 40px;
   }
-  /* Floating / Header Action Toolbar */
   .resume-toolbar {
     position: sticky; top: 0; z-index: 1000;
     background: #0f172a; color: #fff;
@@ -270,6 +437,11 @@ Return ONLY valid JSON matching this exact structure:
     padding: 3px 8px; border-radius: 4px; font-size: 11px; margin-left: 8px;
     border: 1px solid rgba(56, 189, 248, 0.3);
   }
+  .toolbar-projects-badge {
+    background: rgba(99, 102, 241, 0.2); color: #a5b4fc;
+    padding: 3px 8px; border-radius: 4px; font-size: 11px; margin-left: 6px;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+  }
   .toolbar-actions { display: flex; gap: 8px; }
   .tb-btn {
     background: #0284c7; color: #fff; border: none;
@@ -283,7 +455,6 @@ Return ONLY valid JSON matching this exact structure:
   }
   .tb-btn-outline:hover { background: #1e293b; color: #fff; }
 
-  /* Printable Page Sheet */
   .page {
     max-width: 8.5in;
     margin: 20px auto;
@@ -293,7 +464,6 @@ Return ONLY valid JSON matching this exact structure:
     border-radius: 8px;
   }
 
-  /* Header */
   .header h1 {
     font-size: 26pt; font-weight: 800; color: var(--dark);
     letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 4px;
@@ -314,7 +484,6 @@ Return ONLY valid JSON matching this exact structure:
   .contact-bar a { color: var(--text-muted); text-decoration: none; }
   .contact-bar a:hover { color: var(--accent); text-decoration: underline; }
 
-  /* Section */
   .section { margin-bottom: 16px; }
   .section-title {
     font-size: 11pt; font-weight: 700; text-transform: uppercase;
@@ -325,7 +494,6 @@ Return ONLY valid JSON matching this exact structure:
   .summary-text { font-size: 10pt; line-height: 1.55; color: #334155; }
   .summary-text strong { color: var(--dark); }
 
-  /* Competencies */
   .competencies-grid {
     display: flex; flex-wrap: wrap; gap: 6px;
   }
@@ -335,7 +503,6 @@ Return ONLY valid JSON matching this exact structure:
     padding: 3px 8px; border-radius: 4px;
   }
 
-  /* Work Experience */
   .job-header {
     display: flex; justify-content: space-between; align-items: baseline;
     margin-bottom: 2px;
@@ -350,7 +517,7 @@ Return ONLY valid JSON matching this exact structure:
   }
   ul.bullets li strong { color: var(--dark); }
 
-  /* Project */
+  .project-entry { margin-bottom: 14px; }
   .project-header {
     display: flex; justify-content: space-between; align-items: baseline;
     margin-bottom: 2px;
@@ -359,7 +526,6 @@ Return ONLY valid JSON matching this exact structure:
   .project-desc { font-size: 9.5pt; line-height: 1.55; color: #334155; margin-top: 2px; }
   .project-tech { font-size: 9pt; color: var(--accent); font-weight: 600; margin-top: 3px; }
 
-  /* Education & Publications */
   .item-row {
     display: flex; justify-content: space-between; align-items: baseline;
     margin-bottom: 4px; font-size: 9.5pt;
@@ -367,12 +533,10 @@ Return ONLY valid JSON matching this exact structure:
   .item-title { font-weight: 600; color: var(--dark); }
   .item-sub { color: var(--text-muted); font-size: 9pt; }
 
-  /* Skills */
   .skills-list { display: flex; flex-direction: column; gap: 4px; }
   .skill-line { font-size: 9.5pt; line-height: 1.5; color: #334155; }
   .skill-label { font-weight: 700; color: var(--dark); }
 
-  /* Print Styles */
   @media print {
     body { background: #ffffff; padding: 0; }
     .resume-toolbar { display: none !important; }
@@ -386,11 +550,11 @@ Return ONLY valid JSON matching this exact structure:
 </head>
 <body>
 
-<!-- Interactive Mobile & Desktop Action Toolbar -->
 <div class="resume-toolbar">
-  <div style="display:flex;align-items:center;">
+  <div style="display:flex;align-items:center;flex-wrap:wrap;">
     <span class="toolbar-title">📄 Tailored for <strong>${escHtml(compName)}</strong></span>
     <span class="toolbar-badge">🎯 ${escHtml(roleName)}</span>
+    <span class="toolbar-projects-badge">📂 ${(tailoredData.selectedProjects || []).length} projects selected</span>
   </div>
   <div class="toolbar-actions">
     <button class="tb-btn" onclick="window.print()">🖨️ Save as PDF</button>
@@ -444,15 +608,10 @@ Return ONLY valid JSON matching this exact structure:
     </ul>
   </div>
 
-  <!-- PROJECTS -->
+  <!-- PROJECTS (AI-SELECTED & ORDERED) -->
   <div class="section">
     <div class="section-title">Projects</div>
-    <div class="project-header">
-      <span class="project-title">AlphaSense AI — Multi-Model Deep Learning Trading System</span>
-      <span class="job-period">2025 – 2026</span>
-    </div>
-    <div class="project-desc">${tailoredData.projectDescription}</div>
-    <div class="project-tech">Tech: PyTorch, Temporal Fusion Transformer, Bidirectional Mamba, Stable-Baselines3, FastAPI, Hugging Face Spaces</div>
+    ${projectSections}
   </div>
 
   <!-- PUBLICATIONS -->
@@ -499,40 +658,13 @@ Return ONLY valid JSON matching this exact structure:
 
 </body>
 </html>`;
+}
 
-  // Save tailored HTML
-  const destHtmlPath = join(RESUMES_DIR, `resume-${safeJobId}.html`);
-  const destPdfPath = join(RESUMES_DIR, `resume-${safeJobId}.pdf`);
-  writeFileSync(destHtmlPath, htmlContent, "utf-8");
-  console.log(`[tailor-engine] Tailored HTML saved: ${destHtmlPath}`);
-
-  // Compile to PDF via Playwright
-  let pdfGenerated = false;
-  try {
-    const chromium = await getPlaywrightChromium();
-    if (chromium) {
-      console.log(`[tailor-engine] Launching Chromium to render PDF...`);
-      const browser = await chromium.launch({
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
-      });
-      const page = await browser.newPage();
-      await page.setContent(htmlContent, { waitUntil: "load" });
-      await page.pdf({
-        path: destPdfPath,
-        format: "Letter",
-        margin: { top: "0.35in", bottom: "0.35in", left: "0.35in", right: "0.35in" },
-        printBackground: true,
-      });
-      await browser.close();
-      pdfGenerated = true;
-      console.log(`[tailor-engine] Tailored PDF generated successfully: ${destPdfPath}`);
-    }
-  } catch (err) {
-    console.warn(`[tailor-engine] Playwright PDF compilation notice (HTML available): ${err.message}`);
-  }
-
-  const candidateAnswers = {
+// ═══════════════════════════════════════════
+// CANDIDATE ANSWERS & HELPERS
+// ═══════════════════════════════════════════
+function buildCandidateAnswers(tailoredData, compName, roleName, jobTitle) {
+  return {
     fullName: "Prakhar Pragyan Chaubey",
     firstName: "Prakhar Pragyan",
     lastName: "Chaubey",
@@ -550,59 +682,43 @@ Return ONLY valid JSON matching this exact structure:
     salaryExpectation: "₹15,00,000 INR (Negotiable)",
     workAuth: "Yes",
     sponsorship: "No",
-    whyInterested: tailoredData.formAnswers?.whyInterested || `I am excited to apply for the ${roleName} role at ${compName}. With my experience deploying edge-optimized YOLOv8/v9 models (92%+ mAP, sub-100ms latency) and multi-model AI architectures, I am eager to contribute to ${compName}'s engineering goals.`,
-    relevantExperience: tailoredData.formAnswers?.relevantExperience || `At Mayonix Innovation, I developed on-device computer vision models with TensorFlow Lite and YOLOv8/v9, optimizing them via INT8/FP16 quantization for sub-100ms mobile latency. I also engineered AlphaSense AI, integrating PyTorch, Transformers, Mamba, and FastAPI.`,
-    coverLetter: tailoredData.formAnswers?.coverLetter || `Dear Hiring Team at ${compName},\n\nI am writing to express my strong interest in the ${jobTitle} role. As a Machine Learning Engineer at Mayonix Innovation and published IEEE researcher, I specialize in computer vision, real-time object detection (YOLOv8/v9, 92%+ mAP), and edge model optimization (INT8/FP16 quantization, TensorRT, TFLite).\n\nMy background matches your requirements for high-performance ML engineering and latency-critical systems. I look forward to the opportunity to discuss how my hands-on experience can support ${compName}'s engineering goals.\n\nSincerely,\nPrakhar Pragyan Chaubey`,
-    whyHireMe: tailoredData.formAnswers?.whyHireMe || `I combine practical production experience optimizing edge models to sub-100ms latencies with published IEEE research in machine learning. I can immediately contribute to ${compName}'s computer vision and ML pipelines.`
+    whyInterested: tailoredData.formAnswers?.whyInterested || `I am excited to apply for the ${jobTitle} role at ${compName}.`,
+    relevantExperience: tailoredData.formAnswers?.relevantExperience || `At Mayonix Innovation, I engineered production ML systems.`,
+    coverLetter: tailoredData.formAnswers?.coverLetter || `Dear Hiring Team at ${compName},\n\nI am writing to express my interest in the ${jobTitle} role.\n\nSincerely,\nPrakhar Pragyan Chaubey`,
+    whyHireMe: tailoredData.formAnswers?.whyHireMe || `I bring proven production ML experience.`,
   };
+}
 
-  const copyAllText = `APPLICANT INFORMATION:
-Name: ${candidateAnswers.fullName}
-Email: ${candidateAnswers.email}
-Phone: ${candidateAnswers.phone}
-Location: ${candidateAnswers.location}
-LinkedIn: ${candidateAnswers.linkedin}
-GitHub: ${candidateAnswers.github}
-Current Company: ${candidateAnswers.currentCompany}
-Current Title: ${candidateAnswers.currentTitle}
-Notice Period: ${candidateAnswers.noticePeriod}
-Expected CTC: ${candidateAnswers.salaryExpectation}
-Work Authorization: ${candidateAnswers.workAuth} (No sponsorship required)
+function buildCopyAllText(a) {
+  return `APPLICANT INFORMATION:
+Name: ${a.fullName}
+Email: ${a.email}
+Phone: ${a.phone}
+Location: ${a.location}
+LinkedIn: ${a.linkedin}
+GitHub: ${a.github}
+Current Company: ${a.currentCompany}
+Current Title: ${a.currentTitle}
+Notice Period: ${a.noticePeriod}
+Expected CTC: ${a.salaryExpectation}
+Work Authorization: ${a.workAuth} (No sponsorship required)
 
 WHY INTERESTED:
-${candidateAnswers.whyInterested}
+${a.whyInterested}
 
 RELEVANT EXPERIENCE:
-${candidateAnswers.relevantExperience}
+${a.relevantExperience}
 
 WHY HIRE ME:
-${candidateAnswers.whyHireMe}
+${a.whyHireMe}
 
 COVER LETTER:
-${candidateAnswers.coverLetter}`;
+${a.coverLetter}`;
+}
 
-  const cleanAns = (str) => (str || "").replace(/"/g, '\\"').replace(/\n/g, '\\n');
-  const bookmarklet = `javascript:(function(){var c={name:"${candidateAnswers.fullName}",first:"${candidateAnswers.firstName}",last:"${candidateAnswers.lastName}",email:"${candidateAnswers.email}",phone:"${candidateAnswers.phone}",city:"${candidateAnswers.city}",location:"${candidateAnswers.location}",linkedin:"${candidateAnswers.linkedin}",github:"${candidateAnswers.github}",portfolio:"${candidateAnswers.portfolio}",company:"${candidateAnswers.currentCompany}",title:"${candidateAnswers.currentTitle}",notice:"${candidateAnswers.noticePeriod}",salary:"${candidateAnswers.salaryExpectation}",why:"${cleanAns(candidateAnswers.whyInterested)}",exp:"${cleanAns(candidateAnswers.relevantExperience)}",cl:"${cleanAns(candidateAnswers.coverLetter)}"};var f=0;function fill(sel,val){if(!val)return;document.querySelectorAll(sel).forEach(function(el){if(!el.value||el.value.length===0){el.value=val;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));el.style.border="2px solid #22c55e";el.style.backgroundColor="#f0fdf4";f++;}});}fill('input[name*="first_name" i],input[name*="firstName" i],input[id*="first_name" i],input[autocomplete="given-name"]',c.first);fill('input[name*="last_name" i],input[name*="lastName" i],input[id*="last_name" i],input[autocomplete="family-name"]',c.last);fill('input[name*="name" i]:not([name*="first" i]):not([name*="last" i]),input[id*="name" i]:not([id*="first" i]):not([id*="last" i]),input[autocomplete="name"]',c.name);fill('input[type="email"],input[name*="email" i],input[id*="email" i]',c.email);fill('input[type="tel"],input[name*="phone" i],input[id*="phone" i]',c.phone);fill('input[name*="city" i],input[id*="city" i]',c.city);fill('input[name*="location" i],input[id*="location" i]',c.location);fill('input[name*="linkedin" i],input[id*="linkedin" i],input[placeholder*="linkedin" i]',c.linkedin);fill('input[name*="github" i],input[id*="github" i],input[placeholder*="github" i]',c.github);fill('input[name*="portfolio" i],input[id*="portfolio" i],input[name*="website" i]',c.portfolio);fill('input[name*="company" i],input[id*="company" i]',c.company);fill('input[name*="title" i],input[id*="title" i]',c.title);fill('input[name*="notice" i],input[id*="notice" i]',c.notice);fill('input[name*="salary" i],input[id*="salary" i]',c.salary);document.querySelectorAll('input[type="radio"]').forEach(function(r){var t=((r.closest("label")||r.parentElement||{}).innerText||"").toLowerCase();var v=(r.value||"").toLowerCase();if(t.includes("authorized")||t.includes("right to work")){if(v==="yes"||v==="true"||t.includes("yes")){r.click();f++;}}if(t.includes("sponsorship")||t.includes("require visa")){if(v==="no"||v==="false"||t.includes("no")){r.click();f++;}}});document.querySelectorAll('textarea').forEach(function(ta){if(ta.value&&ta.value.length>5)return;var p=((ta.getAttribute("placeholder")||ta.getAttribute("aria-label")||(ta.closest("label,.form-group,div")||{}).innerText)||"").toLowerCase();if(p.includes("cover letter")||p.includes("note to hiring")){ta.value=c.cl;ta.dispatchEvent(new Event('input',{bubbles:true}));ta.dispatchEvent(new Event('change',{bubbles:true}));ta.style.border="2px solid #22c55e";f++;}else if(p.includes("why")&&(p.includes("role")||p.includes("company")||p.includes("interested"))){ta.value=c.why;ta.dispatchEvent(new Event('input',{bubbles:true}));ta.dispatchEvent(new Event('change',{bubbles:true}));ta.style.border="2px solid #22c55e";f++;}else if(p.includes("experience")||p.includes("background")){ta.value=c.exp;ta.dispatchEvent(new Event('input',{bubbles:true}));ta.dispatchEvent(new Event('change',{bubbles:true}));ta.style.border="2px solid #22c55e";f++;}});alert("✅ Job Pilot: Filled "+f+" fields on your screen!");})();`;
-
-  return {
-    success: true,
-    jobId,
-    jobTitle,
-    company: compName,
-    targetRole: roleName,
-    headline: tailoredData.headline,
-    htmlFile: `resume-${safeJobId}.html`,
-    pdfFile: `resume-${safeJobId}.pdf`,
-    destHtmlPath,
-    destPdfPath: pdfGenerated ? destPdfPath : destHtmlPath,
-    hasPdf: pdfGenerated,
-    htmlUrl: `/api/jobs/${encodeURIComponent(jobId)}/resume.html`,
-    pdfUrl: `/api/jobs/${encodeURIComponent(jobId)}/resume.pdf`,
-    formAnswers: candidateAnswers,
-    copyAllText,
-    bookmarklet,
-    generatedAt: new Date().toISOString(),
-  };
+function buildBookmarklet(c) {
+  const cl = (s) => (s || "").replace(/"/g, '\\"').replace(/\n/g, '\\n');
+  return `javascript:(function(){var c={name:"${c.fullName}",first:"${c.firstName}",last:"${c.lastName}",email:"${c.email}",phone:"${c.phone}",city:"${c.city}",location:"${c.location}",linkedin:"${c.linkedin}",github:"${c.github}",portfolio:"${c.portfolio}",company:"${c.currentCompany}",title:"${c.currentTitle}",notice:"${c.noticePeriod}",salary:"${c.salaryExpectation}",why:"${cl(c.whyInterested)}",exp:"${cl(c.relevantExperience)}",cl:"${cl(c.coverLetter)}"};var f=0;function fill(sel,val){if(!val)return;document.querySelectorAll(sel).forEach(function(el){if(!el.value||el.value.length===0){el.value=val;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));el.style.border="2px solid #22c55e";f++;}});}fill('input[type="email"],input[name*="email" i]',c.email);fill('input[type="tel"],input[name*="phone" i]',c.phone);fill('input[name*="name" i]:not([name*="first" i]):not([name*="last" i])',c.name);fill('input[name*="first_name" i],input[autocomplete="given-name"]',c.first);fill('input[name*="last_name" i],input[autocomplete="family-name"]',c.last);fill('input[name*="linkedin" i]',c.linkedin);fill('input[name*="github" i]',c.github);alert("✅ Job Pilot: Filled "+f+" fields!");})();`;
 }
 
 function escHtml(str) {

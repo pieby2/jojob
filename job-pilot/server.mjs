@@ -29,6 +29,7 @@ import {
 } from "./lib/deepseek.mjs";
 
 import { autofillJobApplication } from "./lib/form-autofiller.mjs";
+import { loadProjects, saveProjects } from "./lib/tailor-engine.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -993,6 +994,107 @@ app.get("/api/bookmarklet", (req, res) => {
     alert('✅ Job Pilot: Candidate details auto-filled! Please check and submit.');
   })();`;
   res.json({ bookmarklet: code });
+});
+
+// ═══════════════════════════════════════════
+// PROJECT PORTFOLIO MANAGEMENT API
+// ═══════════════════════════════════════════
+
+// 18. GET /api/projects — List all projects in the portfolio
+app.get("/api/projects", (_req, res) => {
+  try {
+    const projects = loadProjects();
+    res.json({ projects, count: projects.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 19. POST /api/projects — Add a new project to the portfolio
+app.post("/api/projects", (req, res) => {
+  try {
+    const { name, domain, period, description, techStack, bullets, keywords } = req.body;
+    if (!name || !description) {
+      return res.status(400).json({ error: "Project name and description are required." });
+    }
+
+    const projects = loadProjects();
+    const id = (name || "project")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .substring(0, 40) + "-" + Date.now().toString(36);
+
+    const newProject = {
+      id,
+      name,
+      domain: domain || "General",
+      period: period || new Date().getFullYear().toString(),
+      description,
+      techStack: Array.isArray(techStack) ? techStack : (techStack || "").split(",").map((s) => s.trim()).filter(Boolean),
+      bullets: Array.isArray(bullets) ? bullets : (bullets || "").split("\n").map((s) => s.trim()).filter(Boolean),
+      keywords: Array.isArray(keywords) ? keywords : (keywords || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
+    };
+
+    projects.push(newProject);
+    saveProjects(projects);
+
+    console.log(`[projects] Added project: ${newProject.name} (${newProject.domain})`);
+    res.json({ ok: true, project: newProject, totalProjects: projects.length });
+  } catch (err) {
+    console.error("Add project error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 20. PUT /api/projects/:id — Update an existing project
+app.put("/api/projects/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+    const projects = loadProjects();
+    const idx = projects.findIndex((p) => p.id === id);
+    if (idx === -1) return res.status(404).json({ error: "Project not found" });
+
+    const updates = req.body;
+    const project = projects[idx];
+
+    if (updates.name !== undefined) project.name = updates.name;
+    if (updates.domain !== undefined) project.domain = updates.domain;
+    if (updates.period !== undefined) project.period = updates.period;
+    if (updates.description !== undefined) project.description = updates.description;
+    if (updates.techStack !== undefined) {
+      project.techStack = Array.isArray(updates.techStack) ? updates.techStack : (updates.techStack || "").split(",").map((s) => s.trim()).filter(Boolean);
+    }
+    if (updates.bullets !== undefined) {
+      project.bullets = Array.isArray(updates.bullets) ? updates.bullets : (updates.bullets || "").split("\n").map((s) => s.trim()).filter(Boolean);
+    }
+    if (updates.keywords !== undefined) {
+      project.keywords = Array.isArray(updates.keywords) ? updates.keywords : (updates.keywords || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+    }
+
+    projects[idx] = project;
+    saveProjects(projects);
+
+    res.json({ ok: true, project });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 21. DELETE /api/projects/:id — Remove a project from the portfolio
+app.delete("/api/projects/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+    let projects = loadProjects();
+    const before = projects.length;
+    projects = projects.filter((p) => p.id !== id);
+    if (projects.length === before) return res.status(404).json({ error: "Project not found" });
+
+    saveProjects(projects);
+    res.json({ ok: true, remaining: projects.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // --- Get LAN IP ---

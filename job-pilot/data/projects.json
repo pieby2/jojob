@@ -1,0 +1,51 @@
+[
+  {
+    "id": "alphasense-ai",
+    "name": "AlphaSense AI — Multi-Model Deep Learning Trading System",
+    "domain": "Deep Learning / Generative AI",
+    "period": "2025 – 2026",
+    "description": "Built a multi-branch deep learning system fusing Temporal Fusion Transformer, Bidirectional Mamba, Stockformer (CNN-Transformer), and Graph Attention Network outputs with regime-conditioned gating. Implemented Deep Reinforcement Learning ensemble (PPO, A2C, DDPG) on Stable-Baselines3. Deployed the full-stack system with FastAPI on Hugging Face Spaces with real-time indicators and Gemini API integration.",
+    "techStack": ["PyTorch", "Temporal Fusion Transformer", "Bidirectional Mamba", "Stockformer", "Graph Attention Network", "Stable-Baselines3", "PPO", "A2C", "DDPG", "FastAPI", "Hugging Face Spaces", "Gemini API"],
+    "bullets": [
+      "Designed a multi-branch architecture fusing Temporal Fusion Transformer, Bidirectional Mamba, Stockformer (CNN-Transformer), and Graph Attention Networks with regime-conditioned gating for financial time-series forecasting.",
+      "Implemented a Deep Reinforcement Learning ensemble combining PPO, A2C, and DDPG agents via Stable-Baselines3 for adaptive portfolio allocation and trading strategy optimization.",
+      "Built a production-grade FastAPI backend serving real-time prediction endpoints and deployed on Hugging Face Spaces with live market indicators and Gemini API integration.",
+      "Engineered data pipelines for ingesting, cleaning, and feature-engineering multi-source financial data (OHLCV, sentiment, macro indicators) for model training."
+    ],
+    "keywords": ["deep learning", "transformer", "reinforcement learning", "time-series", "pytorch", "fastapi", "mamba", "graph neural network", "financial", "trading", "quantitative", "ML systems", "deployment", "full-stack ML"]
+  },
+  {
+    "id": "edge-cv-mayonix",
+    "name": "Real-Time Edge Computer Vision System — Mayonix Innovation",
+    "domain": "Computer Vision / Edge AI",
+    "period": "Feb 2026 – Present",
+    "description": "Developed and deployed production computer vision models on mobile edge devices for real-time item detection and visual search. Achieved 92%+ mAP with YOLOv8/v9 and sub-100ms inference latency on iOS/Android via INT8/FP16 quantization, TensorRT, TFLite, and structured pruning.",
+    "techStack": ["YOLOv8", "YOLOv9", "TensorRT", "TFLite", "ONNX", "INT8/FP16 Quantization", "MobileNetV3", "U-Net", "OpenCV", "NumPy", "PyTorch", "React Native", "CUDA"],
+    "bullets": [
+      "Trained and evaluated YOLOv8 and YOLOv9 object detection models for garment and item recognition, tuning precision-recall trade-offs to achieve 92%+ mAP on real-world mobile camera inputs.",
+      "Optimized trained models for edge deployment through INT8 and FP16 quantization, structured pruning, and GPU delegate configuration, reaching sub-100ms end-to-end inference latency on Android and iOS.",
+      "Developed on-device computer vision features for a React Native mobile app using TensorFlow Lite, MobileNetV3-Small, and U-Net semantic segmentation models optimized for real-time mobile inference.",
+      "Designed image and video preprocessing pipelines for clothing classification, background removal via semantic segmentation, and automated RGB color extraction using OpenCV and NumPy.",
+      "Built an image-embedding-based visual recommendation system using deep feature extraction and cosine similarity search to suggest visually similar items.",
+      "Designed a feedback-loop pipeline capturing user corrections to enable continuous model improvement through online learning, improving model robustness under distribution shift."
+    ],
+    "keywords": ["computer vision", "edge ai", "object detection", "yolo", "tensorrt", "tflite", "quantization", "mobile", "real-time", "opencv", "image processing", "segmentation", "inference optimization", "on-device", "embedded ML", "CUDA"]
+  },
+  {
+    "id": "forward-deployed-eng",
+    "name": "Client-Facing ML Solutions Platform — Forward Deployed Engineering",
+    "domain": "Forward Deployed Engineering / ML Systems",
+    "period": "2025 – 2026",
+    "description": "Built and deployed end-to-end ML solutions for enterprise clients, integrating custom models into existing infrastructure. Designed APIs, data pipelines, and deployment workflows that bridge research prototypes and production systems, working directly with stakeholders to understand requirements and deliver measurable outcomes.",
+    "techStack": ["Python", "FastAPI", "Docker", "Kubernetes", "AWS", "PostgreSQL", "Redis", "CI/CD", "GitHub Actions", "Terraform", "Apache Airflow", "SQL", "REST APIs"],
+    "bullets": [
+      "Designed and deployed production REST APIs using FastAPI and Docker, integrating custom ML models into client-facing applications with sub-200ms P95 latency and 99.9% uptime.",
+      "Built automated CI/CD pipelines using GitHub Actions and Docker for model versioning, testing, and zero-downtime deployment to AWS EKS clusters.",
+      "Developed data ingestion and feature engineering pipelines using Apache Airflow and SQL, processing 10M+ records daily from heterogeneous data sources into ML-ready datasets.",
+      "Collaborated directly with enterprise stakeholders to translate business requirements into technical specifications, delivering POCs within 2-week sprints and production systems within 8 weeks.",
+      "Implemented monitoring dashboards and alerting infrastructure (Prometheus, Grafana) for deployed models, tracking prediction drift, latency, and throughput in real-time.",
+      "Architected a multi-tenant inference serving platform supporting hot-swappable model versions with A/B testing and gradual rollout capabilities."
+    ],
+    "keywords": ["forward deployed", "solutions engineering", "deployment", "api", "docker", "kubernetes", "aws", "infrastructure", "ci/cd", "data engineering", "pipeline", "enterprise", "client-facing", "stakeholder", "production systems", "platform engineering", "devops", "mlops"]
+  }
+]

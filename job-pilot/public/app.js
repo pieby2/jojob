@@ -862,7 +862,7 @@ ${escHtml(desc)}
 }
 
 // -------------------------------------------------------------------------
-// STEP 2: ROLE-SPECIFIC RESUME TAILORING
+// STEP 2: MULTI-PROJECT RESUME TAILORING
 // -------------------------------------------------------------------------
 function renderStep2(job) {
   const container = document.getElementById("step-2-content");
@@ -872,22 +872,53 @@ function renderStep2(job) {
   const targetRole = job.target_role || detectRoleClient(job.title, job.description);
   const tailored = job._tailoredResume;
 
+  // Build project portfolio preview
+  const projectPortfolioHtml = `
+    <div class="step-section-box" style="border-left:4px solid #8b5cf6;">
+      <div class="step-box-header">
+        <div>
+          <span class="step-box-title" style="color:#a78bfa;">📂 Project Portfolio</span>
+          <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">
+            Your multi-domain projects. The AI selects the most relevant ones for each JD.
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="openProjectManager()">
+          ⚙️ Manage Projects
+        </button>
+      </div>
+      <div id="portfolio-preview" style="margin-top:10px;">
+        <div style="color:var(--text-muted);font-size:0.8rem;">Loading portfolio...</div>
+      </div>
+    </div>`;
+
   if (tailored) {
+    const selectedCount = tailored.selectedProjectCount || tailored.selectedProjectIds?.length || 0;
+    const selectedIds = tailored.selectedProjectIds || [];
+
     container.innerHTML = `
+      ${projectPortfolioHtml}
+
       <div class="step-section-box" style="border-left:4px solid var(--accent-emerald);">
         <div class="step-box-header">
           <div>
-            <span class="step-box-title" style="color:var(--accent-emerald);">📄 Tailored ATS Personal Resume</span>
-            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">Customized strictly from verified track record (zero hallucinations)</div>
+            <span class="step-box-title" style="color:var(--accent-emerald);">📄 Fully Custom Resume Generated</span>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">
+              AI selected ${selectedCount} project(s) most relevant to this JD • Experience bullets rewritten for ${escHtml(targetRole)}
+            </div>
           </div>
           <span class="tag-badge" style="background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.35);">
-            Ready for ${escHtml(targetRole)}
+            ✨ Custom for ${escHtml(targetRole)}
           </span>
         </div>
 
         <div style="font-size:0.9rem;font-weight:700;color:#ffffff;margin-bottom:6px;">
           🎯 Role Headline: <span style="color:#38bdf8;">${escHtml(tailored.headline || targetRole)}</span>
         </div>
+
+        ${selectedIds.length > 0 ? `
+        <div style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap;">
+          ${selectedIds.map((id) => `<span class="tag-badge" style="background:rgba(139,92,246,0.15);color:#c4b5fd;border:1px solid rgba(139,92,246,0.35);font-size:0.72rem;">📁 ${escHtml(id)}</span>`).join("")}
+        </div>` : ""}
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;">
           <a href="/api/jobs/${encodeURIComponent(job._id)}/resume.pdf" target="_blank" download="Prakhar_Chaubey_Resume_${escHtml(company)}.pdf" class="btn btn-success btn-sm">
@@ -897,16 +928,16 @@ function renderStep2(job) {
             🖨️ Save as PDF / Print Preview
           </a>
           <button class="btn btn-ghost btn-sm" onclick="tailorResumeInFlow('${job._id}')">
-            ↻ Re-tailor for Role
+            ↻ Re-tailor with Different Projects
           </button>
         </div>
       </div>
 
-      <!-- Preview Summary & Competencies -->
+      <!-- Tailored Summary Preview -->
       <div class="step-section-box">
-        <div class="step-box-title" style="color:#93c5fd;margin-bottom:8px;">🎯 Tailored Professional Summary</div>
+        <div class="step-box-title" style="color:#93c5fd;margin-bottom:8px;">🎯 Custom Professional Summary</div>
         <div style="font-size:0.84rem;color:#cbd5e1;line-height:1.55;background:var(--bg-surface);padding:10px 12px;border-radius:var(--radius-md);">
-          ${escHtml(tailored.formAnswers?.whyInterested || `Machine Learning Engineer at Mayonix Innovation specializing in edge AI and computer vision models (92%+ mAP YOLOv8/v9, sub-100ms latency on edge hardware via TensorRT, TFLite, INT8 quantization). Seeking to contribute to ${company} as a ${targetRole}.`)}
+          ${escHtml(tailored.formAnswers?.whyInterested || "")}
         </div>
       </div>
 
@@ -918,17 +949,207 @@ function renderStep2(job) {
     `;
   } else {
     container.innerHTML = `
+      ${projectPortfolioHtml}
+
       <div class="step-section-box" style="text-align:center;padding:28px 18px;">
         <div style="font-size:2.2rem;margin-bottom:10px;">📄</div>
-        <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:6px;">Generate Role-Specific Resume for ${escHtml(company)}</h3>
-        <p style="font-size:0.84rem;color:var(--text-secondary);max-width:520px;margin:0 auto 16px;">
-          Our engine reformulates your real accomplishments (Mayonix YOLO 92%+ mAP, sub-100ms edge optimization, AlphaSense AI, IEEE publications) with vocabulary from this <strong>${escHtml(targetRole)}</strong> job description under strict anti-fabrication rules.
+        <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:6px;">Craft Custom Resume for ${escHtml(company)}</h3>
+        <p style="font-size:0.84rem;color:var(--text-secondary);max-width:560px;margin:0 auto 16px;">
+          The AI will analyze your <strong>entire project portfolio</strong> and this <strong>${escHtml(targetRole)}</strong> JD to:
         </p>
+        <div style="text-align:left;max-width:480px;margin:0 auto 20px;font-size:0.82rem;color:#94a3b8;">
+          <div style="margin-bottom:4px;">✅ <strong>Select</strong> the most relevant projects for this specific role</div>
+          <div style="margin-bottom:4px;">✅ <strong>Rewrite</strong> experience bullets using JD keywords & terminology</div>
+          <div style="margin-bottom:4px;">✅ <strong>Craft</strong> a custom summary, competencies, and skills ordering</div>
+          <div>✅ <strong>Generate</strong> ATS-optimized HTML + PDF with zero fabrication</div>
+        </div>
         <button class="btn btn-primary" onclick="tailorResumeInFlow('${job._id}')">
-          ⚡ Generate Role-Specific Resume (PDF &amp; HTML)
+          ⚡ Generate Custom Multi-Project Resume
         </button>
       </div>
     `;
+  }
+
+  // Load portfolio preview
+  loadPortfolioPreview();
+}
+
+// -------------------------------------------------------------------------
+// PROJECT PORTFOLIO MANAGEMENT
+// -------------------------------------------------------------------------
+async function loadPortfolioPreview() {
+  const container = document.getElementById("portfolio-preview");
+  if (!container) return;
+
+  try {
+    const res = await fetch("/api/projects");
+    const data = await res.json();
+    const projects = data.projects || [];
+
+    if (projects.length === 0) {
+      container.innerHTML = `
+        <div style="text-align:center;padding:12px;color:var(--text-muted);font-size:0.82rem;">
+          No projects yet. <button class="btn btn-ghost btn-sm" onclick="openProjectManager()" style="margin-left:8px;">+ Add Your First Project</button>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${projects.map((p) => `
+          <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:8px;padding:8px 12px;flex:1;min-width:200px;max-width:340px;">
+            <div style="font-size:0.82rem;font-weight:700;color:#e2e8f0;margin-bottom:2px;">${escHtml(p.name)}</div>
+            <div style="font-size:0.72rem;color:#8b5cf6;font-weight:600;margin-bottom:4px;">${escHtml(p.domain)}</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(p.techStack?.slice(0, 5).join(", "))}</div>
+          </div>
+        `).join("")}
+      </div>
+      <div style="margin-top:8px;font-size:0.74rem;color:var(--text-muted);">
+        📊 ${projects.length} project(s) in portfolio across ${[...new Set(projects.map((p) => p.domain))].length} domain(s)
+      </div>`;
+  } catch (e) {
+    container.innerHTML = `<div style="color:#f87171;font-size:0.8rem;">Failed to load portfolio</div>`;
+  }
+}
+
+function openProjectManager() {
+  // Create modal overlay
+  const existing = document.getElementById("project-manager-modal");
+  if (existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "project-manager-modal";
+  modal.style.cssText = "position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;padding:20px;";
+  modal.innerHTML = `
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;width:100%;max-width:700px;max-height:85vh;overflow-y:auto;padding:24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h2 style="font-size:1.3rem;font-weight:800;color:#ffffff;margin:0;">📂 Project Portfolio Manager</h2>
+        <button onclick="document.getElementById('project-manager-modal').remove()" style="background:none;border:none;color:#94a3b8;font-size:1.3rem;cursor:pointer;">✕</button>
+      </div>
+
+      <div id="project-list-container" style="margin-bottom:20px;">
+        <div style="color:var(--text-muted);font-size:0.84rem;">Loading projects...</div>
+      </div>
+
+      <div style="border-top:1px solid #334155;padding-top:16px;">
+        <h3 style="font-size:1rem;font-weight:700;color:#e2e8f0;margin-bottom:12px;">➕ Add New Project</h3>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <input id="pm-name" placeholder="Project Name (e.g., Real-Time Drone Perception System)" style="background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:0.88rem;">
+          <div style="display:flex;gap:8px;">
+            <input id="pm-domain" placeholder="Domain (e.g., Computer Vision)" style="flex:1;background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:0.88rem;">
+            <input id="pm-period" placeholder="Period (e.g., 2025–2026)" style="width:150px;background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:0.88rem;">
+          </div>
+          <textarea id="pm-description" rows="3" placeholder="Project description (2-4 sentences about what you built and the impact)" style="background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:0.88rem;resize:vertical;"></textarea>
+          <input id="pm-tech" placeholder="Tech Stack (comma-separated: PyTorch, Docker, FastAPI, AWS...)" style="background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:0.88rem;">
+          <textarea id="pm-bullets" rows="4" placeholder="Key achievement bullets (one per line):&#10;• Achieved 95% accuracy on X&#10;• Reduced latency by 40% using Y&#10;• Deployed to production serving 10K req/s" style="background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:0.88rem;resize:vertical;"></textarea>
+          <input id="pm-keywords" placeholder="Keywords for matching (comma-separated: computer vision, edge ai, deployment...)" style="background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:0.88rem;">
+          <button class="btn btn-primary" onclick="addProjectFromForm()">
+            ➕ Add Project to Portfolio
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  // Close on backdrop click
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
+
+  loadProjectList();
+}
+
+async function loadProjectList() {
+  const container = document.getElementById("project-list-container");
+  if (!container) return;
+
+  try {
+    const res = await fetch("/api/projects");
+    const data = await res.json();
+    const projects = data.projects || [];
+
+    if (projects.length === 0) {
+      container.innerHTML = `<div style="text-align:center;padding:16px;color:#94a3b8;font-size:0.88rem;">No projects yet. Add your first project below!</div>`;
+      return;
+    }
+
+    container.innerHTML = projects.map((p) => `
+      <div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:14px 16px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+          <div style="flex:1;">
+            <div style="font-size:0.92rem;font-weight:700;color:#f1f5f9;">${escHtml(p.name)}</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:3px;">
+              <span style="font-size:0.74rem;font-weight:600;color:#8b5cf6;background:rgba(139,92,246,0.12);padding:2px 8px;border-radius:4px;">${escHtml(p.domain)}</span>
+              <span style="font-size:0.74rem;color:#64748b;">${escHtml(p.period)}</span>
+            </div>
+            <div style="font-size:0.78rem;color:#94a3b8;margin-top:6px;line-height:1.45;">${escHtml(p.description?.substring(0, 180))}${p.description?.length > 180 ? "..." : ""}</div>
+            <div style="font-size:0.72rem;color:#0284c7;margin-top:4px;font-weight:600;">${escHtml(p.techStack?.slice(0, 6).join(" · "))}</div>
+            <div style="font-size:0.68rem;color:#64748b;margin-top:2px;">${p.bullets?.length || 0} bullets · ${p.keywords?.length || 0} keywords</div>
+          </div>
+          <button onclick="deleteProject('${p.id}')" style="background:none;border:1px solid #7f1d1d;color:#f87171;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.76rem;white-space:nowrap;margin-left:10px;">🗑️ Remove</button>
+        </div>
+      </div>
+    `).join("");
+  } catch (e) {
+    container.innerHTML = `<div style="color:#f87171;font-size:0.84rem;">Error loading projects: ${e.message}</div>`;
+  }
+}
+
+async function addProjectFromForm() {
+  const name = document.getElementById("pm-name")?.value?.trim();
+  const domain = document.getElementById("pm-domain")?.value?.trim();
+  const period = document.getElementById("pm-period")?.value?.trim();
+  const description = document.getElementById("pm-description")?.value?.trim();
+  const techStack = document.getElementById("pm-tech")?.value?.trim();
+  const bulletsRaw = document.getElementById("pm-bullets")?.value?.trim();
+  const keywords = document.getElementById("pm-keywords")?.value?.trim();
+
+  if (!name || !description) {
+    alert("Please provide at least a project name and description.");
+    return;
+  }
+
+  // Parse bullets — strip leading bullet markers
+  const bullets = bulletsRaw
+    ? bulletsRaw.split("\n").map((l) => l.replace(/^[\s•\-\*]+/, "").trim()).filter(Boolean)
+    : [];
+
+  try {
+    const res = await fetch("/api/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, domain, period, description, techStack, bullets, keywords }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      showToast(`✅ Added project: ${name}`);
+      // Clear form
+      ["pm-name", "pm-domain", "pm-period", "pm-description", "pm-tech", "pm-bullets", "pm-keywords"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+      });
+      loadProjectList();
+      loadPortfolioPreview();
+    } else {
+      alert("Error: " + (data.error || "Unknown error"));
+    }
+  } catch (e) {
+    alert("Failed to add project: " + e.message);
+  }
+}
+
+async function deleteProject(id) {
+  if (!confirm("Remove this project from your portfolio?")) return;
+
+  try {
+    const res = await fetch(`/api/projects/${encodeURIComponent(id)}`, { method: "DELETE" });
+    const data = await res.json();
+    if (data.ok) {
+      showToast("🗑️ Project removed");
+      loadProjectList();
+      loadPortfolioPreview();
+    }
+  } catch (e) {
+    alert("Failed to delete: " + e.message);
   }
 }
 
@@ -1159,7 +1380,7 @@ async function evaluateJobInFlow(jobId) {
 }
 
 async function tailorResumeInFlow(jobId) {
-  showLoading("Tailoring role-specific ATS resume with DeepSeek...\nStrict anti-fabrication rules active...\nCompiling PDF via Playwright Chromium...");
+  showLoading("🔍 Analyzing your project portfolio against this JD...\n📂 Selecting most relevant projects for this role...\n✍️ Rewriting experience bullets with JD keywords...\n📄 Generating custom HTML + PDF resume...");
   try {
     const res = await fetchWithRetry(
       `/api/jobs/${encodeURIComponent(jobId)}/tailor-resume`,
