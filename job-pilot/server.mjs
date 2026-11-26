@@ -324,7 +324,7 @@ app.use(express.static(join(__dirname, "public"), {
   maxAge: "1d",
   etag: true,
   setHeaders: (res, filePath) => {
-    if (filePath.endsWith(".html")) {
+    if (filePath.endsWith(".html") || filePath.endsWith(".js") || filePath.endsWith(".css")) {
       res.setHeader("Cache-Control", "no-cache");
     } else {
       res.setHeader("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
