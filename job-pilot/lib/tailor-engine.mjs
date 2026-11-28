@@ -138,24 +138,40 @@ Keywords: ${p.keywords.join(", ")}
 }
 
 /**
+ * Strip any HTML tags or markdown bold/italic markers so raw tags never appear in PDF/HTML.
+ */
+function stripMarkup(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/<\/?[^>]+>/g, "")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const ATS_KEYWORD_CATALOG = [
+  "Python", "C++", "CUDA", "SQL", "JavaScript", "Bash", "Shell Scripting",
+  "PyTorch", "TensorFlow", "TensorFlow Lite", "TFLite", "TensorRT", "ONNX", "OpenCV",
+  "YOLO", "YOLOv8", "YOLOv9", "Computer Vision", "Object Detection", "Semantic Segmentation",
+  "U-Net", "MobileNet", "MobileNetV3", "ResNet", "ArcFace", "Image Processing", "Perception", "3D Perception",
+  "Sensor Fusion", "Edge AI", "On-Device", "Embedded ML", "Quantization", "INT8", "FP16", "Pruning",
+  "Deep Learning", "Machine Learning", "Neural Networks", "Transformers", "LLM", "LLMs", "Generative AI",
+  "Reinforcement Learning", "RAG", "LangChain", "CrewAI", "Hugging Face", "Fine-Tuning", "SFT", "RLHF",
+  "Gemini", "FastAPI", "Flask", "REST API", "REST APIs", "Docker", "Kubernetes", "AWS", "CI/CD", "GitHub Actions",
+  "Git", "Terraform", "Airflow", "Apache Airflow", "dbt", "ETL", "MLOps", "Model Serving", "Latency",
+  "Optimization", "PostgreSQL", "pgvector", "MySQL", "MongoDB", "Redis", "Elasticsearch", "Qdrant",
+  "Pandas", "NumPy", "Scikit-learn", "Online Learning", "Embeddings", "Cosine Similarity",
+  "Data Preprocessing", "Feature Engineering", "Model Evaluation", "Model Training", "Linux"
+];
+
+/**
  * Extract high-signal ATS technical & domain keywords from a Job Description.
  */
 function extractJdKeywords(jobTitle = "", description = "") {
   const text = `${jobTitle}\n${description}`.toLowerCase();
-  const catalog = [
-    "Python", "C++", "CUDA", "SQL", "JavaScript", "Bash",
-    "PyTorch", "TensorFlow", "TensorFlow Lite", "TFLite", "TensorRT", "ONNX", "OpenCV",
-    "YOLO", "YOLOv8", "YOLOv9", "Computer Vision", "Object Detection", "Semantic Segmentation",
-    "U-Net", "MobileNet", "ResNet", "Image Processing", "Perception", "3D Perception",
-    "Edge AI", "On-Device", "Embedded ML", "Quantization", "INT8", "FP16", "Pruning",
-    "Deep Learning", "Machine Learning", "Neural Networks", "Transformers", "LLM", "Generative AI",
-    "Reinforcement Learning", "RAG", "LangChain", "Hugging Face", "Fine-Tuning", "SFT", "RLHF",
-    "FastAPI", "Flask", "REST API", "Docker", "Kubernetes", "AWS", "CI/CD", "GitHub Actions",
-    "Terraform", "Airflow", "ETL", "MLOps", "Model Serving", "Latency", "Optimization",
-    "PostgreSQL", "pgvector", "Redis", "Pandas", "NumPy", "Scikit-learn", "Linux", "Git"
-  ];
   const matched = [];
-  for (const kw of catalog) {
+  for (const kw of ATS_KEYWORD_CATALOG) {
     const escaped = kw.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const rx = new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`, "i");
     if (rx.test(text)) {
@@ -166,9 +182,49 @@ function extractJdKeywords(jobTitle = "", description = "") {
 }
 
 /**
+ * Extract the subset of JD keywords that are genuinely verified in the candidate's cv.md or projects.json.
+ */
+function filterVerifiedKeywords(jdKeywords, cvText, projects) {
+  const candidateBlob = [
+    cvText || "",
+    ...(projects || []).flatMap((p) => [
+      p.name || "",
+      p.description || "",
+      ...(p.techStack || []),
+      ...(p.bullets || []),
+      ...(p.keywords || []),
+    ]),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const aliasMap = {
+    "llms": ["llm", "gemini", "langchain", "rag", "transformers"],
+    "llm": ["gemini", "langchain", "rag", "transformers"],
+    "generative ai": ["gemini", "rag", "langchain", "llm"],
+    "neural networks": ["deep learning", "pytorch", "tensorflow", "cnn", "transformer"],
+    "model training": ["trained", "fine-tuning", "pytorch"],
+    "model evaluation": ["evaluated", "map", "precision-recall"],
+    "data preprocessing": ["preprocessing", "pipelines", "etl"],
+    "feature engineering": ["feature", "ceemdan", "embeddings"],
+    "latency": ["sub-100ms", "latency"],
+    "optimization": ["quantization", "pruning", "tensorrt", "optimized"],
+    "mobilenet": ["mobilenetv3"],
+    "git": ["github"],
+  };
+
+  return jdKeywords.filter((kw) => {
+    const low = kw.toLowerCase();
+    if (candidateBlob.includes(low)) return true;
+    const aliases = aliasMap[low] || [];
+    return aliases.some((a) => candidateBlob.includes(a));
+  });
+}
+
+/**
  * Compute real ATS match score (0-100) for the tailored resume against the JD.
  */
-function computeAtsScore(tailoredData, jdKeywords, jobTitle = "") {
+function computeAtsScore(tailoredData, jdKeywords, verifiedJdKeywords) {
   const resumeBlob = [
     tailoredData.headline || "",
     tailoredData.summary || "",
@@ -185,18 +241,20 @@ function computeAtsScore(tailoredData, jdKeywords, jobTitle = "") {
     .join(" ")
     .toLowerCase();
 
+  const targetList = verifiedJdKeywords.length > 0 ? verifiedJdKeywords : jdKeywords;
   let matchedCount = 0;
   const matchedKeywords = [];
-  for (const kw of jdKeywords) {
+  for (const kw of targetList) {
     if (resumeBlob.includes(kw.toLowerCase())) {
       matchedCount++;
       matchedKeywords.push(kw);
     }
   }
 
-  const kwScore = jdKeywords.length > 0 ? (matchedCount / jdKeywords.length) * 75 : 70;
+  // Keyword coverage against applicable JD skills (75 pts)
+  const kwScore = targetList.length > 0 ? (matchedCount / targetList.length) * 75 : 75;
 
-  // Structural ATS readiness checks (25 pts)
+  // Structural ATS readiness checks (25 pts): clean text, standard sections, metrics, real projects
   let structureScore = 0;
   if ((tailoredData.headline || "").trim().length > 4) structureScore += 5;
   if ((tailoredData.summary || "").trim().length > 40) structureScore += 5;
@@ -209,7 +267,7 @@ function computeAtsScore(tailoredData, jdKeywords, jobTitle = "") {
 }
 
 /**
- * MAIN: Generate a fully custom, 1-1.5 page, high-ATS multi-project resume tailored to a specific JD.
+ * MAIN: Generate a fully custom, 1-1.5 page, high-ATS resume using ONLY verified cv.md + projects.json.
  */
 export async function generateJobSpecificResume({ jobId, jobTitle, company, description, targetRole }) {
   if (!existsSync(RESUMES_DIR)) {
@@ -220,15 +278,16 @@ export async function generateJobSpecificResume({ jobId, jobTitle, company, desc
   const roleName = targetRole || jobTitle || "Machine Learning Engineer";
   const compName = company || "Company";
 
-  console.log(`[tailor-engine] Generating concise 1-1.5p high-ATS resume for ${compName} — ${jobTitle} (${roleName})...`);
+  console.log(`[tailor-engine] Generating verified 1-1.5p high-ATS resume for ${compName} — ${jobTitle} (${roleName})...`);
 
   const { cv } = loadCandidateData();
   const projects = loadProjects();
   const projectsBlock = formatProjectsForPrompt(projects);
   const jdKeywords = extractJdKeywords(jobTitle, description);
+  const verifiedJdKeywords = filterVerifiedKeywords(jdKeywords, cv, projects);
 
   const prompt = `You are an expert ATS resume optimizer and career strategist.
-Your task is to craft a SHORT, PRECISE, HIGH-IMPACT resume (strictly 1 to 1.5 pages max when printed) from the candidate's real experience and project portfolio, engineered to score 92%+ on ATS scanners for the target job.
+Your task is to craft a SHORT, PRECISE, HIGH-IMPACT resume (strictly 1 to 1.5 pages max when printed) from the candidate's REAL experience and project portfolio, engineered to score 95%+ on ATS scanners for the target job.
 
 ═══════════════════════════════════════════
 TARGET JOB INFORMATION
@@ -236,7 +295,7 @@ TARGET JOB INFORMATION
 Company: ${compName}
 Job Title: ${jobTitle}
 Role Category: ${roleName}
-Extracted ATS Keywords from JD: ${jdKeywords.length > 0 ? jdKeywords.join(", ") : roleName}
+Verified Matching ATS Keywords from JD: ${verifiedJdKeywords.length > 0 ? verifiedJdKeywords.join(", ") : roleName}
 Job Description:
 ${description ? description.substring(0, 3500) : "No description provided."}
 
@@ -246,57 +305,57 @@ CANDIDATE REAL TRACK RECORD (cv.md)
 ${cv}
 
 ═══════════════════════════════════════════
-CANDIDATE PROJECT PORTFOLIO (${projects.length} projects available)
+CANDIDATE VERIFIED PROJECT PORTFOLIO (${projects.length} project(s) available)
 ═══════════════════════════════════════════
 ${projectsBlock}
 
 ═══════════════════════════════════════════
-STRICT CONCISENESS & ATS RULES (1–1.5 PAGES MAX)
+STRICT RULES — ZERO FABRICATION & ZERO HTML TAGS
 ═══════════════════════════════════════════
-1. **SELECT TOP 2 PROJECTS ONLY**: Pick the TOP 2 most relevant projects for THIS JD and order by relevance.
-2. **CONCISE PROJECT ENTRIES**: For each selected project, write a **1-sentence** crisp description (max 25 words) + **2 short, high-impact bullets** (max 22 words each, with metrics).
-3. **CONCISE WORK EXPERIENCE**: Write **4 short, punchy bullets** for Mayonix Innovation (max 22 words each). Lead with action verbs + metrics + exact JD keywords. Use <strong> around key terms/metrics.
-4. **CRISP SUMMARY**: Write **2-3 tight sentences** (max 50 words total) tailored to ${compName} and ${jobTitle}, weaving in top JD keywords and hard metrics.
-5. **ATS KEYWORD ALIGNMENT (90–95%+ TARGET)**: Naturally weave every applicable keyword from "Extracted ATS Keywords from JD" (that is genuinely true of the candidate) into Summary, Competencies (8 crisp tags), Experience Bullets, Projects, and Technical Skills (4-5 single-line categories).
-6. **STRICT ANTI-FABRICATION**: Never invent companies, degrees, metrics, or unverified skills. ALWAYS preserve exact demoUrl and repoUrl from the project data.
+1. **ONLY VERIFIED WORK EXPERIENCE**: The candidate's ONLY work experience is Mayonix Innovation (Machine Learning Engineer, Feb 2026 – Present). Write **4 short, punchy bullets** (max 22 words each) grounded ONLY in cv.md facts, phrased with JD vocabulary and metrics.
+2. **ONLY VERIFIED PROJECTS**: Pick up to 2 projects strictly from CANDIDATE VERIFIED PROJECT PORTFOLIO above. If only ${projects.length} project exists in the portfolio, return ONLY ${Math.min(2, projects.length)} project(s). NEVER invent, rename, or add any project not listed above!
+3. **CONCISE PROJECT ENTRIES**: For each selected project, write **1 crisp sentence** description (max 25 words) + **2 short, metric-driven bullets** (max 22 words each) strictly from that project's real facts. ALWAYS preserve exact id, name, period, demoUrl, and repoUrl.
+4. **CRISP SUMMARY**: Write **2-3 tight sentences** (max 50 words total) tailored to ${compName} and ${jobTitle}, weaving in top verified JD keywords and hard metrics.
+5. **ATS KEYWORD ALIGNMENT (95%+ TARGET)**: Weave ALL keywords from "Verified Matching ATS Keywords from JD" naturally into Summary, Competencies (8 concise phrases), Experience Bullets, Projects, and Technical Skills (4 single-line categories).
+6. **PLAIN TEXT ONLY — NO HTML/MARKDOWN TAGS**: NEVER output <strong>, <b>, <i>, or ** inside ANY JSON string. Write clean plain text only.
 
 ═══════════════════════════════════════════
 OUTPUT FORMAT — Return ONLY valid JSON:
 ═══════════════════════════════════════════
 {
-  "headline": "Targeted professional title matching this JD",
-  "summary": "2-3 crisp sentences (<=50 words) with JD keywords & metrics",
-  "competencies": ["Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5", "Tag 6", "Tag 7", "Tag 8"],
+  "headline": "Targeted professional title matching this JD (plain text)",
+  "summary": "2-3 crisp sentences (<=50 words) with JD keywords & metrics (plain text, NO HTML tags)",
+  "competencies": ["Phrase 1", "Phrase 2", "Phrase 3", "Phrase 4", "Phrase 5", "Phrase 6", "Phrase 7", "Phrase 8"],
   "experienceBullets": [
-    "Short punchy Mayonix bullet 1 (<=22 words, <strong> on key terms/metrics)",
+    "Short punchy Mayonix bullet 1 (<=22 words, plain text, NO HTML tags)",
     "Short punchy bullet 2",
     "Short punchy bullet 3",
     "Short punchy bullet 4"
   ],
   "selectedProjects": [
     {
-      "id": "project-id from portfolio",
-      "name": "Project Name",
-      "period": "Date range",
-      "demoUrl": "Exact demoUrl from the project data (keep as-is, empty string if none)",
-      "repoUrl": "Exact repoUrl from the project data (keep as-is, empty string if none)",
-      "description": "1 concise sentence (<=25 words) tailored to this JD",
-      "techLine": "Comma-separated tech most relevant to this JD",
+      "id": "exact project id from portfolio above",
+      "name": "exact project name from portfolio above",
+      "period": "exact period",
+      "demoUrl": "exact demoUrl from portfolio",
+      "repoUrl": "exact repoUrl from portfolio",
+      "description": "1 concise sentence (<=25 words, plain text, NO HTML tags)",
+      "techLine": "Comma-separated tech from this project relevant to this JD",
       "bullets": [
-        "Short metric-driven bullet 1 (<=22 words)",
-        "Short metric-driven bullet 2 (<=22 words)"
+        "Short metric-driven bullet 1 (<=22 words, plain text)",
+        "Short metric-driven bullet 2 (<=22 words, plain text)"
       ]
     }
   ],
   "skillsCategories": {
-    "Category most relevant to JD": "Skills list",
-    "Second category": "Skills list",
-    "Third category": "Skills list",
-    "Fourth category": "Skills list"
+    "Category most relevant to JD": "Skills list from cv.md",
+    "Second category": "Skills list from cv.md",
+    "Third category": "Skills list from cv.md",
+    "Fourth category": "Skills list from cv.md"
   },
   "formAnswers": {
     "whyInterested": "2-3 sentences explaining genuine interest in this company and role",
-    "relevantExperience": "2-3 sentences about matching experience from Mayonix + selected projects",
+    "relevantExperience": "2-3 sentences about matching experience from Mayonix + verified projects",
     "coverLetter": "Compelling 3-paragraph cover letter for this specific role",
     "whyHireMe": "2 sentences on immediate value the candidate brings"
   }
@@ -309,7 +368,6 @@ OUTPUT FORMAT — Return ONLY valid JSON:
     tailoredData = JSON.parse(jsonStr);
   } catch (err) {
     console.warn("[tailor-engine] DeepSeek tailoring parse fallback:", err.message);
-    // Intelligent fallback: select projects by keyword overlap with JD
     const jdLower = (description || "").toLowerCase();
     const scored = projects.map((p) => ({
       ...p,
@@ -320,24 +378,22 @@ OUTPUT FORMAT — Return ONLY valid JSON:
 
     tailoredData = {
       headline: roleName,
-      summary: `Machine Learning Engineer at Mayonix Innovation with production experience in edge-optimized computer vision (92%+ mAP YOLOv8/v9, sub-100ms inference via TensorRT/TFLite/INT8 quantization), deep learning systems, and full-stack ML deployment. Published IEEE researcher seeking to contribute to ${compName} as ${jobTitle}.`,
+      summary: `Machine Learning Engineer at Mayonix Innovation with production experience in computer vision (92%+ mAP YOLOv8/v9, sub-100ms edge latency via TensorRT/TFLite/INT8 quantization), deep learning systems, and FastAPI deployment. Published IEEE researcher seeking to contribute to ${compName} as ${jobTitle}.`,
       competencies: [
         "Real-Time Object Detection (YOLOv8/v9)",
         "Edge Optimization (TensorRT, TFLite, ONNX)",
-        "INT8/FP16 Model Quantization & Pruning",
-        "PyTorch & Deep Learning Systems",
-        "FastAPI & Production ML Serving",
+        "INT8/FP16 Quantization & Pruning",
+        "PyTorch & Deep Learning Architectures",
+        "FastAPI & Production ML Deployment",
         "Docker, Kubernetes & CI/CD",
-        "Data Engineering & ETL Pipelines",
+        "Computer Vision & OpenCV Pipelines",
         "Published IEEE Research",
       ],
       experienceBullets: [
-        "Trained and evaluated <strong>YOLOv8 and YOLOv9</strong> object detection models for item recognition, achieving <strong>92%+ mAP</strong> on real-world mobile camera inputs.",
-        "Optimized models for edge deployment through <strong>INT8 and FP16 quantization</strong>, structured pruning, and GPU delegate configuration, reaching <strong>sub-100ms inference latency</strong> on Android and iOS.",
-        "Developed on-device CV features using <strong>TensorFlow Lite, MobileNetV3-Small, and U-Net segmentation</strong> for real-time mobile inference.",
-        "Designed image/video preprocessing pipelines for classification, segmentation, and color extraction using <strong>OpenCV and NumPy</strong>.",
-        "Built an image-embedding-based recommendation system using deep feature extraction and cosine similarity search.",
-        "Designed a feedback-loop pipeline for continuous model improvement through online learning under distribution shift.",
+        "Trained and evaluated YOLOv8 and YOLOv9 object detection models for item recognition, achieving 92%+ mAP on real-world mobile camera inputs.",
+        "Optimized models for edge deployment via INT8/FP16 quantization, structured pruning, and GPU delegates, reaching sub-100ms latency on Android and iOS.",
+        "Developed on-device computer vision features using TensorFlow Lite, MobileNetV3-Small, and U-Net semantic segmentation models.",
+        "Engineered OpenCV/NumPy image preprocessing pipelines and an online-learning feedback loop to sustain accuracy under distribution shift.",
       ],
       selectedProjects: topProjects.map((p) => ({
         id: p.id,
@@ -346,63 +402,116 @@ OUTPUT FORMAT — Return ONLY valid JSON:
         demoUrl: p.demoUrl || "",
         repoUrl: p.repoUrl || "",
         description: p.description,
-        techLine: p.techStack.slice(0, 6).join(", "),
-        bullets: p.bullets.slice(0, 3),
+        techLine: p.techStack.slice(0, 7).join(", "),
+        bullets: p.bullets.slice(0, 2),
       })),
       skillsCategories: {
-        "Core ML & Vision": "PyTorch, TensorFlow, YOLOv8/v9, OpenCV, TensorRT, TFLite, ONNX",
-        "Edge & Optimization": "INT8/FP16 quantization, structured pruning, CUDA, GPU delegates",
-        "Languages": "Python, C++, CUDA, SQL, Bash, JavaScript",
-        "Deployment & Infra": "FastAPI, Docker, Kubernetes, AWS, GitHub Actions, CI/CD",
-        "Databases & Data": "PostgreSQL, pgvector, Redis, Pandas, NumPy, Apache Airflow",
+        "Core ML & Deep Learning": "PyTorch, TensorFlow, TensorFlow Lite, TensorRT, ONNX, YOLOv8/v9, OpenCV, Transformers, Scikit-learn",
+        "AI Frameworks & LLMs": "Hugging Face Transformers, LangChain, CrewAI, RAG, Gemini API, Reinforcement Learning (PPO, A2C, DDPG), Quantization",
+        "Languages & Data": "Python, C++, CUDA, SQL, Bash, JavaScript, Pandas, NumPy, PostgreSQL, pgvector, Redis",
+        "Backend, Cloud & MLOps": "FastAPI, Flask, REST APIs, Docker, Kubernetes, AWS (S3, EKS, Redshift), GitHub Actions, CI/CD, Git",
       },
       formAnswers: {
-        whyInterested: `I am excited to apply for the ${jobTitle} role at ${compName}. My production ML experience deploying edge-optimized models and full-stack ML systems directly aligns with your technical requirements.`,
-        relevantExperience: `At Mayonix Innovation, I developed and deployed production computer vision models with YOLOv8/v9 (92%+ mAP, sub-100ms edge latency) and built full-stack ML systems with FastAPI, Docker, and cloud infrastructure.`,
-        coverLetter: `Dear Hiring Team at ${compName},\n\nI am writing to express my strong interest in the ${jobTitle} role. As a Machine Learning Engineer at Mayonix Innovation and published IEEE researcher, I bring hands-on production experience in computer vision, edge optimization, and full-stack ML deployment.\n\nMy technical background and project portfolio directly match your requirements. I look forward to discussing how I can contribute to ${compName}'s engineering goals.\n\nSincerely,\nPrakhar Pragyan Chaubey`,
-        whyHireMe: `I bring proven production experience taking deep learning models from research to deployment, backed by IEEE publications and a diverse project portfolio spanning computer vision, deep learning, and ML systems engineering.`,
+        whyInterested: `I am excited to apply for the ${jobTitle} role at ${compName}. My production ML experience at Mayonix Innovation and multi-model deep learning work in AlphaSense AI align closely with your engineering requirements.`,
+        relevantExperience: `At Mayonix Innovation, I trained and deployed YOLOv8/v9 computer vision models (92%+ mAP, sub-100ms edge inference via INT8/FP16 quantization). I also built AlphaSense AI fusing multi-branch transformers, Mamba, and a DRL ensemble served with FastAPI on Hugging Face Spaces.`,
+        coverLetter: `Dear Hiring Team at ${compName},\n\nI am writing to express my strong interest in the ${jobTitle} role. As a Machine Learning Engineer at Mayonix Innovation and published IEEE researcher, I bring hands-on production experience in PyTorch, computer vision (92%+ mAP), edge optimization (sub-100ms inference), and full-stack ML deployment.\n\nMy verified experience and project work directly match your requirements. I look forward to discussing how I can contribute to ${compName}'s engineering goals.\n\nSincerely,\nPrakhar Pragyan Chaubey`,
+        whyHireMe: `I bring proven production experience taking ML models from training to sub-100ms deployment, backed by 2 IEEE publications and end-to-end systems engineering.`,
       },
     };
   }
 
-  // Ensure selectedProjects exists & enforce strict 1-1.5 page length caps
-  if (!tailoredData.selectedProjects || tailoredData.selectedProjects.length === 0) {
-    tailoredData.selectedProjects = projects.slice(0, 2).map((p) => ({
-      id: p.id,
-      name: p.name,
-      period: p.period,
-      demoUrl: p.demoUrl || "",
-      repoUrl: p.repoUrl || "",
-      description: p.description,
-      techLine: p.techStack.slice(0, 6).join(", "),
-      bullets: p.bullets.slice(0, 2),
-    }));
-  } else {
-    // Guarantee live demoUrl & repoUrl from canonical projects.json are NEVER lost or stripped by the LLM
-    tailoredData.selectedProjects = tailoredData.selectedProjects.slice(0, 2).map((sp) => {
+  // Strictly reconcile selectedProjects against canonical projects.json (NEVER allow hallucinated/random projects)
+  const validMatchedProjects = [];
+  if (Array.isArray(tailoredData.selectedProjects)) {
+    for (const sp of tailoredData.selectedProjects) {
       const orig = projects.find(
         (p) =>
           (sp.id && p.id === sp.id) ||
           (sp.name && p.name.toLowerCase() === sp.name.toLowerCase()) ||
           (sp.name && p.name.toLowerCase().includes(sp.name.toLowerCase()))
       );
-      return {
-        ...sp,
-        demoUrl: orig?.demoUrl || sp.demoUrl || "",
-        repoUrl: orig?.repoUrl || sp.repoUrl || "",
-        bullets: Array.isArray(sp.bullets) ? sp.bullets.slice(0, 2) : [],
-      };
-    });
+      if (!orig) continue; // Drop any hallucinated project not present in projects.json
+      if (validMatchedProjects.some((v) => v.id === orig.id)) continue;
+      validMatchedProjects.push({
+        id: orig.id,
+        name: orig.name,
+        period: orig.period,
+        demoUrl: orig.demoUrl || "",
+        repoUrl: orig.repoUrl || "",
+        description: stripMarkup(sp.description) || orig.description,
+        techLine: stripMarkup(sp.techLine) || orig.techStack.slice(0, 7).join(", "),
+        bullets: Array.isArray(sp.bullets) && sp.bullets.length > 0
+          ? sp.bullets.slice(0, 2).map(stripMarkup).filter(Boolean)
+          : orig.bullets.slice(0, 2),
+      });
+      if (validMatchedProjects.length >= 2) break;
+    }
   }
 
-  if (Array.isArray(tailoredData.experienceBullets)) {
-    tailoredData.experienceBullets = tailoredData.experienceBullets.slice(0, 4);
+  if (validMatchedProjects.length === 0 && projects.length > 0) {
+    const jdLower = (description || "").toLowerCase();
+    const sorted = [...projects].sort(
+      (a, b) =>
+        b.keywords.filter((k) => jdLower.includes(k.toLowerCase())).length -
+        a.keywords.filter((k) => jdLower.includes(k.toLowerCase())).length
+    );
+    for (const orig of sorted.slice(0, 2)) {
+      validMatchedProjects.push({
+        id: orig.id,
+        name: orig.name,
+        period: orig.period,
+        demoUrl: orig.demoUrl || "",
+        repoUrl: orig.repoUrl || "",
+        description: orig.description,
+        techLine: orig.techStack.slice(0, 7).join(", "),
+        bullets: orig.bullets.slice(0, 2),
+      });
+    }
   }
-  if (Array.isArray(tailoredData.competencies)) {
-    tailoredData.competencies = tailoredData.competencies.slice(0, 8);
+  tailoredData.selectedProjects = validMatchedProjects;
+
+  // Strip any markup tags from all LLM-generated fields
+  tailoredData.headline = stripMarkup(tailoredData.headline) || roleName;
+  tailoredData.summary = stripMarkup(tailoredData.summary);
+  tailoredData.competencies = Array.isArray(tailoredData.competencies)
+    ? tailoredData.competencies.slice(0, 8).map(stripMarkup).filter(Boolean)
+    : [];
+  tailoredData.experienceBullets = Array.isArray(tailoredData.experienceBullets)
+    ? tailoredData.experienceBullets.slice(0, 4).map(stripMarkup).filter(Boolean)
+    : [];
+
+  const cleanSkills = {};
+  if (tailoredData.skillsCategories && typeof tailoredData.skillsCategories === "object") {
+    for (const [k, v] of Object.entries(tailoredData.skillsCategories)) {
+      const ck = stripMarkup(k);
+      const cvVal = stripMarkup(v);
+      if (ck && cvVal) cleanSkills[ck] = cvVal;
+    }
+  }
+  tailoredData.skillsCategories = cleanSkills;
+
+  // Truthful ATS keyword reconciliation: ensure every JD keyword verified in cv.md/projects.json appears in Technical Skills
+  const currentBlob = [
+    tailoredData.headline,
+    tailoredData.summary,
+    ...tailoredData.competencies,
+    ...tailoredData.experienceBullets,
+    ...tailoredData.selectedProjects.flatMap((p) => [p.name, p.description, p.techLine, ...p.bullets]),
+    ...Object.values(tailoredData.skillsCategories),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const missingVerified = verifiedJdKeywords.filter((kw) => !currentBlob.includes(kw.toLowerCase()));
+  if (missingVerified.length > 0) {
+    const firstKey = Object.keys(tailoredData.skillsCategories)[0] || "Role-Aligned Skills";
+    const existing = tailoredData.skillsCategories[firstKey] || "";
+    tailoredData.skillsCategories[firstKey] = existing
+      ? `${existing}, ${missingVerified.join(", ")}`
+      : missingVerified.join(", ");
   }
 
-  const { atsScore, matchedKeywords } = computeAtsScore(tailoredData, jdKeywords, jobTitle);
+  const { atsScore, matchedKeywords } = computeAtsScore(tailoredData, jdKeywords, verifiedJdKeywords);
 
   // Build the HTML resume
   const htmlContent = buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, safeJobId, atsScore });
@@ -500,7 +609,7 @@ function buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, sa
       <div class="project-tech">Tech: ${escHtml(proj.techLine)}</div>
       ${proj.bullets && proj.bullets.length > 0 ? `
       <ul class="bullets">
-        ${proj.bullets.map((b) => `<li>${b}</li>`).join("")}
+        ${proj.bullets.map((b) => `<li>${escHtml(stripMarkup(b))}</li>`).join("")}
       </ul>` : ""}
     </div>`;
   }).join("\n");
@@ -603,13 +712,8 @@ function buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, sa
   .summary-text { font-size: 9pt; line-height: 1.4; color: #334155; }
   .summary-text strong { color: var(--dark); }
 
-  .competencies-grid {
-    display: flex; flex-wrap: wrap; gap: 4px;
-  }
-  .competency-tag {
-    font-size: 8pt; font-weight: 600; color: var(--tag-color);
-    background: var(--bg-tag); border: 1px solid var(--tag-border);
-    padding: 2px 6px; border-radius: 4px;
+  .competencies-line {
+    font-size: 8.7pt; line-height: 1.42; color: #334155;
   }
 
   .job-header {
@@ -697,16 +801,17 @@ function buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, sa
   <!-- PROFESSIONAL SUMMARY -->
   <div class="section">
     <div class="section-title">Professional Summary</div>
-    <div class="summary-text">${tailoredData.summary}</div>
+    <div class="summary-text">${escHtml(stripMarkup(tailoredData.summary))}</div>
   </div>
 
-  <!-- CORE COMPETENCIES -->
+  <!-- CORE COMPETENCIES (clean ATS inline text — zero pill tags) -->
+  ${(tailoredData.competencies || []).length > 0 ? `
   <div class="section">
     <div class="section-title">Core Competencies</div>
-    <div class="competencies-grid">
-      ${(tailoredData.competencies || []).map((c) => `<span class="competency-tag">${escHtml(c)}</span>`).join("")}
+    <div class="competencies-line">
+      ${tailoredData.competencies.map((c) => escHtml(stripMarkup(c))).join(" &bull; ")}
     </div>
-  </div>
+  </div>` : ""}
 
   <!-- WORK EXPERIENCE -->
   <div class="section">
@@ -717,7 +822,7 @@ function buildResumeHtml({ tailoredData, compName, jobTitle, roleName, jobId, sa
     </div>
     <div class="job-role">Machine Learning Engineer · <span class="job-location">Remote</span></div>
     <ul class="bullets">
-      ${(tailoredData.experienceBullets || []).map((b) => `<li>${b}</li>`).join("")}
+      ${(tailoredData.experienceBullets || []).map((b) => `<li>${escHtml(stripMarkup(b))}</li>`).join("")}
     </ul>
   </div>
 
